@@ -7,28 +7,6 @@ from tmdb_api import poster_url
 from database import get_unwatched_movies, get_all_genres, mark_watched
 
 
-VIBE_PRESETS = {
-    "Quick Watch": {"max_runtime": 100, "genres": []},
-    "Epic Night": {"min_runtime": 150, "genres": []},
-    "Feel Good": {"genres": ["Comedy", "Romance", "Animation", "Family"]},
-    "Edge of Our Seats": {"genres": ["Action", "Thriller", "Horror", "Crime"]},
-    "Deep Dive": {"genres": ["Drama", "Documentary", "History"]},
-}
-
-
-def _apply_vibe(cfg):
-    if cfg.get("genres"):
-        st.session_state["pick_genre_filter"] = cfg["genres"]
-    else:
-        st.session_state["pick_genre_filter"] = []
-    if cfg.get("max_runtime"):
-        st.session_state["pick_runtime"] = cfg["max_runtime"]
-    elif cfg.get("min_runtime"):
-        st.session_state["pick_runtime"] = 300
-    else:
-        st.session_state["pick_runtime"] = 300
-
-
 def _has_genre(movie, genre_filter):
     movie_genres = movie.get("genres_list", [])
     return any(g in movie_genres for g in genre_filter)
@@ -65,7 +43,7 @@ def _show_picked_movie(movie, celebrate=False):
            if movie["poster_path"] else POSTER_PLACEHOLDER)
     cols = st.columns([1, 2])
     with cols[0]:
-        st.image(img, width="stretch")
+        st.image(img, width=160)
     with cols[1]:
         st.markdown(f"# {movie['title']}")
         st.markdown(f"**{movie['year'] or '?'}**")
@@ -118,7 +96,7 @@ def _run_reveal(filtered):
             st.markdown("### \U0001F4FC Finding your perfect tape...")
             cols = st.columns([1, 2, 1])
             with cols[1]:
-                st.image(img, width="stretch")
+                st.image(img, width=160)
                 st.markdown(f"#### {movie['title']}")
         delay = 0.08 + (i * 0.04)
         time.sleep(delay)
@@ -146,41 +124,38 @@ def _pick_button(filtered):
 
 
 def _filter_bar(movies):
-    with st.expander("\U0001F527 Filters & Vibes", expanded=False):
-        list_filter = st.radio(
-            "Whose picks?",
-            ["All", "Adam's Picks", "Sean's Picks", "Mutual Discoveries"],
-            horizontal=True,
-            key="pick_list_filter",
+    list_filter = st.radio(
+        "Whose picks?",
+        ["All", "Adam's Picks", "Sean's Picks", "Mutual Discoveries"],
+        horizontal=True,
+        key="pick_list_filter",
+    )
+
+    list_map = {
+        "All": None,
+        "Adam's Picks": "adam_pick",
+        "Sean's Picks": "sean_pick",
+        "Mutual Discoveries": "mutual",
+    }
+    lt = list_map[list_filter]
+    if lt:
+        movies = [m for m in movies if m["list_type"] == lt]
+
+    available_genres = get_all_genres()
+    if available_genres:
+        genre_filter = st.pills(
+            "Genres",
+            available_genres,
+            selection_mode="multi",
+            key="pick_genre_filter",
         )
+    else:
+        genre_filter = []
 
-        list_map = {
-            "All": None,
-            "Adam's Picks": "adam_pick",
-            "Sean's Picks": "sean_pick",
-            "Mutual Discoveries": "mutual",
-        }
-        lt = list_map[list_filter]
-        if lt:
-            movies = [m for m in movies if m["list_type"] == lt]
-
-        available_genres = get_all_genres()
-        genre_filter = st.multiselect("Genres", available_genres,
-                                      key="pick_genre_filter")
-
-        max_runtime = st.slider(
-            "Max runtime (minutes)", 60, 300, 300, step=10,
-            key="pick_runtime",
-        )
-
-        st.markdown("**Quick vibes:**")
-        vibe_cols = st.columns(len(VIBE_PRESETS))
-        for i, (vibe_name, vibe_cfg) in enumerate(VIBE_PRESETS.items()):
-            with vibe_cols[i]:
-                if st.button(vibe_name, key=f"vibe_{vibe_name}",
-                             width="stretch"):
-                    _apply_vibe(vibe_cfg)
-                    st.rerun()
+    max_runtime = st.slider(
+        "Max runtime (minutes)", 60, 300, 300, step=10,
+        key="pick_runtime",
+    )
 
     if genre_filter:
         movies = [m for m in movies if _has_genre(m, genre_filter)]
@@ -194,7 +169,7 @@ def _filter_bar(movies):
 def render():
     inject_css()
     section_header("\U0001F3B0 Pick for Us")
-    st.caption("Let fate decide your movie night. Set your filters and spin!")
+    st.caption("Set your filters and spin!")
 
     all_movies = get_unwatched_movies()
     if not all_movies:
