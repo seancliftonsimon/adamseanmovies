@@ -12,6 +12,13 @@ from styles import inject_css
 from database import get_db_status
 
 
+def _on_sidebar_user():
+    val = st.session_state.user_select
+    st.session_state.current_user = val
+    if "page_user_select" in st.session_state:
+        st.session_state.page_user_select = val
+
+
 def main():
     inject_css()
 
@@ -49,6 +56,7 @@ def main():
             index=0 if st.session_state.current_user == "Adam" else 1,
             key="user_select",
             horizontal=True,
+            on_change=_on_sidebar_user,
         )
         st.session_state.current_user = user
         st.caption(f"Logged in as **{user}**")
