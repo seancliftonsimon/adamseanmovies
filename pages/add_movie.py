@@ -4,24 +4,17 @@ from tmdb_api import search_movies, get_movie_details, small_poster_url
 from database import add_movie, movie_exists
 
 
-LIST_OPTIONS = ["Adam's Pick", "Mutual Discovery", "Sean's Pick"]
+LIST_OPTIONS = ["Adam", "Shared", "Sean"]
 LIST_MAP = {
-    "Adam's Pick": "adam_pick",
-    "Mutual Discovery": "mutual",
-    "Sean's Pick": "sean_pick",
+    "Adam": ("adam_pick", "Adam"),
+    "Shared": ("mutual", "Both"),
+    "Sean": ("sean_pick", "Sean"),
 }
 LIST_LABELS = {
     "adam_pick": "Adam's Picks",
     "sean_pick": "Sean's Picks",
     "mutual": "Mutual Discoveries",
 }
-
-
-def _sync_user_to_sidebar():
-    val = st.session_state.page_user_select
-    st.session_state.current_user = val
-    if "user_select" in st.session_state:
-        st.session_state.user_select = val
 
 
 def _quick_add(tmdb_id, list_type, added_by):
@@ -69,30 +62,19 @@ def render():
     inject_css()
     section_header("\U0001F3AC Add a Movie")
 
-    if "page_user_select" not in st.session_state:
-        st.session_state.page_user_select = st.session_state.get(
-            "current_user", "Adam"
-        )
-
-    who = st.radio(
-        "Who's adding?",
-        ["Adam", "Sean"],
-        horizontal=True,
-        key="page_user_select",
-        on_change=_sync_user_to_sidebar,
+    selection = st.pills(
+        "Add to",
+        LIST_OPTIONS,
+        default="Adam",
+        key="add_list_selection",
     )
-    st.session_state.current_user = who
 
-    default_list = "Adam's Pick" if who == "Adam" else "Sean's Pick"
-    if "add_list_type" not in st.session_state:
-        st.session_state.add_list_type = default_list
+    if not selection:
+        st.caption("Tap a name above to choose which list to add to.")
+        return
 
-    list_label = st.select_slider(
-        "Add to list",
-        options=LIST_OPTIONS,
-        key="add_list_type",
-    )
-    list_type = LIST_MAP[list_label]
+    list_type, added_by = LIST_MAP[selection]
+    btn_label = LIST_LABELS[list_type]
 
     query = st.text_input(
         "Search for a movie",
@@ -137,9 +119,9 @@ def render():
                 if overview_short:
                     st.caption(overview_short)
                 if st.button(
-                    f"\u2795 Add to {list_label}",
+                    f"\u2795 Add to {btn_label}",
                     key=f"add_{tmdb_id}",
                     type="primary",
                     width="stretch",
                 ):
-                    _quick_add(tmdb_id, list_type, who)
+                    _quick_add(tmdb_id, list_type, added_by)

@@ -4,19 +4,12 @@ st.set_page_config(
     page_title="Adam & Sean Movie Night",
     page_icon="\U0001F4FC",
     layout="centered",
-    initial_sidebar_state="auto",
+    initial_sidebar_state="collapsed",
 )
 
 from pages import add_movie, pick_for_us, our_lists, watch_log
 from styles import inject_css
 from database import get_db_status
-
-
-def _on_sidebar_user():
-    val = st.session_state.user_select
-    st.session_state.current_user = val
-    if "page_user_select" in st.session_state:
-        st.session_state.page_user_select = val
 
 
 def main():
@@ -32,46 +25,25 @@ def main():
             icon="\u26a0\ufe0f",
         )
 
-    with st.sidebar:
-        st.markdown(
-            '<div style="text-align:center; padding: 0.5rem 0 0.25rem;">'
-            '<span style="font-size:1.6rem;">\U0001F4FC</span>'
-            '<div style="font-size:1.1rem; font-weight:800; color:#FFD700; '
-            'letter-spacing:0.06em; margin-top:0.15rem; '
-            'text-transform:uppercase;">Movie Night</div>'
-            '<div style="font-size:0.65rem; color:#7aafd4; '
-            'text-transform:uppercase; letter-spacing:0.12em; '
-            'font-weight:600;">Adam &amp; Sean</div>'
-            '</div>',
-            unsafe_allow_html=True,
-        )
-        st.markdown("---")
+    add_pg = st.Page(add_movie.render, title="Add a Movie", icon="\U0001F3AC",
+                     default=True, url_path="add-movie")
+    pick_pg = st.Page(pick_for_us.render, title="Pick for Us", icon="\U0001F3B0",
+                      url_path="pick-for-us")
+    lists_pg = st.Page(our_lists.render, title="Our Lists", icon="\U0001F4CB",
+                       url_path="our-lists")
+    log_pg = st.Page(watch_log.render, title="Watch Log", icon="\U0001F4FC",
+                     url_path="watch-log")
 
-        if "current_user" not in st.session_state:
-            st.session_state.current_user = "Adam"
+    all_pages = [add_pg, pick_pg, lists_pg, log_pg]
+    page = st.navigation(all_pages, position="hidden")
 
-        user = st.radio(
-            "Who's adding?",
-            ["Adam", "Sean"],
-            index=0 if st.session_state.current_user == "Adam" else 1,
-            key="user_select",
-            horizontal=True,
-            on_change=_on_sidebar_user,
-        )
-        st.session_state.current_user = user
-        st.caption(f"Logged in as **{user}**")
-        st.markdown("---")
+    nav_cols = st.columns(len(all_pages))
+    nav_labels = ["Add", "Pick", "Lists", "Log"]
+    for col, pg, label in zip(nav_cols, all_pages, nav_labels):
+        with col:
+            st.page_link(pg, label=label, icon=pg.icon,
+                         use_container_width=True)
 
-    page = st.navigation([
-        st.Page(add_movie.render, title="Add a Movie", icon="\U0001F3AC",
-                default=True, url_path="add-movie"),
-        st.Page(pick_for_us.render, title="Pick for Us", icon="\U0001F3B0",
-                url_path="pick-for-us"),
-        st.Page(our_lists.render, title="Our Lists", icon="\U0001F4CB",
-                url_path="our-lists"),
-        st.Page(watch_log.render, title="Watch Log", icon="\U0001F4FC",
-                url_path="watch-log"),
-    ])
     page.run()
 
 
