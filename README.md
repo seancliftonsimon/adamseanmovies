@@ -24,10 +24,11 @@ A couples movie watchlist app built with Streamlit. Search for movies, organize 
 
 3. **Create a Supabase Postgres project** (recommended for shared persistent data):
    - In Supabase, copy the connection string from:
-     - Project Settings -> Database -> Connection string -> URI
+     - **Connect** -> **Pooler** -> **Connection string** -> **URI**
+   - For Streamlit Cloud, prefer the **Pooler URI** (IPv4 compatible).
    - Ensure it includes SSL (`sslmode=require`), for example:
      ```toml
-     DATABASE_URL = "postgresql://postgres:[YOUR_PASSWORD]@db.[YOUR_PROJECT_REF].supabase.co:5432/postgres?sslmode=require"
+     DATABASE_URL = "postgresql://postgres.[YOUR_PROJECT_REF]:[YOUR_PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?sslmode=require"
      ```
    - Add that `DATABASE_URL` to Streamlit secrets in local and deployed environments.
    - On startup, the app will auto-create the `movies` table and indexes if they do not exist.

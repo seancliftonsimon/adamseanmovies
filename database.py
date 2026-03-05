@@ -65,6 +65,23 @@ def _postgres_host():
         return "unknown-host"
 
 
+def _is_ipv6_route_error(exc):
+    msg = str(exc).lower()
+    return (
+        "cannot assign requested address" in msg
+        or "network is unreachable" in msg
+        or "address family not supported by protocol" in msg
+    )
+
+
+def _pooler_fix_hint():
+    return (
+        "Use Supabase Connect -> Pooler connection URI for DATABASE_URL "
+        "(pooler.supabase.com, typically port 5432/6543, sslmode=require). "
+        "Streamlit Cloud commonly cannot connect to IPv6-only direct DB hosts."
+    )
+
+
 def get_connection():
     if _using_postgres():
         if psycopg is None:
@@ -147,6 +164,8 @@ def init_db():
             _startup_log(
                 f"Postgres init FAILED: {exc.__class__.__name__}: {exc}"
             )
+            if _is_ipv6_route_error(exc):
+                _startup_log(_pooler_fix_hint())
             raise
         finally:
             if "cur" in locals():
