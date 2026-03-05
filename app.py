@@ -9,10 +9,21 @@ st.set_page_config(
 
 from pages import add_movie, pick_for_us, our_lists, watch_log
 from styles import inject_css
+from database import get_db_status
 
 
 def main():
     inject_css()
+
+    db_status = get_db_status()
+    if db_status.get("fallback"):
+        st.warning(
+            "**Database connection failed** — running on local SQLite. "
+            "Data won't persist across app restarts or be shared between users. "
+            "Check the DATABASE_URL in your Streamlit secrets and review the "
+            "app logs for details.",
+            icon="\u26a0\ufe0f",
+        )
 
     with st.sidebar:
         st.markdown(

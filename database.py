@@ -20,7 +20,7 @@ except ImportError:
 
 DB_PATH = Path(__file__).parent / "movies.db"
 LOGGER = logging.getLogger(__name__)
-_DB_STATUS = {"backend": "unknown", "connected": False, "detail": ""}
+_DB_STATUS = {"backend": "unknown", "connected": False, "detail": "", "fallback": False}
 _POSTGRES_FAILED = False
 
 
@@ -58,6 +58,30 @@ def get_db_status():
     return dict(_DB_STATUS)
 
 
+def _mask_url(url):
+    try:
+        parsed = urlparse(url)
+        if parsed.password:
+            return url.replace(f":{parsed.password}@", ":****@", 1)
+        return url
+    except Exception:
+        return "<unparseable URL>"
+
+
+def _parse_url_parts(url):
+    try:
+        parsed = urlparse(url)
+        return {
+            "host": parsed.hostname or "unknown",
+            "port": parsed.port or "unknown",
+            "user": parsed.username or "unknown",
+            "database": (parsed.path or "/").lstrip("/") or "unknown",
+        }
+    except Exception:
+        return {"host": "unknown", "port": "unknown", "user": "unknown",
+                "database": "unknown"}
+
+
 def _postgres_host():
     try:
         parsed = urlparse(_database_url())
@@ -75,12 +99,35 @@ def _is_ipv6_route_error(exc):
     )
 
 
+def _is_auth_error(exc):
+    msg = str(exc).lower()
+    return "password authentication failed" in msg
+
+
 def _pooler_fix_hint():
     return (
         "Use Supabase Connect -> Pooler connection URI for DATABASE_URL "
         "(pooler.supabase.com, typically port 5432/6543, sslmode=require). "
         "Streamlit Cloud commonly cannot connect to IPv6-only direct DB hosts."
     )
+
+
+def _auth_fix_hint(parts):
+    lines = [
+        "Password authentication failed. Checklist:",
+        "  1. Verify the database password in Streamlit secrets matches Supabase.",
+        "  2. If using the Supabase session pooler, the USERNAME must be",
+        "     postgres.<PROJECT_REF>  (not just 'postgres').",
+        "     Example: postgres.aiqkddmjohrqwfwkjkdl",
+        f"  Currently using — user: '{parts['user']}', "
+        f"host: '{parts['host']}', port: {parts['port']}",
+    ]
+    if "pooler" in str(parts["host"]) and "." not in str(parts["user"]):
+        lines.append(
+            "  *** Likely cause: username is 'postgres' but pooler requires "
+            "'postgres.<project-ref>'. ***"
+        )
+    return "\n".join(lines)
 
 
 def get_connection():
@@ -151,8 +198,23 @@ def init_db():
     global _POSTGRES_FAILED
 
     if _database_url():
+        url = _database_url()
+        parts = _parse_url_parts(url)
+        _startup_log(f"DATABASE_URL (masked): {_mask_url(url)}")
+        _startup_log(
+            f"Parsed — user: '{parts['user']}', host: '{parts['host']}', "
+            f"port: {parts['port']}, database: '{parts['database']}'"
+        )
+
+        if "pooler" in str(parts["host"]) and "." not in str(parts["user"]):
+            _startup_log(
+                "WARNING: Connecting to Supabase pooler but username is "
+                f"'{parts['user']}' — pooler requires 'postgres.<project-ref>' "
+                "format. This will likely cause an authentication failure."
+            )
+
         try:
-            host = _postgres_host()
+            host = parts["host"]
             _startup_log(f"Attempting Postgres connection to {host}")
             conn = get_connection()
             cur = conn.cursor()
@@ -188,19 +250,23 @@ def init_db():
             """)
             conn.commit()
             _DB_STATUS.update(
-                {"backend": "postgres", "connected": True, "detail": f"connected:{host}"}
+                {"backend": "postgres", "connected": True,
+                 "detail": f"connected:{host}"}
             )
             _startup_log(f"Postgres connection OK; schema ready on {host}")
             return
         except Exception as exc:
             _DB_STATUS.update(
-                {"backend": "postgres", "connected": False, "detail": str(exc)}
+                {"backend": "postgres", "connected": False,
+                 "detail": str(exc), "fallback": True}
             )
             _startup_log(
                 f"Postgres init FAILED: {exc.__class__.__name__}: {exc}"
             )
             if _is_ipv6_route_error(exc):
                 _startup_log(_pooler_fix_hint())
+            if _is_auth_error(exc):
+                _startup_log(_auth_fix_hint(parts))
             _POSTGRES_FAILED = True
             _startup_log("Falling back to local SQLite database")
         finally:
