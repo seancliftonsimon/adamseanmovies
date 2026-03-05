@@ -5,41 +5,68 @@ BASE_URL = "https://api.themoviedb.org/3"
 IMAGE_BASE = "https://image.tmdb.org/t/p"
 
 
-def _get_headers():
-    token = st.secrets.get("TMDB_READ_TOKEN", "")
-    return {
-        "Authorization": f"Bearer {token}",
-        "accept": "application/json",
-    }
+def _auth_kwargs():
+    token = st.secrets.get("TMDB_READ_TOKEN", "").strip()
+    api_key = st.secrets.get("TMDB_API_KEY", "").strip()
+
+    if token:
+        return {
+            "headers": {
+                "Authorization": f"Bearer {token}",
+                "accept": "application/json",
+            },
+            "base_params": {},
+        }
+
+    if api_key:
+        return {
+            "headers": {"accept": "application/json"},
+            "base_params": {"api_key": api_key},
+        }
+
+    raise RuntimeError(
+        "TMDB credentials are missing. Add TMDB_READ_TOKEN or TMDB_API_KEY to Streamlit secrets."
+    )
 
 
-def _get_api_key():
-    return st.secrets.get("TMDB_API_KEY", "")
+def _request_tmdb(path, params=None):
+    auth = _auth_kwargs()
+    merged_params = dict(auth["base_params"])
+    if params:
+        merged_params.update(params)
+
+    resp = requests.get(
+        f"{BASE_URL}{path}",
+        headers=auth["headers"],
+        params=merged_params,
+        timeout=10,
+    )
+    try:
+        resp.raise_for_status()
+    except requests.HTTPError as exc:
+        if resp.status_code == 401:
+            raise RuntimeError(
+                "TMDB auth failed (401). Verify TMDB_READ_TOKEN or TMDB_API_KEY in Streamlit secrets."
+            ) from exc
+        raise
+    return resp.json()
 
 
 @st.cache_data(ttl=86400, show_spinner=False)
 def search_movies(query, page=1):
-    resp = requests.get(
-        f"{BASE_URL}/search/movie",
-        headers=_get_headers(),
+    data = _request_tmdb(
+        "/search/movie",
         params={"query": query, "page": page, "include_adult": False},
-        timeout=10,
     )
-    resp.raise_for_status()
-    data = resp.json()
     return data.get("results", []), data.get("total_results", 0)
 
 
 @st.cache_data(ttl=86400, show_spinner=False)
 def get_movie_details(tmdb_id):
-    resp = requests.get(
-        f"{BASE_URL}/movie/{tmdb_id}",
-        headers=_get_headers(),
+    data = _request_tmdb(
+        f"/movie/{tmdb_id}",
         params={"append_to_response": "credits"},
-        timeout=10,
     )
-    resp.raise_for_status()
-    data = resp.json()
 
     director = ""
     credits = data.get("credits", {})

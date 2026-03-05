@@ -14,12 +14,12 @@ A couples movie watchlist app built with Streamlit. Search for movies, organize 
 
 ## Setup
 
-1. **Get a free TMDb API key** at [themoviedb.org](https://www.themoviedb.org/settings/api)
+1. **Get TMDb credentials** at [themoviedb.org](https://www.themoviedb.org/settings/api)
 
-2. **Create** `.streamlit/secrets.toml`:
+2. **Create** `.streamlit/secrets.toml` with either a read token, an API key, or both:
    ```toml
-   TMDB_API_KEY = "your_api_key"
    TMDB_READ_TOKEN = "your_read_access_token"
+   TMDB_API_KEY = "your_api_key"
    ```
 
 3. **Install dependencies and run:**
