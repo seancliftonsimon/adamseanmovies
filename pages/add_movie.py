@@ -48,6 +48,9 @@ def _quick_add(tmdb_id, list_type, added_by):
     )
 
     if success:
+        if "added_movies" not in st.session_state:
+            st.session_state.added_movies = set()
+        st.session_state.added_movies.add(tmdb_id)
         st.toast(
             f"Added **{details['title']}** to {LIST_LABELS[list_type]}!",
             icon="\U0001F37F",
@@ -98,6 +101,8 @@ def render():
 
     st.caption(f"Showing {min(len(results), 12)} of {total} results")
 
+    added_set = st.session_state.get("added_movies", set())
+
     for movie in results[:12]:
         tmdb_id = movie["id"]
         title = movie.get("title", "Unknown")
@@ -109,6 +114,7 @@ def render():
             else overview_raw
         )
         img = small_poster_url(movie.get("poster_path"))
+        already_added = tmdb_id in added_set
 
         with st.container(border=True):
             cols = st.columns([1, 3])
@@ -118,7 +124,14 @@ def render():
                 st.markdown(f"**{title}** ({year})")
                 if overview_short:
                     st.caption(overview_short)
-                if st.button(
+                if already_added:
+                    st.button(
+                        "\u2705 Added!",
+                        key=f"add_{tmdb_id}",
+                        disabled=True,
+                        width="stretch",
+                    )
+                elif st.button(
                     f"\u2795 Add to {btn_label}",
                     key=f"add_{tmdb_id}",
                     type="primary",
