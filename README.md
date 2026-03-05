@@ -22,14 +22,30 @@ A couples movie watchlist app built with Streamlit. Search for movies, organize 
    TMDB_API_KEY = "your_api_key"
    ```
 
-3. **Install dependencies and run:**
+3. **Create a Supabase Postgres project** (recommended for shared persistent data):
+   - In Supabase, copy the connection string from:
+     - Project Settings -> Database -> Connection string -> URI
+   - Ensure it includes SSL (`sslmode=require`), for example:
+     ```toml
+     DATABASE_URL = "postgresql://postgres:[YOUR_PASSWORD]@db.[YOUR_PROJECT_REF].supabase.co:5432/postgres?sslmode=require"
+     ```
+   - Add that `DATABASE_URL` to Streamlit secrets in local and deployed environments.
+   - On startup, the app will auto-create the `movies` table and indexes if they do not exist.
+
+4. **Install dependencies and run:**
    ```bash
    pip install -r requirements.txt
    streamlit run app.py
    ```
 
+### Database behavior
+
+- If `DATABASE_URL` is set, the app uses Postgres (Supabase), giving one shared dataset for all users.
+- If `DATABASE_URL` is not set, the app falls back to local SQLite (`movies.db`) for local development.
+
 ## Tech Stack
 
 - **Streamlit** — UI framework
 - **TMDb API** — Movie data, posters, credits (free)
-- **SQLite** — Local database (zero config)
+- **Supabase Postgres** — Shared persistent multi-user database
+- **SQLite** — Local fallback database (zero config)

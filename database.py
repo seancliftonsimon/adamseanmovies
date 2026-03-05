@@ -1,21 +1,124 @@
-import sqlite3
 import json
-from datetime import datetime, date
+import os
+import sqlite3
+from datetime import date, datetime
 from pathlib import Path
+
+try:
+    import streamlit as st
+except Exception:
+    st = None
+
+try:
+    import psycopg
+    from psycopg.rows import dict_row
+except ImportError:
+    psycopg = None
+    dict_row = None
 
 DB_PATH = Path(__file__).parent / "movies.db"
 
 
+def _get_config_value(key, default=""):
+    val = os.getenv(key)
+    if val:
+        return val.strip()
+
+    if st is not None:
+        try:
+            return str(st.secrets.get(key, default)).strip()
+        except Exception:
+            return default
+
+    return default
+
+
+def _database_url():
+    url = _get_config_value("DATABASE_URL", "")
+    if url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql://", 1)
+    return url
+
+
+def _using_postgres():
+    return bool(_database_url())
+
+
 def get_connection():
+    if _using_postgres():
+        if psycopg is None:
+            raise RuntimeError(
+                "DATABASE_URL is set but psycopg is not installed. "
+                "Run: pip install 'psycopg[binary]'"
+            )
+        return psycopg.connect(_database_url(), row_factory=dict_row)
+
     conn = sqlite3.connect(str(DB_PATH))
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     return conn
 
 
-def init_db():
+def _run_query(sql, params=(), fetch=None, commit=False):
     conn = get_connection()
-    conn.execute("""
+    cur = conn.cursor()
+    try:
+        cur.execute(sql, params)
+        result = None
+        if fetch == "one":
+            result = cur.fetchone()
+        elif fetch == "all":
+            result = cur.fetchall()
+        if commit:
+            conn.commit()
+        return result
+    finally:
+        cur.close()
+        conn.close()
+
+
+def init_db():
+    if _using_postgres():
+        conn = get_connection()
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS movies (
+                    id BIGSERIAL PRIMARY KEY,
+                    tmdb_id BIGINT UNIQUE,
+                    title TEXT NOT NULL,
+                    year INTEGER,
+                    poster_path TEXT,
+                    director TEXT,
+                    genres TEXT,
+                    runtime INTEGER,
+                    overview TEXT,
+                    list_type TEXT NOT NULL,
+                    added_by TEXT NOT NULL,
+                    added_date TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+                    watched BOOLEAN DEFAULT FALSE,
+                    watched_date DATE,
+                    adam_rating DOUBLE PRECISION,
+                    sean_rating DOUBLE PRECISION,
+                    notes TEXT
+                )
+            """)
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_movies_watched_list_added_date
+                ON movies (watched, list_type, added_date DESC)
+            """)
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_movies_watched_watched_date
+                ON movies (watched, watched_date DESC)
+            """)
+            conn.commit()
+        finally:
+            cur.close()
+            conn.close()
+        return
+
+    _run_query(
+        """
         CREATE TABLE IF NOT EXISTS movies (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             tmdb_id INTEGER UNIQUE,
@@ -35,97 +138,138 @@ def init_db():
             sean_rating REAL,
             notes TEXT
         )
-    """)
-    conn.commit()
-    conn.close()
+        """,
+        commit=True,
+    )
 
 
 def add_movie(tmdb_id, title, year, poster_path, director, genres, runtime,
               overview, list_type, added_by):
+    sql = """
+        INSERT INTO movies (tmdb_id, title, year, poster_path, director,
+                            genres, runtime, overview, list_type, added_by)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """ if _using_postgres() else """
+        INSERT INTO movies (tmdb_id, title, year, poster_path, director,
+                            genres, runtime, overview, list_type, added_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """
     conn = get_connection()
+    cur = conn.cursor()
     try:
-        conn.execute("""
-            INSERT INTO movies (tmdb_id, title, year, poster_path, director,
-                                genres, runtime, overview, list_type, added_by)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (tmdb_id, title, year, poster_path, director,
-              json.dumps(genres) if isinstance(genres, list) else genres,
-              runtime, overview, list_type, added_by))
+        cur.execute(
+            sql,
+            (tmdb_id, title, year, poster_path, director,
+             json.dumps(genres) if isinstance(genres, list) else genres,
+             runtime, overview, list_type, added_by),
+        )
         conn.commit()
         return True
-    except sqlite3.IntegrityError:
-        return False
+    except Exception as exc:
+        if isinstance(exc, sqlite3.IntegrityError):
+            return False
+        if psycopg is not None and isinstance(exc, psycopg.IntegrityError):
+            return False
+        raise
     finally:
+        cur.close()
         conn.close()
 
 
 def get_unwatched_movies(list_type=None):
-    conn = get_connection()
-    if list_type:
-        rows = conn.execute(
-            "SELECT * FROM movies WHERE watched = 0 AND list_type = ? ORDER BY added_date DESC",
-            (list_type,)
-        ).fetchall()
+    if _using_postgres():
+        if list_type:
+            rows = _run_query(
+                "SELECT * FROM movies WHERE watched = FALSE AND list_type = %s ORDER BY added_date DESC",
+                (list_type,),
+                fetch="all",
+            )
+        else:
+            rows = _run_query(
+                "SELECT * FROM movies WHERE watched = FALSE ORDER BY added_date DESC",
+                fetch="all",
+            )
     else:
-        rows = conn.execute(
-            "SELECT * FROM movies WHERE watched = 0 ORDER BY added_date DESC"
-        ).fetchall()
-    conn.close()
+        if list_type:
+            rows = _run_query(
+                "SELECT * FROM movies WHERE watched = 0 AND list_type = ? ORDER BY added_date DESC",
+                (list_type,),
+                fetch="all",
+            )
+        else:
+            rows = _run_query(
+                "SELECT * FROM movies WHERE watched = 0 ORDER BY added_date DESC",
+                fetch="all",
+            )
     return [_row_to_dict(r) for r in rows]
 
 
 def get_watched_movies():
-    conn = get_connection()
-    rows = conn.execute(
-        "SELECT * FROM movies WHERE watched = 1 ORDER BY watched_date DESC"
-    ).fetchall()
-    conn.close()
+    sql = (
+        "SELECT * FROM movies WHERE watched = TRUE ORDER BY watched_date DESC"
+        if _using_postgres()
+        else "SELECT * FROM movies WHERE watched = 1 ORDER BY watched_date DESC"
+    )
+    rows = _run_query(sql, fetch="all")
     return [_row_to_dict(r) for r in rows]
 
 
 def mark_watched(movie_id, adam_rating=None, sean_rating=None, notes=None,
                  watched_date=None):
-    conn = get_connection()
     if watched_date is None:
         watched_date = date.today().isoformat()
     elif isinstance(watched_date, date):
         watched_date = watched_date.isoformat()
-    conn.execute("""
-        UPDATE movies
-        SET watched = 1, watched_date = ?, adam_rating = ?, sean_rating = ?, notes = ?
-        WHERE id = ?
-    """, (watched_date, adam_rating, sean_rating, notes, movie_id))
-    conn.commit()
-    conn.close()
+
+    if _using_postgres():
+        _run_query(
+            """
+            UPDATE movies
+            SET watched = TRUE, watched_date = %s, adam_rating = %s, sean_rating = %s, notes = %s
+            WHERE id = %s
+            """,
+            (watched_date, adam_rating, sean_rating, notes, movie_id),
+            commit=True,
+        )
+    else:
+        _run_query(
+            """
+            UPDATE movies
+            SET watched = 1, watched_date = ?, adam_rating = ?, sean_rating = ?, notes = ?
+            WHERE id = ?
+            """,
+            (watched_date, adam_rating, sean_rating, notes, movie_id),
+            commit=True,
+        )
 
 
 def remove_movie(movie_id):
-    conn = get_connection()
-    conn.execute("DELETE FROM movies WHERE id = ?", (movie_id,))
-    conn.commit()
-    conn.close()
+    sql = "DELETE FROM movies WHERE id = %s" if _using_postgres() else "DELETE FROM movies WHERE id = ?"
+    _run_query(sql, (movie_id,), commit=True)
 
 
 def movie_exists(tmdb_id):
-    conn = get_connection()
-    row = conn.execute(
-        "SELECT id, title, list_type, watched FROM movies WHERE tmdb_id = ?",
-        (tmdb_id,)
-    ).fetchone()
-    conn.close()
+    sql = (
+        "SELECT id, title, list_type, watched FROM movies WHERE tmdb_id = %s"
+        if _using_postgres()
+        else "SELECT id, title, list_type, watched FROM movies WHERE tmdb_id = ?"
+    )
+    row = _run_query(sql, (tmdb_id,), fetch="one")
     return _row_to_dict(row) if row else None
 
 
 def get_all_genres():
-    conn = get_connection()
-    rows = conn.execute(
-        "SELECT genres FROM movies WHERE watched = 0"
-    ).fetchall()
-    conn.close()
+    sql = (
+        "SELECT genres FROM movies WHERE watched = FALSE"
+        if _using_postgres()
+        else "SELECT genres FROM movies WHERE watched = 0"
+    )
+    rows = _run_query(sql, fetch="all")
     all_genres = set()
     for row in rows:
+        row_dict = _row_to_dict(row)
         try:
-            genres = json.loads(row["genres"])
+            genres = json.loads(row_dict["genres"]) if isinstance(row_dict.get("genres"), str) else []
             all_genres.update(genres)
         except (json.JSONDecodeError, TypeError):
             pass
@@ -133,12 +277,12 @@ def get_all_genres():
 
 
 def get_watch_stats():
-    conn = get_connection()
-    watched = conn.execute(
-        "SELECT * FROM movies WHERE watched = 1"
-    ).fetchall()
-    conn.close()
-
+    sql = (
+        "SELECT * FROM movies WHERE watched = TRUE"
+        if _using_postgres()
+        else "SELECT * FROM movies WHERE watched = 1"
+    )
+    watched = _run_query(sql, fetch="all")
     watched = [_row_to_dict(r) for r in watched]
     total = len(watched)
     if total == 0:
@@ -181,7 +325,19 @@ def get_watch_stats():
 def _row_to_dict(row):
     if row is None:
         return None
-    d = dict(row)
+
+    if isinstance(row, dict):
+        d = dict(row)
+    else:
+        d = dict(row)
+
+    for dt_field in ("added_date", "watched_date"):
+        if dt_field in d and isinstance(d[dt_field], (datetime, date)):
+            d[dt_field] = d[dt_field].isoformat()
+
+    if "watched" in d:
+        d["watched"] = bool(d["watched"])
+
     if "genres" in d and isinstance(d["genres"], str):
         try:
             d["genres_list"] = json.loads(d["genres"])
