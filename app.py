@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(
     page_title="Adam & Sean Movie Night",
-    page_icon="\U0001F37F",
+    page_icon="\U0001F4FC",
     layout="centered",
     initial_sidebar_state="auto",
 )
@@ -11,33 +11,19 @@ from pages import add_movie, pick_for_us, our_lists, watch_log
 from styles import inject_css
 
 
-def add_movie_page():
-    add_movie.render()
-
-
-def pick_for_us_page():
-    pick_for_us.render()
-
-
-def our_lists_page():
-    our_lists.render()
-
-
-def watch_log_page():
-    watch_log.render()
-
-
 def main():
     inject_css()
 
     with st.sidebar:
         st.markdown(
             '<div style="text-align:center; padding: 0.5rem 0 0.25rem;">'
-            '<span style="font-size:1.6rem;">&#127871;</span>'
-            '<div style="font-size:1.1rem; font-weight:700; color:#FAFAFA; '
-            'letter-spacing:0.02em; margin-top:0.15rem;">Movie Night</div>'
-            '<div style="font-size:0.7rem; color:#C62828; text-transform:uppercase; '
-            'letter-spacing:0.12em; font-weight:600;">Adam &amp; Sean</div>'
+            '<span style="font-size:1.6rem;">\U0001F4FC</span>'
+            '<div style="font-size:1.1rem; font-weight:800; color:#FFD700; '
+            'letter-spacing:0.06em; margin-top:0.15rem; '
+            'text-transform:uppercase;">Movie Night</div>'
+            '<div style="font-size:0.65rem; color:#7aafd4; '
+            'text-transform:uppercase; letter-spacing:0.12em; '
+            'font-weight:600;">Adam &amp; Sean</div>'
             '</div>',
             unsafe_allow_html=True,
         )
@@ -58,31 +44,11 @@ def main():
         st.markdown("---")
 
     page = st.navigation([
-        st.Page(
-            add_movie_page,
-            title="Add a Movie",
-            icon="\U0001F3AC",
-            url_path="add-movie",
-            default=True,
-        ),
-        st.Page(
-            pick_for_us_page,
-            title="Pick for Us",
-            icon="\U0001F3B0",
-            url_path="pick-for-us",
-        ),
-        st.Page(
-            our_lists_page,
-            title="Our Lists",
-            icon="\U0001F4CB",
-            url_path="our-lists",
-        ),
-        st.Page(
-            watch_log_page,
-            title="Watch Log",
-            icon="\U0001F4D6",
-            url_path="watch-log",
-        ),
+        st.Page(add_movie.render, title="Add a Movie", icon="\U0001F3AC",
+                default=True),
+        st.Page(pick_for_us.render, title="Pick for Us", icon="\U0001F3B0"),
+        st.Page(our_lists.render, title="Our Lists", icon="\U0001F4CB"),
+        st.Page(watch_log.render, title="Watch Log", icon="\U0001F4FC"),
     ])
     page.run()
 
