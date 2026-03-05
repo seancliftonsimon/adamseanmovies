@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 import sqlite3
 from datetime import date, datetime
 from pathlib import Path
@@ -43,10 +44,26 @@ def _get_config_value(key, default=""):
     return default
 
 
+_BRACKET_PASSWORD_RE = re.compile(
+    r"(postgresql?://[^:]+:)\[([^\]]+)\](@)"
+)
+_BRACKET_FIX_LOGGED = False
+
+
 def _database_url():
+    global _BRACKET_FIX_LOGGED
     url = _get_config_value("DATABASE_URL", "")
     if url.startswith("postgres://"):
-        return url.replace("postgres://", "postgresql://", 1)
+        url = url.replace("postgres://", "postgresql://", 1)
+    if _BRACKET_PASSWORD_RE.search(url):
+        if not _BRACKET_FIX_LOGGED:
+            _startup_log(
+                "AUTO-FIX: Stripped square brackets from password in "
+                "DATABASE_URL. Update your Streamlit secrets to remove "
+                "the [ ] around the password."
+            )
+            _BRACKET_FIX_LOGGED = True
+        url = _BRACKET_PASSWORD_RE.sub(r"\1\2\3", url, count=1)
     return url
 
 
