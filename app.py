@@ -10,6 +10,22 @@ st.set_page_config(
 from pages import add_movie, pick_for_us, our_lists, watch_log
 
 
+def add_movie_page():
+    add_movie.render()
+
+
+def pick_for_us_page():
+    pick_for_us.render()
+
+
+def our_lists_page():
+    our_lists.render()
+
+
+def watch_log_page():
+    watch_log.render()
+
+
 def main():
     with st.sidebar:
         st.markdown("## \U0001F37F Movie Night")
@@ -31,26 +47,26 @@ def main():
 
     page = st.navigation([
         st.Page(
-            add_movie.render,
+            add_movie_page,
             title="Add a Movie",
             icon="\U0001F3AC",
             url_path="add-movie",
             default=True,
         ),
         st.Page(
-            pick_for_us.render,
+            pick_for_us_page,
             title="Pick for Us",
             icon="\U0001F3B0",
             url_path="pick-for-us",
         ),
         st.Page(
-            our_lists.render,
+            our_lists_page,
             title="Our Lists",
             icon="\U0001F4CB",
             url_path="our-lists",
         ),
         st.Page(
-            watch_log.render,
+            watch_log_page,
             title="Watch Log",
             icon="\U0001F4D6",
             url_path="watch-log",
