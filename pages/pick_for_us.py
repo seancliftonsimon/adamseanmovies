@@ -45,7 +45,7 @@ def _watch_form(movie):
                          placeholder="e.g. Great pick!")
     watch_date = st.date_input("Date watched", key="pick_wd")
     if st.button("Save to Watch Log", key="pick_save_watch", type="primary",
-                 use_container_width=True):
+                 width="stretch"):
         mark_watched(movie["id"], adam_r, sean_r, notes, watch_date)
         st.session_state["watching_movie"] = None
         st.toast(f"**{movie['title']}** saved to your Watch Log!",
@@ -65,7 +65,7 @@ def _show_picked_movie(movie, celebrate=False):
            if movie["poster_path"] else POSTER_PLACEHOLDER)
     cols = st.columns([1, 2])
     with cols[0]:
-        st.image(img, use_container_width=True)
+        st.image(img, width="stretch")
     with cols[1]:
         st.markdown(f"# {movie['title']}")
         st.markdown(f"**{movie['year'] or '?'}**")
@@ -92,12 +92,12 @@ def _show_picked_movie(movie, celebrate=False):
     c1, c2 = st.columns(2)
     with c1:
         if st.button("\U0001F3B2 Spin Again", key="spin_again",
-                     use_container_width=True):
+                     width="stretch"):
             st.session_state["picked_movie"] = None
             st.rerun()
     with c2:
         if st.button("\u2705 Let's Watch This!", key="lets_watch",
-                     type="primary", use_container_width=True):
+                     type="primary", width="stretch"):
             st.session_state["watching_movie"] = movie
             st.session_state["picked_movie"] = None
             st.rerun()
@@ -118,7 +118,7 @@ def _run_reveal(filtered):
             st.markdown("### \U0001F4FC Finding your perfect tape...")
             cols = st.columns([1, 2, 1])
             with cols[1]:
-                st.image(img, use_container_width=True)
+                st.image(img, width="stretch")
                 st.markdown(f"#### {movie['title']}")
         delay = 0.08 + (i * 0.04)
         time.sleep(delay)
@@ -135,7 +135,7 @@ def _pick_button(filtered):
         pick_clicked = st.button(
             "\U0001F3B2 PICK FOR US!",
             type="primary",
-            use_container_width=True,
+            width="stretch",
             key="pick_btn",
         )
 
@@ -178,7 +178,7 @@ def _filter_bar(movies):
         for i, (vibe_name, vibe_cfg) in enumerate(VIBE_PRESETS.items()):
             with vibe_cols[i]:
                 if st.button(vibe_name, key=f"vibe_{vibe_name}",
-                             use_container_width=True):
+                             width="stretch"):
                     _apply_vibe(vibe_cfg)
                     st.rerun()
 

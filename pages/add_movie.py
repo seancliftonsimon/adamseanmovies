@@ -66,9 +66,9 @@ def _show_detail_and_add(tmdb_id, who):
     cols = st.columns([1, 2])
     with cols[0]:
         if img:
-            st.image(img, use_container_width=True)
+            st.image(img, width="stretch")
         else:
-            st.image(POSTER_PLACEHOLDER, use_container_width=True)
+            st.image(POSTER_PLACEHOLDER, width="stretch")
     with cols[1]:
         if details["director"]:
             st.markdown(f"**Director:** {details['director']}")
@@ -89,17 +89,17 @@ def _show_detail_and_add(tmdb_id, who):
     added = False
     with col1:
         if st.button("\U0001F3AC Adam's Pick", key="add_adam",
-                     use_container_width=True,
+                     width="stretch",
                      help="Adam has seen this and wants to share it"):
             added = _save_movie(details, "adam_pick", who)
     with col2:
         if st.button("\U0001F3AC Sean's Pick", key="add_sean",
-                     use_container_width=True,
+                     width="stretch",
                      help="Sean has seen this and wants to share it"):
             added = _save_movie(details, "sean_pick", who)
     with col3:
         if st.button("\U0001F31F Mutual Discovery", key="add_mutual",
-                     use_container_width=True,
+                     width="stretch",
                      help="Neither of us has seen this \u2014 we both want to!"):
             added = _save_movie(details, "mutual", who)
 
@@ -138,12 +138,12 @@ def _do_search(query, who):
         cols = st.columns([1, 3])
         with cols[0]:
             if img:
-                st.image(img, use_container_width=True)
+                st.image(img, width="stretch")
             else:
-                st.image(POSTER_PLACEHOLDER, use_container_width=True)
+                st.image(POSTER_PLACEHOLDER, width="stretch")
         with cols[1]:
             if st.button(f"**{title}** ({year})", key=f"sel_{tmdb_id}",
-                         use_container_width=True):
+                         width="stretch"):
                 st.session_state.selected_tmdb_id = tmdb_id
             if overview_short:
                 st.caption(overview_short)

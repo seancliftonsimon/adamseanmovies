@@ -1,8 +1,10 @@
 import json
+import logging
 import os
 import sqlite3
 from datetime import date, datetime
 from pathlib import Path
+from urllib.parse import urlparse
 
 try:
     import streamlit as st
@@ -17,6 +19,13 @@ except ImportError:
     dict_row = None
 
 DB_PATH = Path(__file__).parent / "movies.db"
+LOGGER = logging.getLogger(__name__)
+_DB_STATUS = {"backend": "unknown", "connected": False, "detail": ""}
+
+
+def _startup_log(message):
+    print(f"[database] {message}", flush=True)
+    LOGGER.info(message)
 
 
 def _get_config_value(key, default=""):
@@ -42,6 +51,18 @@ def _database_url():
 
 def _using_postgres():
     return bool(_database_url())
+
+
+def get_db_status():
+    return dict(_DB_STATUS)
+
+
+def _postgres_host():
+    try:
+        parsed = urlparse(_database_url())
+        return parsed.hostname or "unknown-host"
+    except Exception:
+        return "unknown-host"
 
 
 def get_connection():
@@ -79,9 +100,12 @@ def _run_query(sql, params=(), fetch=None, commit=False):
 
 def init_db():
     if _using_postgres():
-        conn = get_connection()
-        cur = conn.cursor()
         try:
+            host = _postgres_host()
+            _startup_log(f"Attempting Postgres connection to {host}")
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute("SELECT 1")
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS movies (
                     id BIGSERIAL PRIMARY KEY,
@@ -112,35 +136,60 @@ def init_db():
                 ON movies (watched, watched_date DESC)
             """)
             conn.commit()
+            _DB_STATUS.update(
+                {"backend": "postgres", "connected": True, "detail": f"connected:{host}"}
+            )
+            _startup_log(f"Postgres connection OK; schema ready on {host}")
+        except Exception as exc:
+            _DB_STATUS.update(
+                {"backend": "postgres", "connected": False, "detail": str(exc)}
+            )
+            _startup_log(
+                f"Postgres init FAILED: {exc.__class__.__name__}: {exc}"
+            )
+            raise
         finally:
-            cur.close()
-            conn.close()
+            if "cur" in locals():
+                cur.close()
+            if "conn" in locals():
+                conn.close()
         return
 
-    _run_query(
-        """
-        CREATE TABLE IF NOT EXISTS movies (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            tmdb_id INTEGER UNIQUE,
-            title TEXT NOT NULL,
-            year INTEGER,
-            poster_path TEXT,
-            director TEXT,
-            genres TEXT,
-            runtime INTEGER,
-            overview TEXT,
-            list_type TEXT NOT NULL,
-            added_by TEXT NOT NULL,
-            added_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            watched INTEGER DEFAULT 0,
-            watched_date TEXT,
-            adam_rating REAL,
-            sean_rating REAL,
-            notes TEXT
+    try:
+        _run_query(
+            """
+            CREATE TABLE IF NOT EXISTS movies (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tmdb_id INTEGER UNIQUE,
+                title TEXT NOT NULL,
+                year INTEGER,
+                poster_path TEXT,
+                director TEXT,
+                genres TEXT,
+                runtime INTEGER,
+                overview TEXT,
+                list_type TEXT NOT NULL,
+                added_by TEXT NOT NULL,
+                added_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                watched INTEGER DEFAULT 0,
+                watched_date TEXT,
+                adam_rating REAL,
+                sean_rating REAL,
+                notes TEXT
+            )
+            """,
+            commit=True,
         )
-        """,
-        commit=True,
-    )
+        _DB_STATUS.update(
+            {"backend": "sqlite", "connected": True, "detail": str(DB_PATH)}
+        )
+        _startup_log(f"SQLite fallback active at {DB_PATH}")
+    except Exception as exc:
+        _DB_STATUS.update(
+            {"backend": "sqlite", "connected": False, "detail": str(exc)}
+        )
+        _startup_log(f"SQLite init FAILED: {exc.__class__.__name__}: {exc}")
+        raise
 
 
 def add_movie(tmdb_id, title, year, poster_path, director, genres, runtime,
@@ -379,20 +428,28 @@ SEED_MOVIES = [
 
 
 def _seed_if_empty():
-    conn = get_connection()
-    count = conn.execute("SELECT COUNT(*) FROM movies").fetchone()[0]
+    count_row = _run_query("SELECT COUNT(*) AS total FROM movies", fetch="one")
+    count = count_row["total"] if isinstance(count_row, dict) else count_row[0]
+
     if count == 0:
+        _startup_log("Database is empty; seeding starter movies")
         for (tmdb_id, title, year, poster_path, director, genres,
              runtime, overview, list_type, added_by) in SEED_MOVIES:
-            conn.execute("""
-                INSERT OR IGNORE INTO movies
-                    (tmdb_id, title, year, poster_path, director, genres,
-                     runtime, overview, list_type, added_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (tmdb_id, title, year, poster_path, director,
-                  json.dumps(genres), runtime, overview, list_type, added_by))
-        conn.commit()
-    conn.close()
+            add_movie(
+                tmdb_id=tmdb_id,
+                title=title,
+                year=year,
+                poster_path=poster_path,
+                director=director,
+                genres=genres,
+                runtime=runtime,
+                overview=overview,
+                list_type=list_type,
+                added_by=added_by,
+            )
+        _startup_log("Seed complete")
+    else:
+        _startup_log(f"Seed skipped; movies already present ({count})")
 
 
 init_db()

@@ -30,7 +30,7 @@ def _rating_form(movie, prefix):
                          placeholder="e.g. We both loved it!")
     watch_date = st.date_input("Date watched", key=f"wd_{prefix}_{movie['id']}")
     if st.button("Save to Watch Log", key=f"sv_{prefix}_{movie['id']}",
-                 type="primary", use_container_width=True):
+                 type="primary", width="stretch"):
         mark_watched(movie["id"], adam_r, sean_r, notes, watch_date)
         st.session_state[f"sel_{prefix}"] = None
         st.session_state.pop(f"rate_{prefix}", None)
@@ -51,7 +51,7 @@ def _render_drawer(movie, prefix):
     with cols[0]:
         img = (make_poster_url(movie["poster_path"])
                if movie["poster_path"] else POSTER_PLACEHOLDER)
-        st.image(img, use_container_width=True)
+        st.image(img, width="stretch")
     with cols[1]:
         if movie["director"]:
             st.markdown(f"**Director:** {movie['director']}")
@@ -66,11 +66,11 @@ def _render_drawer(movie, prefix):
     c1, c2 = st.columns(2)
     with c1:
         if st.button("\u2705 We watched this!", key=f"dw_{prefix}_{movie['id']}",
-                     type="primary", use_container_width=True):
+                     type="primary", width="stretch"):
             st.session_state[f"rate_{prefix}"] = movie["id"]
     with c2:
         if st.button("\U0001F5D1\uFE0F Remove", key=f"drm_{prefix}_{movie['id']}",
-                     use_container_width=True):
+                     width="stretch"):
             st.session_state[f"confirm_rm_{prefix}"] = movie["id"]
 
     if st.session_state.get(f"rate_{prefix}") == movie["id"]:
@@ -81,7 +81,7 @@ def _render_drawer(movie, prefix):
         rc1, rc2 = st.columns(2)
         with rc1:
             if st.button("Yes, remove", key=f"yrm_{prefix}_{movie['id']}",
-                         use_container_width=True):
+                         width="stretch"):
                 remove_movie(movie["id"])
                 st.session_state[f"sel_{prefix}"] = None
                 st.session_state.pop(f"confirm_rm_{prefix}", None)
@@ -89,7 +89,7 @@ def _render_drawer(movie, prefix):
                 st.rerun()
         with rc2:
             if st.button("Cancel", key=f"nrm_{prefix}_{movie['id']}",
-                         use_container_width=True):
+                         width="stretch"):
                 st.session_state.pop(f"confirm_rm_{prefix}", None)
                 st.rerun()
 
@@ -127,7 +127,7 @@ def _render_shelf(movies, prefix):
                 if st.button(
                     "\u25B2" if is_sel else "\u25BC",
                     key=f"vhs_{prefix}_{movie['id']}",
-                    use_container_width=True,
+                    width="stretch",
                 ):
                     if is_sel:
                         st.session_state[f"sel_{prefix}"] = None

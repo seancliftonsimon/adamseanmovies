@@ -55,7 +55,7 @@ def _render_watched_drawer(movie):
     with cols[0]:
         img = (make_poster_url(movie["poster_path"])
                if movie["poster_path"] else POSTER_PLACEHOLDER)
-        st.image(img, use_container_width=True)
+        st.image(img, width="stretch")
     with cols[1]:
         if movie["director"]:
             st.markdown(f"**Director:** {movie['director']}")
@@ -105,7 +105,7 @@ def _render_shelf(watched):
                 if st.button(
                     "\u25B2" if is_sel else "\u25BC",
                     key=f"wvhs_{movie['id']}",
-                    use_container_width=True,
+                    width="stretch",
                 ):
                     st.session_state["sel_watched"] = (
                         None if is_sel else movie["id"]
