@@ -21,6 +21,7 @@ except ImportError:
 DB_PATH = Path(__file__).parent / "movies.db"
 LOGGER = logging.getLogger(__name__)
 _DB_STATUS = {"backend": "unknown", "connected": False, "detail": ""}
+_POSTGRES_FAILED = False
 
 
 def _startup_log(message):
@@ -50,7 +51,7 @@ def _database_url():
 
 
 def _using_postgres():
-    return bool(_database_url())
+    return bool(_database_url()) and not _POSTGRES_FAILED
 
 
 def get_db_status():
@@ -115,8 +116,41 @@ def _run_query(sql, params=(), fetch=None, commit=False):
         conn.close()
 
 
+def _init_sqlite():
+    _run_query(
+        """
+        CREATE TABLE IF NOT EXISTS movies (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tmdb_id INTEGER UNIQUE,
+            title TEXT NOT NULL,
+            year INTEGER,
+            poster_path TEXT,
+            director TEXT,
+            genres TEXT,
+            runtime INTEGER,
+            overview TEXT,
+            list_type TEXT NOT NULL,
+            added_by TEXT NOT NULL,
+            added_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            watched INTEGER DEFAULT 0,
+            watched_date TEXT,
+            adam_rating REAL,
+            sean_rating REAL,
+            notes TEXT
+        )
+        """,
+        commit=True,
+    )
+    _DB_STATUS.update(
+        {"backend": "sqlite", "connected": True, "detail": str(DB_PATH)}
+    )
+    _startup_log(f"SQLite fallback active at {DB_PATH}")
+
+
 def init_db():
-    if _using_postgres():
+    global _POSTGRES_FAILED
+
+    if _database_url():
         try:
             host = _postgres_host()
             _startup_log(f"Attempting Postgres connection to {host}")
@@ -157,6 +191,7 @@ def init_db():
                 {"backend": "postgres", "connected": True, "detail": f"connected:{host}"}
             )
             _startup_log(f"Postgres connection OK; schema ready on {host}")
+            return
         except Exception as exc:
             _DB_STATUS.update(
                 {"backend": "postgres", "connected": False, "detail": str(exc)}
@@ -166,43 +201,16 @@ def init_db():
             )
             if _is_ipv6_route_error(exc):
                 _startup_log(_pooler_fix_hint())
-            raise
+            _POSTGRES_FAILED = True
+            _startup_log("Falling back to local SQLite database")
         finally:
             if "cur" in locals():
                 cur.close()
             if "conn" in locals():
                 conn.close()
-        return
 
     try:
-        _run_query(
-            """
-            CREATE TABLE IF NOT EXISTS movies (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                tmdb_id INTEGER UNIQUE,
-                title TEXT NOT NULL,
-                year INTEGER,
-                poster_path TEXT,
-                director TEXT,
-                genres TEXT,
-                runtime INTEGER,
-                overview TEXT,
-                list_type TEXT NOT NULL,
-                added_by TEXT NOT NULL,
-                added_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                watched INTEGER DEFAULT 0,
-                watched_date TEXT,
-                adam_rating REAL,
-                sean_rating REAL,
-                notes TEXT
-            )
-            """,
-            commit=True,
-        )
-        _DB_STATUS.update(
-            {"backend": "sqlite", "connected": True, "detail": str(DB_PATH)}
-        )
-        _startup_log(f"SQLite fallback active at {DB_PATH}")
+        _init_sqlite()
     except Exception as exc:
         _DB_STATUS.update(
             {"backend": "sqlite", "connected": False, "detail": str(exc)}
