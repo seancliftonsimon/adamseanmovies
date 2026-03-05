@@ -8,6 +8,7 @@ st.set_page_config(
 )
 
 from pages import add_movie, pick_for_us, our_lists, watch_log
+from styles import inject_css
 
 
 def add_movie_page():
@@ -27,8 +28,19 @@ def watch_log_page():
 
 
 def main():
+    inject_css()
+
     with st.sidebar:
-        st.markdown("## \U0001F37F Movie Night")
+        st.markdown(
+            '<div style="text-align:center; padding: 0.5rem 0 0.25rem;">'
+            '<span style="font-size:1.6rem;">&#127871;</span>'
+            '<div style="font-size:1.1rem; font-weight:700; color:#FAFAFA; '
+            'letter-spacing:0.02em; margin-top:0.15rem;">Movie Night</div>'
+            '<div style="font-size:0.7rem; color:#C62828; text-transform:uppercase; '
+            'letter-spacing:0.12em; font-weight:600;">Adam &amp; Sean</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
         st.markdown("---")
 
         if "current_user" not in st.session_state:

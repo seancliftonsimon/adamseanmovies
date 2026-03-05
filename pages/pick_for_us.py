@@ -2,7 +2,7 @@ import random
 import time
 import streamlit as st
 from styles import (inject_css, genre_pills_html, runtime_display,
-                    stars_html, POSTER_PLACEHOLDER)
+                    stars_html, section_header, POSTER_PLACEHOLDER)
 from tmdb_api import poster_url
 from database import get_unwatched_movies, get_all_genres, mark_watched
 
@@ -18,7 +18,7 @@ VIBE_PRESETS = {
 
 def render():
     inject_css()
-    st.title("\U0001F3B0 Pick for Us")
+    section_header("Pick for Us")
     st.caption("Let fate decide your movie night. Set your filters and spin!")
 
     all_movies = get_unwatched_movies()
@@ -140,7 +140,7 @@ def _show_picked_movie(movie, celebrate=False):
         st.balloons()
 
     st.markdown("---")
-    st.markdown("## \U0001F37F Tonight's Movie")
+    section_header("Tonight's Movie")
 
     img = poster_url(movie["poster_path"]) if movie["poster_path"] else POSTER_PLACEHOLDER
     cols = st.columns([1, 2])

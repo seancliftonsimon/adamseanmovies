@@ -1,13 +1,13 @@
 import streamlit as st
 from styles import (inject_css, genre_pills_html, runtime_display,
-                    POSTER_PLACEHOLDER)
+                    section_header, POSTER_PLACEHOLDER)
 from database import get_unwatched_movies, remove_movie, mark_watched
 from tmdb_api import poster_url as make_poster_url
 
 
 def render():
     inject_css()
-    st.title("\U0001F4CB Our Lists")
+    section_header("Our Lists")
     st.caption("Browse all the movies waiting to be watched.")
 
     adam_movies = get_unwatched_movies("adam_pick")
