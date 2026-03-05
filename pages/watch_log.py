@@ -1,13 +1,13 @@
 import streamlit as st
 from styles import (inject_css, genre_pills_html, runtime_display,
-                    stars_html, POSTER_PLACEHOLDER)
+                    stars_html, section_header, POSTER_PLACEHOLDER)
 from tmdb_api import poster_url as make_poster_url
 from database import get_watched_movies, get_watch_stats
 
 
 def render():
     inject_css()
-    st.title("\U0001F4D6 Watch Log")
+    section_header("Watch Log")
     st.caption("Every movie you've watched together, rated and remembered.")
 
     stats = get_watch_stats()

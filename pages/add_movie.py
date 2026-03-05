@@ -1,5 +1,6 @@
 import streamlit as st
-from styles import inject_css, genre_pills_html, runtime_display, POSTER_PLACEHOLDER
+from styles import (inject_css, genre_pills_html, runtime_display,
+                    section_header, POSTER_PLACEHOLDER)
 from tmdb_api import search_movies, get_movie_details, poster_url, small_poster_url
 from database import add_movie, movie_exists
 
@@ -7,7 +8,7 @@ from database import add_movie, movie_exists
 def render():
     inject_css()
 
-    st.title("\U0001F3AC Add a Movie")
+    section_header("Add a Movie")
     st.caption("Search for a movie, preview it, and add it to the right list.")
 
     who = st.session_state.get("current_user", "Adam")
