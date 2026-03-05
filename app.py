@@ -45,10 +45,13 @@ def main():
 
     page = st.navigation([
         st.Page(add_movie.render, title="Add a Movie", icon="\U0001F3AC",
-                default=True),
-        st.Page(pick_for_us.render, title="Pick for Us", icon="\U0001F3B0"),
-        st.Page(our_lists.render, title="Our Lists", icon="\U0001F4CB"),
-        st.Page(watch_log.render, title="Watch Log", icon="\U0001F4FC"),
+                default=True, url_path="add-movie"),
+        st.Page(pick_for_us.render, title="Pick for Us", icon="\U0001F3B0",
+                url_path="pick-for-us"),
+        st.Page(our_lists.render, title="Our Lists", icon="\U0001F4CB",
+                url_path="our-lists"),
+        st.Page(watch_log.render, title="Watch Log", icon="\U0001F4FC",
+                url_path="watch-log"),
     ])
     page.run()
 
