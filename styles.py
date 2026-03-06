@@ -324,7 +324,10 @@ def inject_css():
     /* ===== MOBILE-FIRST ===== */
     @media (max-width: 640px) {
         .block-container {
-            max-width: 100%;
+            width: 100vw !important;
+            max-width: 100vw !important;
+            box-sizing: border-box !important;
+            overflow-x: clip !important;
             padding-top: 2.8rem;
             padding-left: 0.5rem;
             padding-right: 0.5rem;
@@ -339,20 +342,30 @@ def inject_css():
         .genre-pill { font-size: 0.58rem; padding: 2px 5px; }
         [data-testid="stMetric"] { padding: 0.4rem; }
 
-        /* Keep movie shelf rows in a real two-up grid on mobile. */
+        /* Keep movie shelf rows locked to viewport width on mobile. */
+        [class*="st-key-shelf-row-"],
+        [class*="st-key-shelf_row_"] {
+            width: calc(100vw - 1rem) !important;
+            width: calc(100dvw - 1rem) !important;
+            max-width: calc(100vw - 1rem) !important;
+            max-width: calc(100dvw - 1rem) !important;
+            overflow-x: clip !important;
+        }
         [class*="st-key-shelf-row-"] [data-testid="stHorizontalBlock"],
         [class*="st-key-shelf_row_"] [data-testid="stHorizontalBlock"] {
-            display: grid !important;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+            display: flex !important;
+            flex-wrap: nowrap !important;
             gap: 0.35rem !important;
             width: 100% !important;
             max-width: 100% !important;
+            overflow-x: clip !important;
         }
         [class*="st-key-shelf-row-"] [data-testid="stHorizontalBlock"] > [data-testid="column"],
         [class*="st-key-shelf_row_"] [data-testid="stHorizontalBlock"] > [data-testid="column"] {
+            flex: 0 0 calc((100% - 0.35rem) / 2) !important;
+            max-width: calc((100% - 0.35rem) / 2) !important;
             min-width: 0 !important;
             width: auto !important;
-            max-width: 100% !important;
         }
         [class*="st-key-shelf-row-"] .vhs-tape,
         [class*="st-key-shelf_row_"] .vhs-tape {

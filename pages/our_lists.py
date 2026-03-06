@@ -82,21 +82,15 @@ def _render_drawer(movie, prefix):
         unsafe_allow_html=True,
     )
 
-    cols = st.columns([1, 2])
-    with cols[0]:
-        img = (make_poster_url(movie["poster_path"])
-               if movie["poster_path"] else POSTER_PLACEHOLDER)
-        st.image(img, width="stretch")
-    with cols[1]:
-        if movie["director"]:
-            st.markdown(f"**Director:** {movie['director']}")
-        if movie["genres_list"]:
-            st.markdown(genre_pills_html(movie["genres_list"]),
-                        unsafe_allow_html=True)
-        if movie["runtime"]:
-            st.markdown(f"**Runtime:** {runtime_display(movie['runtime'])}")
-        if movie["overview"]:
-            st.caption(movie["overview"])
+    if movie["director"]:
+        st.markdown(f"**Director:** {movie['director']}")
+    if movie["genres_list"]:
+        st.markdown(genre_pills_html(movie["genres_list"]),
+                    unsafe_allow_html=True)
+    if movie["runtime"]:
+        st.markdown(f"**Runtime:** {runtime_display(movie['runtime'])}")
+    if movie["overview"]:
+        st.caption(movie["overview"])
 
     c1, c2 = st.columns(2)
     with c1:
