@@ -19,6 +19,7 @@ def inject_css():
     [data-testid="stAppViewContainer"],
     [data-testid="stApp"] {
         background-color: #001029;
+        overflow-x: hidden;
     }
 
     /* ===== TYPOGRAPHY ===== */
@@ -339,14 +340,24 @@ def inject_css():
         [data-testid="stMetric"] { padding: 0.4rem; }
 
         /* Keep movie shelf rows in a real two-up grid on mobile. */
+        [class*="st-key-shelf-row-"] [data-testid="stHorizontalBlock"],
         [class*="st-key-shelf_row_"] [data-testid="stHorizontalBlock"] {
-            flex-wrap: nowrap !important;
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
             gap: 0.35rem !important;
+            width: 100% !important;
+            max-width: 100% !important;
         }
+        [class*="st-key-shelf-row-"] [data-testid="stHorizontalBlock"] > [data-testid="column"],
         [class*="st-key-shelf_row_"] [data-testid="stHorizontalBlock"] > [data-testid="column"] {
-            flex: 1 1 0 !important;
-            width: 0 !important;
             min-width: 0 !important;
+            width: auto !important;
+            max-width: 100% !important;
+        }
+        [class*="st-key-shelf-row-"] .vhs-tape,
+        [class*="st-key-shelf_row_"] .vhs-tape {
+            width: 100% !important;
+            max-width: 100% !important;
         }
     }
 

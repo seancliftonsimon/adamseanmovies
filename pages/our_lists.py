@@ -150,7 +150,7 @@ def _render_shelf(movies, prefix):
     rows = [movies[i:i + shelf_cols] for i in range(0, len(movies), shelf_cols)]
 
     for row_idx, row_movies in enumerate(rows):
-        with st.container(key=f"shelf_row_{prefix}_{row_idx}"):
+        with st.container(key=f"shelf-row-{prefix}-{row_idx}"):
             cols = st.columns(shelf_cols, gap="small")
             for col_idx, movie in enumerate(row_movies):
                 with cols[col_idx]:
