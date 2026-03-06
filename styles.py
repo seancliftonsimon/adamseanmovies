@@ -342,35 +342,34 @@ def inject_css():
         .genre-pill { font-size: 0.58rem; padding: 2px 5px; }
         [data-testid="stMetric"] { padding: 0.4rem; }
 
-        /* Keep movie shelf rows locked to viewport width on mobile. */
-        [class*="st-key-shelf-row-"],
-        [class*="st-key-shelf_row_"] {
-            width: calc(100vw - 1rem) !important;
-            width: calc(100dvw - 1rem) !important;
-            max-width: calc(100vw - 1rem) !important;
-            max-width: calc(100dvw - 1rem) !important;
-            overflow-x: clip !important;
-        }
-        [class*="st-key-shelf-row-"] [data-testid="stHorizontalBlock"],
-        [class*="st-key-shelf_row_"] [data-testid="stHorizontalBlock"] {
+        /* Keep movie shelf rows (2-col) locked to viewport width on mobile.
+           Target only 2-column layouts with vhs-tape to avoid affecting watch_log (4 cols). */
+        [data-testid="stHorizontalBlock"]:has(> [data-testid="column"]:first-child:nth-last-child(2)):has(.vhs-tape) {
             display: flex !important;
             flex-wrap: nowrap !important;
             gap: 0.35rem !important;
             width: 100% !important;
             max-width: 100% !important;
-            overflow-x: clip !important;
-        }
-        [class*="st-key-shelf-row-"] [data-testid="stHorizontalBlock"] > [data-testid="column"],
-        [class*="st-key-shelf_row_"] [data-testid="stHorizontalBlock"] > [data-testid="column"] {
-            flex: 0 0 calc((100% - 0.35rem) / 2) !important;
-            max-width: calc((100% - 0.35rem) / 2) !important;
             min-width: 0 !important;
-            width: auto !important;
+            overflow: hidden !important;
         }
-        [class*="st-key-shelf-row-"] .vhs-tape,
-        [class*="st-key-shelf_row_"] .vhs-tape {
+        [data-testid="stHorizontalBlock"]:has(> [data-testid="column"]:first-child:nth-last-child(2)):has(.vhs-tape) > [data-testid="column"] {
+            flex: 0 0 calc(50% - 0.2rem) !important;
+            max-width: calc(50% - 0.2rem) !important;
+            min-width: 0 !important;
+            overflow: hidden !important;
+        }
+        [data-testid="stHorizontalBlock"]:has(> [data-testid="column"]:first-child:nth-last-child(2)):has(.vhs-tape) .vhs-tape {
             width: 100% !important;
             max-width: 100% !important;
+            min-width: 0 !important;
+        }
+        [data-testid="stHorizontalBlock"]:has(> [data-testid="column"]:first-child:nth-last-child(2)):has(.vhs-tape) .vhs-tape img {
+            max-width: 100% !important;
+            width: 100% !important;
+            height: auto !important;
+            aspect-ratio: 2/3 !important;
+            object-fit: cover !important;
         }
     }
 
