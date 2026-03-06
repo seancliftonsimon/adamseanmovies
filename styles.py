@@ -338,12 +338,14 @@ def inject_css():
         .genre-pill { font-size: 0.58rem; padding: 2px 5px; }
         [data-testid="stMetric"] { padding: 0.4rem; }
 
-        /* Keep shelf posters in a real two-up grid on mobile. */
-        [data-testid="stHorizontalBlock"]:has(.vhs-tape) {
+        /* Keep movie shelf rows in a real two-up grid on mobile. */
+        [class*="st-key-shelf_row_"] [data-testid="stHorizontalBlock"] {
             flex-wrap: nowrap !important;
+            gap: 0.35rem !important;
         }
-        [data-testid="stHorizontalBlock"]:has(.vhs-tape) > [data-testid="column"] {
+        [class*="st-key-shelf_row_"] [data-testid="stHorizontalBlock"] > [data-testid="column"] {
             flex: 1 1 0 !important;
+            width: 0 !important;
             min-width: 0 !important;
         }
     }

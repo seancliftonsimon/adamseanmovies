@@ -149,32 +149,33 @@ def _render_shelf(movies, prefix):
     shelf_cols = 2 if _is_mobile_client() else SHELF_COLS
     rows = [movies[i:i + shelf_cols] for i in range(0, len(movies), shelf_cols)]
 
-    for row_movies in rows:
-        cols = st.columns(shelf_cols)
-        for col_idx, movie in enumerate(row_movies):
-            with cols[col_idx]:
-                poster_size = "w154" if shelf_cols == 2 else "w185"
-                img = (make_poster_url(movie["poster_path"], poster_size)
-                       if movie["poster_path"] else POSTER_PLACEHOLDER)
-                st.markdown(
-                    vhs_tape_html(img, movie["title"], movie.get("year")),
-                    unsafe_allow_html=True,
-                )
-                is_sel = st.session_state[f"sel_{prefix}"] == movie["id"]
-                if st.button(
-                    "\u25B2" if is_sel else "\u25BC",
-                    key=f"vhs_{prefix}_{movie['id']}",
-                    width="stretch",
-                ):
-                    if is_sel:
-                        st.session_state[f"sel_{prefix}"] = None
-                    else:
-                        st.session_state[f"sel_{prefix}"] = movie["id"]
-                        st.session_state.pop(f"rate_{prefix}", None)
-                        st.session_state.pop(f"confirm_rm_{prefix}", None)
-                    st.rerun()
+    for row_idx, row_movies in enumerate(rows):
+        with st.container(key=f"shelf_row_{prefix}_{row_idx}"):
+            cols = st.columns(shelf_cols, gap="small")
+            for col_idx, movie in enumerate(row_movies):
+                with cols[col_idx]:
+                    poster_size = "w154" if shelf_cols == 2 else "w185"
+                    img = (make_poster_url(movie["poster_path"], poster_size)
+                           if movie["poster_path"] else POSTER_PLACEHOLDER)
+                    st.markdown(
+                        vhs_tape_html(img, movie["title"], movie.get("year")),
+                        unsafe_allow_html=True,
+                    )
+                    is_sel = st.session_state[f"sel_{prefix}"] == movie["id"]
+                    if st.button(
+                        "\u25B2" if is_sel else "\u25BC",
+                        key=f"vhs_{prefix}_{movie['id']}",
+                        width="stretch",
+                    ):
+                        if is_sel:
+                            st.session_state[f"sel_{prefix}"] = None
+                        else:
+                            st.session_state[f"sel_{prefix}"] = movie["id"]
+                            st.session_state.pop(f"rate_{prefix}", None)
+                            st.session_state.pop(f"confirm_rm_{prefix}", None)
+                        st.rerun()
 
-        st.markdown(shelf_bar_html(), unsafe_allow_html=True)
+            st.markdown(shelf_bar_html(), unsafe_allow_html=True)
 
         sel_id = st.session_state.get(f"sel_{prefix}")
         sel_movie = next((m for m in row_movies if m["id"] == sel_id), None)
