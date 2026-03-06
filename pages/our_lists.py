@@ -7,6 +7,28 @@ from database import get_unwatched_movies, remove_movie, mark_watched
 from tmdb_api import poster_url as make_poster_url
 
 
+def _is_mobile_client():
+    """Best-effort mobile detection via request headers."""
+    context = getattr(st, "context", None)
+    headers = getattr(context, "headers", None)
+    if not headers:
+        return False
+
+    mobile_hint = (headers.get("sec-ch-ua-mobile") or "").strip()
+    if mobile_hint == "?1":
+        return True
+
+    user_agent = (
+        headers.get("user-agent")
+        or headers.get("User-Agent")
+        or ""
+    ).lower()
+    return any(
+        token in user_agent
+        for token in ("iphone", "android", "mobile", "ipad")
+    )
+
+
 def _sort_movies(movies, sort_option):
     if sort_option == "Title A\u2013Z":
         return sorted(movies, key=lambda m: (m["title"] or "").lower())
@@ -111,13 +133,15 @@ def _render_shelf(movies, prefix):
     if f"sel_{prefix}" not in st.session_state:
         st.session_state[f"sel_{prefix}"] = None
 
-    rows = [movies[i:i + SHELF_COLS] for i in range(0, len(movies), SHELF_COLS)]
+    shelf_cols = 2 if _is_mobile_client() else SHELF_COLS
+    rows = [movies[i:i + shelf_cols] for i in range(0, len(movies), shelf_cols)]
 
     for row_movies in rows:
-        cols = st.columns(SHELF_COLS)
+        cols = st.columns(shelf_cols)
         for col_idx, movie in enumerate(row_movies):
             with cols[col_idx]:
-                img = (make_poster_url(movie["poster_path"], "w185")
+                poster_size = "w154" if shelf_cols == 2 else "w185"
+                img = (make_poster_url(movie["poster_path"], poster_size)
                        if movie["poster_path"] else POSTER_PLACEHOLDER)
                 st.markdown(
                     vhs_tape_html(img, movie["title"], movie.get("year")),

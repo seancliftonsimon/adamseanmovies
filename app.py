@@ -35,14 +35,7 @@ def main():
                      url_path="watch-log")
 
     all_pages = [add_pg, pick_pg, lists_pg, log_pg]
-    page = st.navigation(all_pages, position="hidden")
-
-    nav_cols = st.columns(len(all_pages))
-    nav_labels = ["Add", "Pick", "Lists", "Log"]
-    for col, pg, label in zip(nav_cols, all_pages, nav_labels):
-        with col:
-            st.page_link(pg, label=label, icon=pg.icon,
-                         use_container_width=True)
+    page = st.navigation(all_pages, position="top")
 
     page.run()
 
