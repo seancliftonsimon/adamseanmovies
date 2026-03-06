@@ -537,6 +537,64 @@ SEED_MOVIES = [
 ]
 
 
+WATCHED_SEED_MOVIES = [
+    ("After Hours", "2025-12-09", "adam_pick", "Adam"),
+    ("Kill Bill Vol. 1", "2025-12-09", "sean_pick", "Sean"),
+    ("Spy", "2025-11-29", "sean_pick", "Sean"),
+    ("How to Steal a Million", "2025-11-29", "adam_pick", "Adam"),
+    ("House (1977)", "2025-10-22", "sean_pick", "Sean"),
+    ("Scooby-Doo", "2025-10-22", "sean_pick", "Sean"),
+    ("While You Were Sleeping", "2025-10-17", "adam_pick", "Adam"),
+    ("Frances Ha", "2025-10-17", "sean_pick", "Sean"),
+    ("Party Girl", "2025-09-26", "adam_pick", "Adam"),
+    ("One Battle After Another", "2025-09-25", "mutual", "Both"),
+    ("Elio", "2025-07-23", "adam_pick", "Adam"),
+    ("Freakier Friday", "2025-08-28", "adam_pick", "Adam"),
+    ("Strange Darling", "2024-09-16", "adam_pick", "Adam"),
+    ("Muppets Most Wanted", "2025-09-11", "sean_pick", "Sean"),
+    ("Downton Abbey: The Grand Finale", "2025-09-12", "mutual", "Both"),
+    ("What's Up, Doc?", "2025-09-06", "adam_pick", "Adam"),
+    ("Pan's Labyrinth", "2025-09-02", "sean_pick", "Sean"),
+    ("The Muppet Movie", "2025-05-04", "sean_pick", "Sean"),
+    ("Pride and Prejudice (2005)", "2025-04-26", "adam_pick", "Adam"),
+    ("Teen Beach Movie", "2025-04-17", "sean_pick", "Sean"),
+    ("Broadcast News", "2025-04-02", "sean_pick", "Sean"),
+    ("Return to Me", "2025-03-15", "adam_pick", "Adam"),
+    ("Titanic", "2025-02-25", "sean_pick", "Sean"),
+    ("Jurassic Park", "2025-01-16", "sean_pick", "Sean"),
+    ("Gremlins 2", "2024-10-13", "sean_pick", "Sean"),
+    ("Alien Covenant", "2024-08-24", "sean_pick", "Sean"),
+    ("Prometheus", "2024-08-24", "sean_pick", "Sean"),
+]
+
+
+def _seed_watched_movies():
+    _startup_log("Seeding watched movies")
+    pg = _using_postgres()
+    for title, watched_date, list_type, added_by in WATCHED_SEED_MOVIES:
+        if pg:
+            _run_query(
+                """
+                INSERT INTO movies
+                    (title, list_type, added_by, watched, watched_date)
+                VALUES (%s, %s, %s, TRUE, %s)
+                """,
+                (title, list_type, added_by, watched_date),
+                commit=True,
+            )
+        else:
+            _run_query(
+                """
+                INSERT INTO movies
+                    (title, list_type, added_by, watched, watched_date)
+                VALUES (?, ?, ?, 1, ?)
+                """,
+                (title, list_type, added_by, watched_date),
+                commit=True,
+            )
+    _startup_log(f"Seeded {len(WATCHED_SEED_MOVIES)} watched movies")
+
+
 def _seed_if_empty():
     count_row = _run_query("SELECT COUNT(*) AS total FROM movies", fetch="one")
     count = count_row["total"] if isinstance(count_row, dict) else count_row[0]
@@ -557,6 +615,7 @@ def _seed_if_empty():
                 list_type=list_type,
                 added_by=added_by,
             )
+        _seed_watched_movies()
         _startup_log("Seed complete")
     else:
         _startup_log(f"Seed skipped; movies already present ({count})")
