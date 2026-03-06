@@ -21,16 +21,25 @@ def _is_mobile_client():
     mobile_hint = (headers.get("sec-ch-ua-mobile") or "").strip()
     if mobile_hint == "?1":
         return True
+    if mobile_hint == "?0":
+        return False
 
-    user_agent = (
-        headers.get("user-agent")
-        or headers.get("User-Agent")
-        or ""
-    ).lower()
-    return any(
-        token in user_agent
-        for token in ("iphone", "android", "mobile", "ipad")
-    )
+    # Some deployments pass UA through non-standard header names.
+    ua_values = []
+    for key in headers.keys():
+        if "user-agent" in key.lower():
+            value = headers.get(key) or ""
+            if value:
+                ua_values.append(str(value).lower())
+
+    combined_ua = " ".join(ua_values)
+    if any(t in combined_ua for t in ("iphone", "android", "mobile", "ipad")):
+        return True
+    if any(t in combined_ua for t in ("windows", "macintosh", "x11", "linux x86_64")):
+        return False
+
+    # Unknown agent: favor compact layout so mobile portrait remains usable.
+    return True
 
 
 def _sort_movies(movies, sort_option):

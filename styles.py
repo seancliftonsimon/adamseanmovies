@@ -324,7 +324,7 @@ def inject_css():
     @media (max-width: 640px) {
         .block-container {
             max-width: 100%;
-            padding-top: 0.5rem;
+            padding-top: 2.8rem;
             padding-left: 0.5rem;
             padding-right: 0.5rem;
         }
@@ -337,6 +337,15 @@ def inject_css():
         .vhs-spine { font-size: 0.45rem; padding: 2px; }
         .genre-pill { font-size: 0.58rem; padding: 2px 5px; }
         [data-testid="stMetric"] { padding: 0.4rem; }
+
+        /* Keep shelf posters in a real two-up grid on mobile. */
+        [data-testid="stHorizontalBlock"]:has(.vhs-tape) {
+            flex-wrap: nowrap !important;
+        }
+        [data-testid="stHorizontalBlock"]:has(.vhs-tape) > [data-testid="column"] {
+            flex: 1 1 0 !important;
+            min-width: 0 !important;
+        }
     }
 
     @media (min-width: 641px) {
