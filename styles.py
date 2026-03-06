@@ -342,8 +342,27 @@ def inject_css():
         .genre-pill { font-size: 0.58rem; padding: 2px 5px; }
         [data-testid="stMetric"] { padding: 0.4rem; }
 
-        /* Keep movie shelf rows (2-col) locked to viewport width on mobile.
-           Target only 2-column layouts with vhs-tape to avoid affecting watch_log (4 cols). */
+        /* Shelf row: controlled 2-col flex layout (our_lists mobile only) */
+        .shelf-row-two-col {
+            display: flex !important;
+            gap: 0.5rem !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin-bottom: 2px !important;
+            overflow: hidden !important;
+        }
+        .shelf-row-two-col .shelf-cell {
+            flex: 0 0 calc(50% - 0.25rem) !important;
+            max-width: calc(50% - 0.25rem) !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+        }
+        .shelf-row-two-col .vhs-tape {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        /* Legacy: 2-col column layout constraint (fallback if using st.columns) */
         [data-testid="stHorizontalBlock"]:has(> [data-testid="column"]:first-child:nth-last-child(2)):has(.vhs-tape) {
             display: flex !important;
             flex-wrap: nowrap !important;
@@ -400,6 +419,27 @@ def vhs_tape_html(img_url, title, year=None):
         f'<div class="vhs-spine">{escape(label)}</div>'
         f'</div>'
     )
+
+
+def shelf_row_html(movies, make_poster_url_fn, poster_placeholder):
+    """Render a row of posters in a controlled 2-col flex layout for mobile."""
+    cells = []
+    for movie in movies:
+        img = (make_poster_url_fn(movie["poster_path"], "w154")
+               if movie["poster_path"] else poster_placeholder)
+        label = movie["title"] if len(movie["title"]) <= 20 else movie["title"][:18] + "\u2026"
+        if movie.get("year"):
+            yr = f" ({movie['year']})"
+            if len(label) + len(yr) <= 24:
+                label += yr
+        cells.append(
+            f'<div class="shelf-cell">'
+            f'<div class="vhs-tape">'
+            f'<img src="{img}" alt="{escape(movie["title"])}" />'
+            f'<div class="vhs-spine">{escape(label)}</div>'
+            f'</div></div>'
+        )
+    return f'<div class="shelf-row-two-col">{"".join(cells)}</div>'
 
 
 def shelf_bar_html():
