@@ -11,6 +11,24 @@ from pages import add_movie, pick_for_us, our_lists, watch_log
 from styles import inject_css
 from database import get_db_status
 
+NAV_ITEMS = [
+    ("\U0001F3AC Add", add_movie.render),
+    ("\U0001F3B0 Pick", pick_for_us.render),
+    ("\U0001F4CB Lists", our_lists.render),
+    ("\U0001F4FC Log", watch_log.render),
+]
+
+
+def _render_top_menu():
+    labels = [label for label, _ in NAV_ITEMS]
+    selected = st.pills(
+        "Menu",
+        labels,
+        default=labels[0],
+        key="top_nav_menu",
+    )
+    return selected or labels[0]
+
 
 def main():
     inject_css()
@@ -25,19 +43,9 @@ def main():
             icon="\u26a0\ufe0f",
         )
 
-    add_pg = st.Page(add_movie.render, title="Add a Movie", icon="\U0001F3AC",
-                     default=True, url_path="add-movie")
-    pick_pg = st.Page(pick_for_us.render, title="Pick for Us", icon="\U0001F3B0",
-                      url_path="pick-for-us")
-    lists_pg = st.Page(our_lists.render, title="Our Lists", icon="\U0001F4CB",
-                       url_path="our-lists")
-    log_pg = st.Page(watch_log.render, title="Watch Log", icon="\U0001F4FC",
-                     url_path="watch-log")
-
-    all_pages = [add_pg, pick_pg, lists_pg, log_pg]
-    page = st.navigation(all_pages, position="top")
-
-    page.run()
+    selected_menu = _render_top_menu()
+    render_map = dict(NAV_ITEMS)
+    render_map[selected_menu]()
 
 
 if __name__ == "__main__":

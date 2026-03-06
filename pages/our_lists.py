@@ -8,11 +8,15 @@ from tmdb_api import poster_url as make_poster_url
 
 
 def _is_mobile_client():
-    """Best-effort mobile detection via request headers."""
+    """Best-effort mobile detection with compact fallback."""
     context = getattr(st, "context", None)
+    if context is None:
+        # Older Streamlit versions lack st.context; prefer compact layout.
+        return True
+
     headers = getattr(context, "headers", None)
     if not headers:
-        return False
+        return True
 
     mobile_hint = (headers.get("sec-ch-ua-mobile") or "").strip()
     if mobile_hint == "?1":

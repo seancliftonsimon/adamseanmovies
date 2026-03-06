@@ -28,8 +28,7 @@ def inject_css():
     h3 { font-size: 1.05rem !important; }
 
     /* ===== HIDE CHROME ===== */
-    #MainMenu, footer { visibility: hidden; }
-    header { visibility: visible; }
+    #MainMenu, header, footer { visibility: hidden; }
 
     /* ===== SIDEBAR ===== */
     [data-testid="stSidebar"] {
