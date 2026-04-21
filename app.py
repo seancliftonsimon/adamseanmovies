@@ -9,7 +9,7 @@ st.set_page_config(
 )
 
 from pages import add_movie, pick_for_us, our_lists, watch_log
-from styles import inject_css
+from styles import inject_css, app_header_html, bottom_nav_html
 from database import get_db_status, get_movies_missing_posters, update_movie_metadata
 from tmdb_api import search_movies, get_movie_details
 
@@ -46,6 +46,7 @@ def _backfill_posters():
         except Exception:
             pass
 
+
 NAV_ITEMS = [
     ("\U0001F3AC Add", add_movie.render),
     ("\U0001F3B0 Pick", pick_for_us.render),
@@ -69,6 +70,9 @@ def main():
     inject_css()
     _backfill_posters()
 
+    # Sticky header
+    st.markdown(app_header_html(), unsafe_allow_html=True)
+
     db_status = get_db_status()
     if db_status.get("fallback"):
         st.warning(
@@ -82,6 +86,9 @@ def main():
     selected_menu = _render_top_menu()
     render_map = dict(NAV_ITEMS)
     render_map[selected_menu]()
+
+    # Fixed bottom nav
+    st.markdown(bottom_nav_html(selected_menu), unsafe_allow_html=True)
 
 
 if __name__ == "__main__":

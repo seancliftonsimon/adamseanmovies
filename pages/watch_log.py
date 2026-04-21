@@ -2,31 +2,33 @@ import streamlit as st
 from html import escape
 from styles import (inject_css, genre_pills_html, runtime_display,
                     stars_html, section_header, vhs_tape_html,
-                    shelf_bar_html, POSTER_PLACEHOLDER, SHELF_COLS)
+                    shelf_bar_html, stat_cards_row_html,
+                    POSTER_PLACEHOLDER, SHELF_COLS)
 from tmdb_api import poster_url as make_poster_url
 from database import get_watched_movies, get_watch_stats
 
 
 def _render_stats(stats):
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.metric("Movies Watched", stats["total"])
-    with c2:
-        st.metric("Total Hours", stats["total_hours"])
-    with c3:
-        st.metric("Adam's Avg",
-                  f"{stats['avg_adam']}/10" if stats["avg_adam"] else "N/A")
-    with c4:
-        st.metric("Sean's Avg",
-                  f"{stats['avg_sean']}/10" if stats["avg_sean"] else "N/A")
+    row1 = [
+        {"label": "Movies Watched", "value": stats["total"], "yellow": True},
+        {"label": "Total Hours", "value": f"{stats['total_hours']}h"},
+        {"label": "Adam's Avg",
+         "value": f"{stats['avg_adam']}/10" if stats["avg_adam"] else "—"},
+        {"label": "Sean's Avg",
+         "value": f"{stats['avg_sean']}/10" if stats["avg_sean"] else "—"},
+    ]
+    st.markdown(stat_cards_row_html(row1), unsafe_allow_html=True)
 
-    c5, c6, c7 = st.columns(3)
-    with c5:
-        st.metric("Top Genre", stats["top_genre"])
-    with c6:
-        st.metric("Adam's Picks Done", stats["adam_suggested_watched"])
-    with c7:
-        st.metric("Sean's Picks Done", stats["sean_suggested_watched"])
+    top_genre = stats.get("top_genre") or "—"
+    row2 = [
+        {"label": "Top Genre", "value": top_genre,
+         "sub": "most watched genre"},
+        {"label": "Adam's Picks Done",
+         "value": stats["adam_suggested_watched"]},
+        {"label": "Sean's Picks Done",
+         "value": stats["sean_suggested_watched"]},
+    ]
+    st.markdown(stat_cards_row_html(row2), unsafe_allow_html=True)
 
     if stats["adam_suggested_watched"] > 0 or stats["sean_suggested_watched"] > 0:
         if stats["adam_suggested_watched"] > stats["sean_suggested_watched"]:
