@@ -14,10 +14,11 @@ def inject_css():
 
     /* ===== GLOBAL ===== */
     .block-container {
-        max-width: 580px;
-        padding-top: 1rem;
-        padding-bottom: 5rem;
+        max-width: 620px;
+        padding-top: 4.5rem;   /* clears the 56px fixed header */
+        padding-bottom: 7rem;  /* clears the 80px bottom nav */
         font-family: 'Inter', sans-serif;
+        font-size: 1rem;
     }
     html, body,
     [data-testid="stAppViewContainer"],
@@ -26,6 +27,9 @@ def inject_css():
         overflow-x: hidden;
     }
 
+    /* ===== HIDE STREAMLIT CHROME ===== */
+    #MainMenu, header, footer { display: none !important; }
+
     /* ===== TYPOGRAPHY ===== */
     h1, h2, h3 {
         font-family: 'Epilogue', sans-serif !important;
@@ -33,13 +37,10 @@ def inject_css():
         color: #1a1a1a !important;
         letter-spacing: -0.02em !important;
     }
-    h1 { font-size: 1.8rem !important; letter-spacing: -0.03em !important; }
-    h2 { font-size: 1.4rem !important; }
-    h3 { font-size: 1.1rem !important; }
-    p, li { font-family: 'Inter', sans-serif; color: #1a1a1a; }
-
-    /* ===== HIDE STREAMLIT CHROME ===== */
-    #MainMenu, header, footer { display: none !important; }
+    h1 { font-size: 2rem !important; letter-spacing: -0.03em !important; }
+    h2 { font-size: 1.5rem !important; }
+    h3 { font-size: 1.2rem !important; }
+    p, li { font-family: 'Inter', sans-serif; color: #1a1a1a; font-size: 1rem; }
 
     /* ===== STICKY APP HEADER ===== */
     .app-header {
@@ -54,7 +55,7 @@ def inject_css():
         height: 56px;
         display: flex;
         align-items: center;
-        padding: 0 1rem;
+        padding: 0 1.25rem;
         gap: 0.75rem;
         box-sizing: border-box;
     }
@@ -62,7 +63,7 @@ def inject_css():
         font-family: 'Epilogue', sans-serif;
         font-weight: 900;
         font-style: italic;
-        font-size: 1.4rem;
+        font-size: 1.5rem;
         color: #F2E400;
         text-transform: uppercase;
         letter-spacing: -0.04em;
@@ -78,109 +79,118 @@ def inject_css():
     }
     .app-header-tagline {
         font-family: 'Space Grotesk', sans-serif;
-        font-size: 0.58rem;
+        font-size: 0.65rem;
         font-weight: 700;
-        color: rgba(255,255,255,0.5);
+        color: rgba(255,255,255,0.55);
         text-transform: uppercase;
         letter-spacing: 0.14em;
         line-height: 1;
     }
 
-    /* ===== NAVIGATION PILLS — dark strip style ===== */
-    [data-testid="stPills"] {
-        background: #1a1a1a !important;
-        padding: 0 4px !important;
-        border-radius: 0 !important;
-        border-bottom: 2px solid #000 !important;
-        margin-bottom: 1rem !important;
-        gap: 0 !important;
+    /* ===== BOTTOM NAV BAR =====
+       We inject a .bnav-anchor div right before st.columns(4).
+       In Streamlit's DOM they are sibling stElementContainers inside
+       the same stVerticalBlock, so the yellow bar uses the anchor's
+       neighbouring div to paint a background strip, while the real
+       buttons are just st.button components inside the columns.
+    */
+    .bnav-anchor {
+        margin-top: 2rem;
     }
-    [data-testid="stPills"] > label { display: none !important; }
-    [data-testid="stPills"] [data-baseweb="radio-group"] {
-        gap: 0 !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
+
+    /* Yellow bar that visually hosts the nav buttons.
+       We paint it on the stVerticalBlock that directly contains
+       both the anchor AND the next sibling (the columns row). */
+    body:has(.bnav-anchor) [data-testid="stHorizontalBlock"]:last-of-type {
+        background: #F2E400;
+        border-top: 3px solid #1a1a1a;
+        border-bottom: 3px solid #1a1a1a;
+        padding: 8px 4px;
+        position: sticky;
+        bottom: 0;
+        z-index: 100;
+        gap: 4px !important;
+        box-shadow: 0 -3px 0 rgba(0,0,0,0.12);
     }
-    [data-testid="stPills"] button {
-        background: transparent !important;
-        color: rgba(255,255,255,0.55) !important;
-        border: none !important;
-        border-bottom: 3px solid transparent !important;
-        border-radius: 0 !important;
+
+    /* Nav buttons inside the yellow bar — override global button styles */
+    body:has(.bnav-anchor) [data-testid="stHorizontalBlock"]:last-of-type div.stButton > button {
+        height: 64px !important;
+        border-radius: 4px !important;
         font-family: 'Epilogue', sans-serif !important;
         font-weight: 800 !important;
-        font-size: 0.68rem !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.08em !important;
-        padding: 10px 14px !important;
+        font-size: 0.7rem !important;
+        letter-spacing: 0.06em !important;
+        line-height: 1.3 !important;
+        white-space: pre-wrap !important;
+        border: 2px solid #1a1a1a !important;
         box-shadow: none !important;
-        transition: color 0.1s, border-color 0.1s !important;
+        padding: 6px 4px !important;
+        transition: transform 0.1s !important;
     }
-    [data-testid="stPills"] button:hover {
-        background: rgba(255,255,255,0.08) !important;
-        color: #ffffff !important;
-        transform: none !important;
+    body:has(.bnav-anchor) [data-testid="stHorizontalBlock"]:last-of-type div.stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 2px 0 #1a1a1a !important;
+    }
+    body:has(.bnav-anchor) [data-testid="stHorizontalBlock"]:last-of-type div.stButton > button:active {
+        transform: translateY(1px) !important;
         box-shadow: none !important;
-        border-color: rgba(242,228,0,0.4) !important;
     }
-    [data-testid="stPills"] button[aria-checked="true"] {
+    /* Active nav button (primary = yellow) */
+    body:has(.bnav-anchor) [data-testid="stHorizontalBlock"]:last-of-type div.stButton > button[kind="primary"],
+    body:has(.bnav-anchor) [data-testid="stHorizontalBlock"]:last-of-type div.stButton > button[data-testid="stBaseButton-primary"] {
+        background: #003399 !important;
         color: #F2E400 !important;
-        border-bottom-color: #F2E400 !important;
-        background: transparent !important;
+        border-color: #1a1a1a !important;
+        box-shadow: none !important;
+    }
+    /* Inactive nav button (secondary = white) */
+    body:has(.bnav-anchor) [data-testid="stHorizontalBlock"]:last-of-type div.stButton > button[kind="secondary"],
+    body:has(.bnav-anchor) [data-testid="stHorizontalBlock"]:last-of-type div.stButton > button[data-testid="stBaseButton-secondary"] {
+        background: rgba(255,255,255,0.7) !important;
+        color: #1a1a1a !important;
+        border-color: #1a1a1a !important;
         box-shadow: none !important;
     }
 
-    /* ===== FIXED BOTTOM NAV ===== */
-    .app-bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 999;
-        background: #F2E400;
-        border-top: 3px solid #1a1a1a;
-        box-shadow: 0 -3px 0 rgba(0,0,0,0.15);
-        height: 60px;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        padding: 0;
-        box-sizing: border-box;
+    /* ===== PILLS (genre filter, list selector — NOT nav) ===== */
+    [data-testid="stPills"] {
+        gap: 6px !important;
     }
-    .bnav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 2px;
-        padding: 6px 18px;
-        opacity: 0.6;
+    [data-testid="stPills"] > label {
+        font-family: 'Space Grotesk', sans-serif !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.06em !important;
+        font-size: 0.85rem !important;
+        color: #1a1a1a !important;
     }
-    .bnav-item.bnav-active {
-        opacity: 1;
-        background: #003399;
-        padding: 8px 18px;
-        border: 2px solid #1a1a1a;
-        box-shadow: 3px -3px 0 #1a1a1a;
-        transform: translateY(-6px);
+    [data-testid="stPills"] button {
+        background: #ffffff !important;
+        color: #1a1a1a !important;
+        border: 2px solid #1a1a1a !important;
+        border-radius: 4px !important;
+        font-family: 'Space Grotesk', sans-serif !important;
+        font-weight: 700 !important;
+        font-size: 0.78rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        padding: 6px 14px !important;
+        box-shadow: 2px 2px 0 #1a1a1a !important;
+        transition: transform 0.1s !important;
     }
-    .bnav-item.bnav-active .bnav-icon,
-    .bnav-item.bnav-active .bnav-label {
-        color: #F2E400;
+    [data-testid="stPills"] button:hover {
+        transform: translate(-1px, -1px) !important;
+        box-shadow: 3px 3px 0 #1a1a1a !important;
+        background: #ffffff !important;
+        color: #1a1a1a !important;
     }
-    .bnav-icon {
-        font-size: 1.1rem;
-        line-height: 1;
-        color: #1a1a1a;
-    }
-    .bnav-label {
-        font-family: 'Epilogue', sans-serif;
-        font-weight: 800;
-        font-size: 0.48rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: #1a1a1a;
-        line-height: 1;
+    [data-testid="stPills"] button[aria-checked="true"] {
+        background: #F2E400 !important;
+        color: #1a1a1a !important;
+        border-color: #1a1a1a !important;
+        box-shadow: 2px 2px 0 #1a1a1a !important;
+        transform: none !important;
     }
 
     /* ===== VHS TAPE CARD ===== */
@@ -197,10 +207,7 @@ def inject_css():
         transform: translate(-2px, -2px);
         box-shadow: 5px 5px 0 #1a1a1a;
     }
-    .vhs-img-wrap {
-        position: relative;
-        overflow: hidden;
-    }
+    .vhs-img-wrap { position: relative; overflow: hidden; }
     .vhs-img-wrap img {
         width: 100%;
         display: block;
@@ -209,9 +216,7 @@ def inject_css():
         filter: grayscale(15%);
         transition: filter 0.3s ease;
     }
-    .vhs-tape:hover .vhs-img-wrap img {
-        filter: grayscale(0%);
-    }
+    .vhs-tape:hover .vhs-img-wrap img { filter: grayscale(0%); }
     .vhs-badge {
         position: absolute;
         top: 5px;
@@ -219,16 +224,15 @@ def inject_css():
         background: #F2E400;
         color: #1a1a1a;
         font-family: 'Space Grotesk', sans-serif;
-        font-size: 0.42rem;
+        font-size: 0.48rem;
         font-weight: 700;
-        padding: 2px 4px;
+        padding: 2px 5px;
         border: 1px solid #1a1a1a;
         box-shadow: 1px 1px 0 #1a1a1a;
         text-transform: uppercase;
         letter-spacing: 0.08em;
         line-height: 1.2;
     }
-    /* Gloss overlay */
     .vhs-img-wrap::after {
         content: '';
         position: absolute;
@@ -242,31 +246,31 @@ def inject_css():
     .vhs-info {
         background: #ffffff;
         border-top: 2px solid #1a1a1a;
-        padding: 4px 6px 3px;
+        padding: 5px 7px 4px;
     }
     .vhs-title {
         display: block;
         font-family: 'Epilogue', sans-serif;
         font-weight: 800;
-        font-size: 0.56rem;
+        font-size: 0.65rem;
         color: #1a1a1a;
         text-transform: uppercase;
         letter-spacing: -0.01em;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        line-height: 1.2;
+        line-height: 1.25;
     }
     .vhs-meta {
         display: block;
         font-family: 'Space Grotesk', sans-serif;
-        font-size: 0.42rem;
+        font-size: 0.52rem;
         font-weight: 500;
         color: #747684;
         text-transform: uppercase;
         letter-spacing: 0.1em;
         line-height: 1.2;
-        margin-top: 1px;
+        margin-top: 2px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -276,19 +280,18 @@ def inject_css():
     .shelf-bar {
         height: 6px;
         background: #1a1a1a;
-        margin: 2px 0 8px;
-        border-radius: 0;
+        margin: 2px 0 10px;
     }
 
     /* ===== DRAWER ===== */
     .vhs-drawer-header {
         background: #003399;
-        padding: 0.5rem 0.75rem;
+        padding: 0.6rem 0.85rem;
         margin-bottom: 0;
         font-family: 'Epilogue', sans-serif;
         font-weight: 800;
         color: #F2E400;
-        font-size: 0.85rem;
+        font-size: 0.95rem;
         letter-spacing: 0.04em;
         border-radius: 4px 4px 0 0;
         text-transform: uppercase;
@@ -302,43 +305,41 @@ def inject_css():
         border: 2px solid #1a1a1a;
         border-top: none;
         margin-top: 0;
-        margin-bottom: 0.75rem;
+        margin-bottom: 1rem;
     }
 
     /* ===== STAT CARDS ===== */
     .stat-cards-row {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-        margin-bottom: 1.25rem;
+        gap: 14px;
+        margin-bottom: 1.5rem;
     }
     .stat-card {
         background: #ffffff;
         border: 2px solid #1a1a1a;
         box-shadow: 4px 4px 0 #1a1a1a;
-        padding: 1rem 0.85rem 0.75rem;
+        padding: 1.1rem 1rem 0.85rem;
         position: relative;
         overflow: hidden;
     }
-    .stat-card-yellow {
-        background: #F2E400;
-    }
+    .stat-card-yellow { background: #F2E400; }
     .stat-label {
         font-family: 'Space Grotesk', sans-serif;
-        font-size: 0.58rem;
+        font-size: 0.68rem;
         font-weight: 700;
         color: #002068;
         opacity: 0.65;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        margin: 0 0 4px;
+        margin: 0 0 6px;
         line-height: 1;
     }
     .stat-card-yellow .stat-label { color: #1a1a1a; opacity: 0.7; }
     .stat-value {
         font-family: 'Epilogue', sans-serif;
         font-weight: 900;
-        font-size: 2rem;
+        font-size: 2.4rem;
         color: #002068;
         line-height: 1;
         letter-spacing: -0.04em;
@@ -347,7 +348,7 @@ def inject_css():
     .stat-card-yellow .stat-value { color: #1a1a1a; }
     .stat-sub {
         font-family: 'Space Grotesk', sans-serif;
-        font-size: 0.56rem;
+        font-size: 0.62rem;
         font-weight: 700;
         color: #444653;
         text-transform: uppercase;
@@ -360,15 +361,15 @@ def inject_css():
     .store-sign {
         background: #003399;
         color: #F2E400;
-        padding: 0.65rem 1rem;
+        padding: 0.85rem 1.1rem;
         border-radius: 4px;
         font-family: 'Epilogue', sans-serif;
-        font-size: 1.05rem;
+        font-size: 1.25rem;
         font-weight: 900;
         text-transform: uppercase;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.04em;
         text-align: center;
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.85rem;
         border: 2px solid #1a1a1a;
         box-shadow: 4px 4px 0 #1a1a1a;
     }
@@ -378,10 +379,10 @@ def inject_css():
         display: inline-block;
         background: #1a1a1a;
         color: #F2E400;
-        padding: 2px 8px;
+        padding: 3px 10px;
         border-radius: 20px;
         font-family: 'Space Grotesk', sans-serif;
-        font-size: 0.65rem;
+        font-size: 0.72rem;
         margin: 2px 3px 2px 0;
         font-weight: 700;
         border: 1.5px solid #1a1a1a;
@@ -392,13 +393,13 @@ def inject_css():
     /* ===== STAR RATINGS ===== */
     .stars {
         color: #F2E400;
-        font-size: 1rem;
+        font-size: 1.1rem;
         letter-spacing: 1px;
         font-weight: 700;
         -webkit-text-stroke: 0.5px #1a1a1a;
     }
 
-    /* ===== BUTTONS ===== */
+    /* ===== BUTTONS (global) ===== */
     div.stButton > button {
         background: #ffffff;
         color: #1a1a1a;
@@ -408,7 +409,8 @@ def inject_css():
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        font-size: 0.7rem;
+        font-size: 0.8rem;
+        padding: 0.55rem 0.9rem;
         box-shadow: 3px 3px 0 #1a1a1a;
         transition: transform 0.1s, box-shadow 0.1s;
     }
@@ -430,8 +432,8 @@ def inject_css():
         border: 2px solid #1a1a1a;
         font-family: 'Epilogue', sans-serif;
         font-weight: 800;
-        font-size: 0.8rem;
-        padding: 0.55rem 1rem;
+        font-size: 0.9rem;
+        padding: 0.6rem 1rem;
         border-radius: 4px;
         box-shadow: 4px 4px 0 #1a1a1a;
     }
@@ -448,18 +450,18 @@ def inject_css():
         box-shadow: 1px 1px 0 #1a1a1a;
     }
 
-    /* ===== METRIC CARDS (legacy — used as fallback) ===== */
+    /* ===== METRIC CARDS ===== */
     [data-testid="stMetric"] {
         background: #ffffff;
         border: 2px solid #1a1a1a;
         border-radius: 4px;
-        padding: 0.65rem;
+        padding: 0.85rem;
         box-shadow: 3px 3px 0 #1a1a1a;
     }
     [data-testid="stMetric"] label {
         color: #444444 !important;
         font-family: 'Space Grotesk', sans-serif !important;
-        font-size: 0.65rem !important;
+        font-size: 0.75rem !important;
         text-transform: uppercase;
         letter-spacing: 0.08em;
     }
@@ -467,6 +469,7 @@ def inject_css():
         color: #003399 !important;
         font-family: 'Epilogue', sans-serif !important;
         font-weight: 900 !important;
+        font-size: 1.8rem !important;
     }
 
     /* ===== TABS ===== */
@@ -480,10 +483,10 @@ def inject_css():
     }
     .stTabs [data-baseweb="tab"] {
         border-radius: 2px;
-        padding: 7px 14px;
+        padding: 8px 16px;
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 700;
-        font-size: 0.75rem;
+        font-size: 0.82rem;
         color: #444444;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -502,7 +505,7 @@ def inject_css():
         background: #ffffff;
         border: 2px solid #1a1a1a !important;
         border-radius: 4px;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.6rem;
         box-shadow: 3px 3px 0 #1a1a1a;
     }
     [data-testid="stExpander"]:hover { box-shadow: 4px 4px 0 #1a1a1a; }
@@ -511,7 +514,9 @@ def inject_css():
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;
+        font-size: 0.85rem;
         color: #1a1a1a;
+        padding: 0.75rem 1rem;
     }
 
     /* ===== TEXT INPUT ===== */
@@ -521,6 +526,8 @@ def inject_css():
         border-radius: 4px;
         color: #1a1a1a;
         font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+        padding: 0.6rem 0.75rem;
     }
     [data-testid="stTextInput"] input:focus {
         border-color: #003399;
@@ -531,7 +538,7 @@ def inject_css():
         font-weight: 700 !important;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        font-size: 0.75rem !important;
+        font-size: 0.82rem !important;
         color: #1a1a1a !important;
     }
 
@@ -542,6 +549,7 @@ def inject_css():
         border-radius: 4px;
         color: #1a1a1a;
         font-family: 'Inter', sans-serif;
+        font-size: 1rem;
     }
     [data-testid="stTextArea"] textarea:focus {
         border-color: #003399;
@@ -552,7 +560,7 @@ def inject_css():
         font-weight: 700 !important;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        font-size: 0.75rem !important;
+        font-size: 0.82rem !important;
         color: #1a1a1a !important;
     }
 
@@ -562,14 +570,50 @@ def inject_css():
         border: 2px solid #1a1a1a;
         border-radius: 4px;
         color: #1a1a1a;
+        font-size: 1rem;
     }
     [data-testid="stSelectbox"] label {
         font-family: 'Space Grotesk', sans-serif !important;
         font-weight: 700 !important;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        font-size: 0.75rem !important;
+        font-size: 0.82rem !important;
         color: #1a1a1a !important;
+    }
+
+    /* ===== RADIO BUTTONS ===== */
+    [data-testid="stRadio"] label {
+        color: #1a1a1a !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.95rem !important;
+    }
+    [data-testid="stRadio"] > label {
+        font-family: 'Space Grotesk', sans-serif !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.06em !important;
+        font-size: 0.82rem !important;
+    }
+    /* Selected radio dot — white fill so it's readable on any bg */
+    [data-testid="stRadio"] [data-baseweb="radio"][aria-checked="true"] [role="presentation"] {
+        background-color: #003399 !important;
+        border-color: #003399 !important;
+    }
+
+    /* ===== SLIDER ===== */
+    [data-testid="stSlider"] > label {
+        font-family: 'Space Grotesk', sans-serif !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.06em !important;
+        font-size: 0.82rem !important;
+        color: #1a1a1a !important;
+    }
+    [data-testid="stSlider"] [data-testid="stTickBar"] span,
+    [data-testid="stSlider"] [data-testid="stSliderThumbValue"] {
+        color: #1a1a1a !important;
+        font-family: 'Space Grotesk', sans-serif !important;
+        font-weight: 700 !important;
     }
 
     /* ===== DIVIDER ===== */
@@ -586,7 +630,7 @@ def inject_css():
     .stCaption, [data-testid="stCaptionContainer"] {
         color: #444653 !important;
         font-family: 'Space Grotesk', sans-serif !important;
-        font-size: 0.68rem !important;
+        font-size: 0.78rem !important;
         letter-spacing: 0.06em !important;
         text-transform: uppercase !important;
     }
@@ -597,25 +641,26 @@ def inject_css():
         border: 2px solid #1a1a1a !important;
         box-shadow: 3px 3px 0 #1a1a1a;
         font-family: 'Inter', sans-serif;
+        font-size: 0.95rem;
     }
 
-    /* ===== PICKER CARD (pick_for_us) ===== */
+    /* ===== PICKER CARD ===== */
     .picker-card {
         background: #003399;
         border: 2px solid #1a1a1a;
         border-radius: 6px;
-        padding: 1.5rem 1.25rem;
+        padding: 1.75rem 1.5rem;
         text-align: center;
         box-shadow: 6px 6px 0 #1a1a1a;
         color: #ffffff;
     }
 
-    /* ===== MOVIE CARD (search results in add_movie) ===== */
+    /* ===== MOVIE CARD (search results) ===== */
     .movie-card {
         background: #ffffff;
         border-radius: 4px;
-        padding: 0.85rem;
-        margin-bottom: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 0.6rem;
         border: 2px solid #1a1a1a;
         box-shadow: 3px 3px 0 #1a1a1a;
         transition: transform 0.1s, box-shadow 0.1s;
@@ -645,23 +690,17 @@ def inject_css():
             max-width: 100vw !important;
             box-sizing: border-box !important;
             overflow-x: clip !important;
-            padding-top: 0.5rem;
-            padding-left: 0.5rem;
-            padding-right: 0.5rem;
-            padding-bottom: 5rem;
+            padding-top: 4.5rem;
+            padding-left: 0.6rem;
+            padding-right: 0.6rem;
+            padding-bottom: 7rem;
         }
-        div.stButton > button {
-            width: 100%;
-            padding: 0.5rem 0.5rem;
-        }
-        h1 { font-size: 1.4rem !important; }
-        .store-sign { font-size: 0.9rem; padding: 0.5rem 0.75rem; }
-        .genre-pill { font-size: 0.58rem; padding: 2px 5px; }
-        [data-testid="stMetric"] { padding: 0.4rem; }
-        .stat-cards-row { gap: 8px; }
-        .stat-value { font-size: 1.6rem; }
+        h1 { font-size: 1.6rem !important; }
+        .store-sign { font-size: 1rem; padding: 0.65rem 0.85rem; }
+        .stat-value { font-size: 1.9rem; }
+        .stat-cards-row { gap: 10px; }
 
-        /* Shelf row: controlled 2-col flex layout */
+        /* Shelf row: 2-col flex layout */
         .shelf-row-two-col {
             display: flex !important;
             gap: 0.5rem !important;
@@ -712,8 +751,7 @@ def inject_css():
     }
 
     @media (min-width: 641px) {
-        .block-container { max-width: 680px; padding-top: 1.5rem; }
-        .app-header-logo { font-size: 1.6rem; }
+        .block-container { max-width: 720px; padding-top: 5rem; }
         .stat-cards-row { grid-template-columns: repeat(4, 1fr); }
     }
     </style>
@@ -731,27 +769,6 @@ def app_header_html():
         '<div class="app-header-tagline">Movie Vault</div>'
         '</div>'
     )
-
-
-def bottom_nav_html(active=None):
-    """Fixed bottom navigation bar. active = the current page label string."""
-    items = [
-        ("🎬", "Add"),
-        ("🎰", "Pick"),
-        ("📋", "Lists"),
-        ("📼", "Log"),
-    ]
-    parts = []
-    for icon, label in items:
-        is_active = active and label in active
-        cls = "bnav-item bnav-active" if is_active else "bnav-item"
-        parts.append(
-            f'<div class="{cls}">'
-            f'<span class="bnav-icon">{icon}</span>'
-            f'<span class="bnav-label">{label.upper()}</span>'
-            f'</div>'
-        )
-    return f'<div class="app-bottom-nav">{"".join(parts)}</div>'
 
 
 # ── Content HTML helpers ──────────────────────────────────────────────
