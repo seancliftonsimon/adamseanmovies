@@ -53,11 +53,11 @@ def _request_tmdb(path, params=None):
 
 
 @st.cache_data(ttl=86400, show_spinner=False)
-def search_movies(query, page=1):
-    data = _request_tmdb(
-        "/search/movie",
-        params={"query": query, "page": page, "include_adult": False},
-    )
+def search_movies(query, page=1, year=None):
+    params = {"query": query, "page": page, "include_adult": False}
+    if year:
+        params["primary_release_year"] = year
+    data = _request_tmdb("/search/movie", params=params)
     return data.get("results", []), data.get("total_results", 0)
 
 

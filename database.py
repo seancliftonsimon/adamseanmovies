@@ -123,27 +123,19 @@ def _is_auth_error(exc):
 
 def _pooler_fix_hint():
     return (
-        "Use Supabase Connect -> Pooler connection URI for DATABASE_URL "
-        "(pooler.supabase.com, typically port 5432/6543, sslmode=require). "
-        "Streamlit Cloud commonly cannot connect to IPv6-only direct DB hosts."
+        "Check your Neon DATABASE_URL — ensure sslmode=require is appended "
+        "and the host matches your Neon project endpoint."
     )
 
 
 def _auth_fix_hint(parts):
     lines = [
         "Password authentication failed. Checklist:",
-        "  1. Verify the database password in Streamlit secrets matches Supabase.",
-        "  2. If using the Supabase session pooler, the USERNAME must be",
-        "     postgres.<PROJECT_REF>  (not just 'postgres').",
-        "     Example: postgres.aiqkddmjohrqwfwkjkdl",
+        "  1. Verify the database password in Streamlit secrets matches your Neon project.",
+        "  2. Ensure the username matches what Neon shows (typically 'neondb_owner' or similar).",
         f"  Currently using — user: '{parts['user']}', "
         f"host: '{parts['host']}', port: {parts['port']}",
     ]
-    if "pooler" in str(parts["host"]) and "." not in str(parts["user"]):
-        lines.append(
-            "  *** Likely cause: username is 'postgres' but pooler requires "
-            "'postgres.<project-ref>'. ***"
-        )
     return "\n".join(lines)
 
 
@@ -222,13 +214,6 @@ def init_db():
             f"Parsed — user: '{parts['user']}', host: '{parts['host']}', "
             f"port: {parts['port']}, database: '{parts['database']}'"
         )
-
-        if "pooler" in str(parts["host"]) and "." not in str(parts["user"]):
-            _startup_log(
-                "WARNING: Connecting to Supabase pooler but username is "
-                f"'{parts['user']}' — pooler requires 'postgres.<project-ref>' "
-                "format. This will likely cause an authentication failure."
-            )
 
         try:
             host = parts["host"]
@@ -398,6 +383,55 @@ def mark_watched(movie_id, adam_rating=None, sean_rating=None, notes=None,
             WHERE id = ?
             """,
             (watched_date, adam_rating, sean_rating, notes, movie_id),
+            commit=True,
+        )
+
+
+def get_movies_missing_posters():
+    rows = _run_query(
+        "SELECT id, title FROM movies WHERE (poster_path IS NULL OR poster_path = '') AND title IS NOT NULL",
+        fetch="all",
+    )
+    return [_row_to_dict(r) for r in rows]
+
+
+def update_movie_metadata(movie_id, data):
+    genres = data.get("genres", [])
+    genres_str = json.dumps(genres) if isinstance(genres, list) else genres
+    if _using_postgres():
+        _run_query(
+            """
+            UPDATE movies SET
+                tmdb_id    = COALESCE(tmdb_id,    %s),
+                poster_path = COALESCE(poster_path, %s),
+                year       = COALESCE(year,       %s),
+                director   = COALESCE(director,   %s),
+                genres     = COALESCE(genres,     %s),
+                runtime    = COALESCE(runtime,    %s),
+                overview   = COALESCE(overview,   %s)
+            WHERE id = %s
+            """,
+            (data.get("tmdb_id"), data.get("poster_path"), data.get("year"),
+             data.get("director"), genres_str, data.get("runtime"),
+             data.get("overview"), movie_id),
+            commit=True,
+        )
+    else:
+        _run_query(
+            """
+            UPDATE movies SET
+                tmdb_id    = COALESCE(tmdb_id,    ?),
+                poster_path = COALESCE(poster_path, ?),
+                year       = COALESCE(year,       ?),
+                director   = COALESCE(director,   ?),
+                genres     = COALESCE(genres,     ?),
+                runtime    = COALESCE(runtime,    ?),
+                overview   = COALESCE(overview,   ?)
+            WHERE id = ?
+            """,
+            (data.get("tmdb_id"), data.get("poster_path"), data.get("year"),
+             data.get("director"), genres_str, data.get("runtime"),
+             data.get("overview"), movie_id),
             commit=True,
         )
 

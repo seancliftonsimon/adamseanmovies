@@ -22,13 +22,12 @@ A couples movie watchlist app built with Streamlit. Search for movies, organize 
    TMDB_API_KEY = "your_api_key"
    ```
 
-3. **Create a Supabase Postgres project** (recommended for shared persistent data):
-   - In Supabase, copy the connection string from:
-     - **Connect** -> **Pooler** -> **Connection string** -> **URI**
-   - For Streamlit Cloud, prefer the **Pooler URI** (IPv4 compatible).
+3. **Create a Neon Postgres project** (recommended for shared persistent data):
+   - In the Neon console, copy the connection string from:
+     - **Project** -> **Connection Details** -> **Connection string**
    - Ensure it includes SSL (`sslmode=require`), for example:
      ```toml
-     DATABASE_URL = "postgresql://postgres.[YOUR_PROJECT_REF]:[YOUR_PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?sslmode=require"
+     DATABASE_URL = "postgresql://neondb_owner:[YOUR_PASSWORD]@ep-XXXX.[REGION].aws.neon.tech/neondb?sslmode=require"
      ```
    - Add that `DATABASE_URL` to Streamlit secrets in local and deployed environments.
    - On startup, the app will auto-create the `movies` table and indexes if they do not exist.
@@ -41,12 +40,12 @@ A couples movie watchlist app built with Streamlit. Search for movies, organize 
 
 ### Database behavior
 
-- If `DATABASE_URL` is set, the app uses Postgres (Supabase), giving one shared dataset for all users.
+- If `DATABASE_URL` is set, the app uses Postgres (Neon), giving one shared dataset for all users.
 - If `DATABASE_URL` is not set, the app falls back to local SQLite (`movies.db`) for local development.
 
 ## Tech Stack
 
 - **Streamlit** — UI framework
 - **TMDb API** — Movie data, posters, credits (free)
-- **Supabase Postgres** — Shared persistent multi-user database
+- **Neon Postgres** — Shared persistent multi-user database
 - **SQLite** — Local fallback database (zero config)
