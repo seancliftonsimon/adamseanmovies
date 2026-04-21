@@ -4,7 +4,7 @@ import streamlit as st
 st.set_page_config(
     page_title="Adam & Sean Movie Night",
     page_icon="\U0001F4FC",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state="collapsed",
 )
 
