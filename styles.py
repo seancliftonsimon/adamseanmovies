@@ -1,7 +1,7 @@
 import streamlit as st
 from html import escape
 
-POSTER_PLACEHOLDER = "https://via.placeholder.com/185x278/001029/FFD700?text=No+Tape"
+POSTER_PLACEHOLDER = "https://via.placeholder.com/185x278/003399/F2E400?text=NO+TAPE"
 
 SHELF_COLS = 4
 
@@ -9,67 +9,79 @@ SHELF_COLS = 4
 def inject_css():
     st.markdown("""
     <style>
+    /* ===== GOOGLE FONTS ===== */
+    @import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;800;900&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap');
+
     /* ===== GLOBAL ===== */
     .block-container {
         max-width: 540px;
         padding-top: 1rem;
         padding-bottom: 2rem;
+        font-family: 'Inter', sans-serif;
     }
     html, body,
     [data-testid="stAppViewContainer"],
     [data-testid="stApp"] {
-        background-color: #001029;
+        background-color: #f9f9f9;
         overflow-x: hidden;
     }
 
     /* ===== TYPOGRAPHY ===== */
-    h1, h2, h3 { font-weight: 800 !important; }
-    h1 { font-size: 1.4rem !important; color: #FFD700 !important; }
-    h2 { font-size: 1.2rem !important; color: #FFD700 !important; }
-    h3 { font-size: 1.05rem !important; }
+    h1, h2, h3 {
+        font-family: 'Epilogue', sans-serif !important;
+        font-weight: 900 !important;
+        color: #1a1a1a !important;
+        letter-spacing: -0.02em !important;
+    }
+    h1 { font-size: 1.8rem !important; letter-spacing: -0.03em !important; }
+    h2 { font-size: 1.4rem !important; }
+    h3 { font-size: 1.1rem !important; }
+    p, li { font-family: 'Inter', sans-serif; color: #1a1a1a; }
 
     /* ===== HIDE CHROME ===== */
     #MainMenu, header, footer { visibility: hidden; }
 
     /* ===== SIDEBAR ===== */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #001940 0%, #001029 100%);
-        border-right: 2px solid #004B93;
+        background: #003399;
+        border-right: 3px solid #1a1a1a;
+    }
+    [data-testid="stSidebar"] * { color: #ffffff !important; }
+    [data-testid="stSidebarUserContent"] p,
+    [data-testid="stSidebarUserContent"] span {
+        color: #ffffff !important;
     }
 
     /* ===== STORE SIGN (section headers) ===== */
     .store-sign {
-        background: linear-gradient(135deg, #004B93 0%, #0060B8 100%);
-        color: #FFD700;
-        padding: 0.7rem 1rem;
-        border-radius: 6px;
+        background: #003399;
+        color: #F2E400;
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        font-family: 'Epilogue', sans-serif;
         font-size: 1.1rem;
-        font-weight: 800;
+        font-weight: 900;
         text-transform: uppercase;
         letter-spacing: 0.06em;
         text-align: center;
         margin-bottom: 0.75rem;
-        border: 2px solid #FFD700;
-        box-shadow: 0 2px 12px rgba(0, 75, 147, 0.5);
+        border: 2px solid #1a1a1a;
+        box-shadow: 4px 4px 0 #1a1a1a;
     }
 
     /* ===== VHS TAPE ===== */
     .vhs-tape {
-        background: #0a0a0a;
+        background: #ffffff;
         border: 2px solid #1a1a1a;
         border-radius: 3px;
-        padding: 4px 4px 0 4px;
-        box-shadow:
-            2px 2px 8px rgba(0,0,0,0.6),
-            inset 0 0 0 1px rgba(255,255,255,0.03);
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        padding: 3px 3px 0 3px;
+        box-shadow: 3px 3px 0 #1a1a1a;
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
         margin-bottom: 2px;
     }
     .vhs-tape:hover {
-        transform: translateY(-3px) scale(1.02);
-        box-shadow:
-            2px 5px 14px rgba(0,0,0,0.7),
-            0 0 10px rgba(255,215,0,0.12);
+        transform: translate(-2px, -2px);
+        box-shadow: 5px 5px 0 #1a1a1a;
     }
     .vhs-tape img {
         width: 100%;
@@ -79,17 +91,18 @@ def inject_css():
         object-fit: cover;
     }
     .vhs-spine {
-        background: linear-gradient(135deg, #FFD700, #FFC107);
-        color: #002244;
+        background: #003399;
+        color: #F2E400;
+        font-family: 'Space Grotesk', sans-serif;
         font-size: 0.52rem;
-        font-weight: 800;
+        font-weight: 700;
         padding: 3px 3px;
         text-align: center;
         margin-top: 3px;
         margin-bottom: 2px;
         border-radius: 1px;
         text-transform: uppercase;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.1em;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -99,129 +112,156 @@ def inject_css():
     /* ===== SHELF BAR ===== */
     .shelf-bar {
         height: 6px;
-        background: linear-gradient(180deg, #004B93 0%, #003366 50%, #002244 100%);
+        background: #1a1a1a;
         margin: 2px 0 8px;
-        border-radius: 1px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        border-radius: 0;
     }
 
     /* ===== DRAWER ===== */
     .vhs-drawer-header {
-        background: linear-gradient(135deg, #002244, #003366);
-        border-top: 3px solid #FFD700;
+        background: #003399;
         padding: 0.5rem 0.75rem;
         margin-bottom: 0.25rem;
-        font-weight: 700;
-        color: #FFD700;
+        font-family: 'Epilogue', sans-serif;
+        font-weight: 800;
+        color: #F2E400;
         font-size: 0.85rem;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.04em;
         border-radius: 4px 4px 0 0;
+        text-transform: uppercase;
+        border: 2px solid #1a1a1a;
+        border-bottom: none;
+        box-shadow: 3px 3px 0 #1a1a1a;
     }
     .vhs-drawer-end {
-        height: 3px;
-        background: linear-gradient(90deg, #FFD700, #FFC107, #FFD700);
-        margin-top: 0.5rem;
+        height: 4px;
+        background: #F2E400;
+        border: 2px solid #1a1a1a;
+        border-top: none;
+        margin-top: 0;
         margin-bottom: 0.75rem;
-        border-radius: 0 0 4px 4px;
     }
 
     /* ===== GENRE PILLS ===== */
     .genre-pill {
         display: inline-block;
-        background: #002244;
-        color: #FFD700;
+        background: #1a1a1a;
+        color: #F2E400;
         padding: 2px 8px;
         border-radius: 20px;
-        font-size: 0.68rem;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.65rem;
         margin: 2px 3px 2px 0;
         font-weight: 700;
-        border: 1px solid #004B93;
+        border: 1.5px solid #1a1a1a;
         text-transform: uppercase;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.08em;
     }
 
     /* ===== STAR RATINGS ===== */
     .stars {
-        color: #FFD700;
+        color: #F2E400;
         font-size: 1rem;
         letter-spacing: 1px;
-        font-weight: 600;
+        font-weight: 700;
+        -webkit-text-stroke: 0.5px #1a1a1a;
     }
 
     /* ===== BUTTONS ===== */
     div.stButton > button {
-        background: #004B93;
-        color: #FFD700;
-        border: 1px solid #005BB5;
+        background: #ffffff;
+        color: #1a1a1a;
+        border: 2px solid #1a1a1a;
         border-radius: 4px;
+        font-family: 'Space Grotesk', sans-serif;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.05em;
         font-size: 0.7rem;
-        transition: all 0.15s;
+        box-shadow: 3px 3px 0 #1a1a1a;
+        transition: transform 0.1s, box-shadow 0.1s;
     }
     div.stButton > button:hover {
-        background: #005BB5;
-        border-color: #FFD700;
-        box-shadow: 0 0 8px rgba(255,215,0,0.15);
+        transform: translate(-1px, -1px);
+        box-shadow: 4px 4px 0 #1a1a1a;
+        border-color: #1a1a1a;
+        background: #ffffff;
+        color: #1a1a1a;
+    }
+    div.stButton > button:active {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0 #1a1a1a;
     }
     div.stButton > button[kind="primary"],
     div.stButton > button[data-testid="stBaseButton-primary"] {
-        background: linear-gradient(135deg, #FFD700, #FFC107);
-        color: #002244;
-        border: none;
+        background: #F2E400;
+        color: #1a1a1a;
+        border: 2px solid #1a1a1a;
+        font-family: 'Epilogue', sans-serif;
         font-weight: 800;
         font-size: 0.8rem;
         padding: 0.55rem 1rem;
-        border-radius: 6px;
-        box-shadow: 0 2px 8px rgba(255, 215, 0, 0.25);
+        border-radius: 4px;
+        box-shadow: 4px 4px 0 #1a1a1a;
     }
     div.stButton > button[kind="primary"]:hover,
     div.stButton > button[data-testid="stBaseButton-primary"]:hover {
-        background: linear-gradient(135deg, #FFC107, #FFB300);
-        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.35);
+        background: #F2E400;
+        color: #1a1a1a;
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0 #1a1a1a;
+    }
+    div.stButton > button[kind="primary"]:active,
+    div.stButton > button[data-testid="stBaseButton-primary"]:active {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0 #1a1a1a;
     }
 
     /* ===== STAT / METRIC CARDS ===== */
     [data-testid="stMetric"] {
-        background: #001940;
-        border: 1px solid #003366;
-        border-radius: 8px;
+        background: #ffffff;
+        border: 2px solid #1a1a1a;
+        border-radius: 4px;
         padding: 0.65rem;
-        border-left: 3px solid #FFD700;
+        box-shadow: 3px 3px 0 #1a1a1a;
     }
     [data-testid="stMetric"] label {
-        color: #7aafd4 !important;
-        font-size: 0.7rem !important;
+        color: #444444 !important;
+        font-family: 'Space Grotesk', sans-serif !important;
+        font-size: 0.65rem !important;
         text-transform: uppercase;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.08em;
     }
     [data-testid="stMetric"] [data-testid="stMetricValue"] {
-        color: #FFD700 !important;
-        font-weight: 800 !important;
+        color: #003399 !important;
+        font-family: 'Epilogue', sans-serif !important;
+        font-weight: 900 !important;
     }
 
     /* ===== TABS ===== */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 0;
-        background: #001940;
-        border-radius: 8px;
-        padding: 3px;
-        border: 1px solid #003366;
+        gap: 4px;
+        background: #e2e2e2;
+        border-radius: 4px;
+        padding: 4px;
+        border: 2px solid #1a1a1a;
+        box-shadow: 3px 3px 0 #1a1a1a;
     }
     .stTabs [data-baseweb="tab"] {
-        border-radius: 6px;
+        border-radius: 2px;
         padding: 7px 14px;
+        font-family: 'Space Grotesk', sans-serif;
         font-weight: 700;
-        font-size: 0.78rem;
-        color: #7aafd4;
+        font-size: 0.75rem;
+        color: #444444;
         text-transform: uppercase;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.05em;
     }
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #004B93, #0066CC) !important;
-        color: #FFD700 !important;
-        border-radius: 6px !important;
+        background: #003399 !important;
+        color: #F2E400 !important;
+        border-radius: 2px !important;
+        box-shadow: 2px 2px 0 #1a1a1a !important;
     }
     .stTabs [data-baseweb="tab-highlight"],
     .stTabs [data-baseweb="tab-border"] {
@@ -230,95 +270,161 @@ def inject_css():
 
     /* ===== EXPANDER ===== */
     [data-testid="stExpander"] {
-        background: #001940;
-        border: 1px solid #003366;
-        border-radius: 8px;
+        background: #ffffff;
+        border: 2px solid #1a1a1a !important;
+        border-radius: 4px;
         margin-bottom: 0.5rem;
+        box-shadow: 3px 3px 0 #1a1a1a;
     }
     [data-testid="stExpander"]:hover {
-        border-color: #FFD700;
+        box-shadow: 4px 4px 0 #1a1a1a;
+    }
+    [data-testid="stExpander"] summary {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #1a1a1a;
     }
 
     /* ===== TEXT INPUT ===== */
     [data-testid="stTextInput"] input {
-        background: #001940;
-        border: 1px solid #003366;
-        border-radius: 6px;
-        color: #FAFAFA;
+        background: #ffffff;
+        border: 2px solid #1a1a1a;
+        border-radius: 4px;
+        color: #1a1a1a;
+        font-family: 'Inter', sans-serif;
     }
     [data-testid="stTextInput"] input:focus {
-        border-color: #FFD700;
-        box-shadow: 0 0 0 1px #FFD700;
+        border-color: #003399;
+        box-shadow: 0 0 0 3px #F2E400;
+    }
+    [data-testid="stTextInput"] label {
+        font-family: 'Space Grotesk', sans-serif !important;
+        font-weight: 700 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 0.75rem !important;
+        color: #1a1a1a !important;
     }
 
     /* ===== TEXT AREA ===== */
     [data-testid="stTextArea"] textarea {
-        background: #001940;
-        border: 1px solid #003366;
-        border-radius: 6px;
-        color: #FAFAFA;
+        background: #ffffff;
+        border: 2px solid #1a1a1a;
+        border-radius: 4px;
+        color: #1a1a1a;
+        font-family: 'Inter', sans-serif;
     }
     [data-testid="stTextArea"] textarea:focus {
-        border-color: #FFD700;
-        box-shadow: 0 0 0 1px #FFD700;
+        border-color: #003399;
+        box-shadow: 0 0 0 3px #F2E400;
+    }
+    [data-testid="stTextArea"] label {
+        font-family: 'Space Grotesk', sans-serif !important;
+        font-weight: 700 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 0.75rem !important;
+        color: #1a1a1a !important;
     }
 
     /* ===== SELECT BOX ===== */
     [data-testid="stSelectbox"] > div > div {
-        background: #001940;
-        border: 1px solid #003366;
-        border-radius: 6px;
+        background: #ffffff;
+        border: 2px solid #1a1a1a;
+        border-radius: 4px;
+        color: #1a1a1a;
+    }
+    [data-testid="stSelectbox"] label {
+        font-family: 'Space Grotesk', sans-serif !important;
+        font-weight: 700 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 0.75rem !important;
+        color: #1a1a1a !important;
     }
 
     /* ===== DIVIDER ===== */
-    [data-testid="stHorizontalRule"] { border-color: #003366; }
+    [data-testid="stHorizontalRule"] {
+        border-color: #1a1a1a;
+        border-width: 2px;
+    }
 
     /* ===== IMAGE ===== */
-    [data-testid="stImage"] img { border-radius: 4px; }
+    [data-testid="stImage"] img {
+        border-radius: 2px;
+        border: 2px solid #1a1a1a;
+        box-shadow: 3px 3px 0 #1a1a1a;
+    }
 
     /* ===== CAPTION ===== */
     .stCaption, [data-testid="stCaptionContainer"] {
-        color: #7aafd4 !important;
+        color: #444653 !important;
+        font-family: 'Space Grotesk', sans-serif !important;
+        font-size: 0.68rem !important;
+        letter-spacing: 0.06em !important;
+        text-transform: uppercase !important;
     }
 
     /* ===== ALERTS ===== */
-    [data-testid="stAlert"] { border-radius: 6px; }
+    [data-testid="stAlert"] {
+        border-radius: 4px;
+        border: 2px solid #1a1a1a !important;
+        box-shadow: 3px 3px 0 #1a1a1a;
+        font-family: 'Inter', sans-serif;
+    }
 
     /* ===== NAVIGATION ===== */
     nav[data-testid="stSidebarNav"] a {
-        border-radius: 6px;
-        font-weight: 600;
+        border-radius: 4px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
         padding: 0.5rem 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #ffffff !important;
     }
-    nav[data-testid="stSidebarNav"] a:hover { background: #002244; }
+    nav[data-testid="stSidebarNav"] a:hover {
+        background: #002068;
+        color: #F2E400 !important;
+    }
     nav[data-testid="stSidebarNav"] a[aria-current="page"] {
-        background: linear-gradient(135deg, #004B93, #0066CC);
-        color: #FFD700;
+        background: #F2E400;
+        color: #1a1a1a !important;
+        border: 2px solid #1a1a1a;
+        box-shadow: 2px 2px 0 #1a1a1a;
     }
 
     /* ===== PICKER CARD (pick_for_us) ===== */
     .picker-card {
-        background: #001940;
-        border: 2px solid #FFD700;
-        border-radius: 10px;
+        background: #ffffff;
+        border: 2px solid #1a1a1a;
+        border-radius: 6px;
         padding: 1.25rem;
         text-align: center;
+        box-shadow: 5px 5px 0 #003399;
     }
 
     /* ===== MOVIE CARD (search results in add_movie) ===== */
     .movie-card {
-        background: #001940;
-        border-radius: 8px;
+        background: #ffffff;
+        border-radius: 4px;
         padding: 0.85rem;
         margin-bottom: 0.5rem;
-        border: 1px solid #003366;
-        transition: border-color 0.15s;
+        border: 2px solid #1a1a1a;
+        box-shadow: 3px 3px 0 #1a1a1a;
+        transition: transform 0.1s, box-shadow 0.1s;
     }
-    .movie-card:hover { border-color: #FFD700; }
+    .movie-card:hover {
+        transform: translate(-1px, -1px);
+        box-shadow: 4px 4px 0 #1a1a1a;
+    }
     .movie-card img {
-        border-radius: 4px;
+        border-radius: 2px;
         width: 100%;
         max-width: 185px;
+        border: 1px solid #1a1a1a;
     }
 
     /* ===== MOBILE-FIRST ===== */
@@ -336,7 +442,7 @@ def inject_css():
             width: 100%;
             padding: 0.5rem 0.5rem;
         }
-        h1 { font-size: 1.2rem !important; }
+        h1 { font-size: 1.4rem !important; }
         .store-sign { font-size: 0.9rem; padding: 0.5rem 0.75rem; }
         .vhs-spine { font-size: 0.45rem; padding: 2px; }
         .genre-pill { font-size: 0.58rem; padding: 2px 5px; }
