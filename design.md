@@ -101,53 +101,63 @@ spacing:
   shelf-padding: 16px
 ---
 
-## Brand & Style
+## Refined Design Language (Pick for Us Baseline)
 
-The design system is an unapologetic homage to the golden age of physical media rental. It prioritizes high-energy, high-contrast visuals over modern minimalism. The personality is "Commercial Energetic"—evoking the feeling of walking into a brightly lit store on a Friday night. 
+This system is now optimized around a **clean retro utility** style: still VHS-inspired, but less decorative and more layout-disciplined. The goal is to keep the "movie night" personality while making controls scannable and aligned.
 
-The aesthetic style merges **High-Contrast Bold** with **Tactile / Skeuomorphic** elements. It utilizes the "Physicality of the 90s" by referencing real-world objects: the glossy plastic of a VHS case, the magnetic strip of a membership card, and the punchy, backlit glow of store signage. It avoids subtle gradients and ambient blurs in favor of hard-edged shadows, thick strokes, and vibrant saturation.
+### 1) Visual Personality
+- **Tone:** Bold, playful, decisive.
+- **Structure:** Functional panels first, ornament second.
+- **Rule:** Decorative copy should never float outside panel logic. If text does not guide an action, remove it.
 
-## Colors
+### 2) Composition Rules
+- Use two primary zones on picker-style screens:
+  1. **Filter Panel** (left / top on mobile): source selection + constraints.
+  2. **Result Panel** (right / below on mobile): candidate count, preview posters, primary action.
+- Every zone uses the same shell:
+  - 3px dark border
+  - hard offset shadow
+  - warm off-white panel background
+- Section labels must align directly with their controls (no detached hero text above empty boxes).
 
-The palette is anchored by the iconic duo of Royal Blue and Pop Yellow. 
-- **Royal Blue (#003399)**: Used for primary containers, headers, and backgrounds to provide a deep, reliable foundation.
-- **Pop Yellow (#FFF000)**: Reserved for primary actions, highlights, and "New Release" style callouts. It must always be paired with dark text for accessibility.
-- **New Release Red (#E60000)**: An accent color used sparingly for urgency, sale prices, or "Live" indicators, reminiscent of clearance stickers.
-- **VHS Black (#1A1A1A)**: Used for typography and "plastic" elements, ensuring high legibility against the yellow and white.
+### 3) Typography System
+- **Epilogue 800/900:** Headlines and major outcomes only (movie title, count headline).
+- **Space Grotesk 700:** Utility labels and control headings (WHOSE PICKS, GENRES, RUNTIME).
+- **Inter 400/500:** Supporting text only when needed.
+- Remove redundant explanatory lines like onboarding slogans once interaction is self-explanatory.
 
-## Typography
+### 4) Color & Contrast Usage
+- **Royal Blue `#003399`:** structural emphasis (headers, active nav, kickers).
+- **Pop Yellow `#F2E400`:** primary CTA and high-priority highlights.
+- **Ink Black `#111111` / `#1A1A1A`:** borders and shadow anchors.
+- **Paper `#fffcf3` to `#f7f3e8`:** content canvas.
+- Maintain high contrast and avoid soft translucency for interactive elements.
 
-This design system uses a "Chunky Sans" approach. **Epilogue** is the hero font, utilized in heavy weights (800-900) to mimic the weight of physical signage. Headlines should feel massive and authoritative.
+### 5) Interaction Language
+- Controls should be explicit and stacked in workflow order:
+  1. Whose picks?
+  2. Genres
+  3. Runtime
+  4. Pick action
+- Active states must be obvious via color inversion (blue/yellow or dark/light).
+- Only one primary action per panel ("Pick for Us"); secondary actions are visually quieter.
 
-**Inter** provides a clean, neutral balance for long-form text, ensuring the interface remains functional despite the loud brand elements. **Space Grotesk** is used for utility labels and "meta" information, nodding to the technical, monospaced-adjacent look of rental receipts and VHS spine labels. Large headlines should utilize tight letter-spacing to reinforce the "blocky" feel.
+### 6) Spacing & Rhythm
+- Base unit: **8px**.
+- Typical vertical rhythm inside panels: **16–24px**.
+- Labels sit immediately above controls with **8–10px** gap.
+- Do not insert decorative empty framed elements; all framed elements should contain useful UI.
 
-## Layout & Spacing
+### 7) Component Guidance for Other Pages
+- Reuse the picker panel shell for "task" surfaces (forms, filters, summaries).
+- Reuse rounded pills for multi-select filters.
+- Use hard-shadow buttons consistently:
+  - default: offset shadow visible
+  - hover: slightly larger offset
+  - pressed/active: reduced offset
+- Keep content hierarchy compact: label → control → feedback.
 
-The layout follows a **Fixed Grid** philosophy, reminiscent of organized store shelves. Content is housed in 12-column layouts with generous margins to prevent the high-contrast colors from feeling claustrophobic.
-
-Spacing is calculated in 8px increments. The "Shelf" model is preferred for content discovery: horizontal rows with strict alignment that mimic the experience of browsing VHS tapes. Use defined borders rather than whitespace to separate different sections of the UI.
-
-## Elevation & Depth
-
-Depth is communicated through **Bold Borders** and **Hard Shadows** rather than soft blurs. 
-
-1.  **Level 0 (Floor):** Flat white or Royal Blue background.
-2.  **Level 1 (Card):** 2px solid border (VHS Black or Royal Blue) with a 4px-8px hard offset shadow in Pop Yellow or VHS Black.
-3.  **Level 2 (Active/Pressed):** Shadow offset reduces to 0px, and the element shifts slightly to simulate a physical button press.
-
-Avoid all use of Gaussian blurs or "glassmorphism." Surfaces should feel opaque, solid, and made of high-gloss plastic or cardstock.
-
-## Shapes
-
-The primary shape language is **Rounded**, reflecting the injection-molded plastic of tape cassettes and the die-cut corners of membership cards. 
-
-A specific signature element of this design system is the **"Ticket Notch"**—a 45-degree inward corner cut used on the corners of primary containers and hero sections, directly referencing the classic "torn ticket" logo silhouette. Buttons use a standard 0.5rem radius, while "VHS Case" cards use a slightly tighter 0.25rem radius to look more rectangular and stackable.
-
-## Components
-
-- **Buttons:** Primary buttons are Pop Yellow with heavy VHS Black text. They feature a 2px solid black border and a hard offset shadow. On hover, the shadow grows; on click, it disappears.
-- **VHS Cards:** Content items (like movie posters or product cards) should be styled as VHS boxes. This includes a subtle "plastic" sheen overlay and a vertical "spine" label on the left edge for metadata.
-- **Membership Chips:** Use a "magnetic strip" style footer for tags or status indicators. Rounded-lg backgrounds with a dark horizontal bar.
-- **Inputs:** Styled after rental agreement forms. Thick borders, bright yellow focus states, and bold labels.
-- **Status Badges:** Styled like "Be Kind, Rewind" stickers—circular or oval shapes placed at a slight 5-degree tilt to look manually applied.
-- **Dividers:** Use a "Film Strip" pattern—a black line with white rectangular perforations—to separate major page sections.
+### 8) Content Guidelines
+- Prefer direct, action-oriented copy.
+- Avoid duplicated headlines/subtitles when labels already explain controls.
+- Reserve celebratory voice for outcomes (final picked movie), not setup instructions.
