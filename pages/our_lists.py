@@ -120,7 +120,6 @@ def _render_drawer(movie, prefix):
             if st.button("Cancel", key=f"nrm_{prefix}_{movie['id']}",
                          width="stretch"):
                 st.session_state.pop(f"confirm_rm_{prefix}", None)
-                st.rerun()
 
     st.markdown('<div class="vhs-drawer-end"></div>', unsafe_allow_html=True)
 
@@ -137,9 +136,6 @@ def _render_shelf(movies, prefix):
     )
     movies = _sort_movies(movies, sort_option)
 
-    if f"sel_{prefix}" not in st.session_state:
-        st.session_state[f"sel_{prefix}"] = None
-
     shelf_cols = 2 if _is_mobile_client() else SHELF_COLS
     rows = [movies[i:i + shelf_cols] for i in range(0, len(movies), shelf_cols)]
 
@@ -154,19 +150,8 @@ def _render_shelf(movies, prefix):
                 btn_cols = st.columns(2, gap="small")
                 for col_idx, movie in enumerate(row_movies):
                     with btn_cols[col_idx]:
-                        is_sel = st.session_state[f"sel_{prefix}"] == movie["id"]
-                        if st.button(
-                            "\u25B2" if is_sel else "\u25BC",
-                            key=f"vhs_{prefix}_{movie['id']}",
-                            width="stretch",
-                        ):
-                            if is_sel:
-                                st.session_state[f"sel_{prefix}"] = None
-                            else:
-                                st.session_state[f"sel_{prefix}"] = movie["id"]
-                                st.session_state.pop(f"rate_{prefix}", None)
-                                st.session_state.pop(f"confirm_rm_{prefix}", None)
-                            st.rerun()
+                        with st.expander("Details", expanded=False):
+                            _render_drawer(movie, prefix)
             else:
                 # Desktop: use st.columns for posters + buttons
                 cols = st.columns(shelf_cols, gap="small")
@@ -179,26 +164,17 @@ def _render_shelf(movies, prefix):
                             vhs_tape_html(img, movie["title"], movie.get("year")),
                             unsafe_allow_html=True,
                         )
-                        is_sel = st.session_state[f"sel_{prefix}"] == movie["id"]
-                        if st.button(
-                            "\u25B2" if is_sel else "\u25BC",
-                            key=f"vhs_{prefix}_{movie['id']}",
-                            width="stretch",
-                        ):
-                            if is_sel:
-                                st.session_state[f"sel_{prefix}"] = None
-                            else:
-                                st.session_state[f"sel_{prefix}"] = movie["id"]
-                                st.session_state.pop(f"rate_{prefix}", None)
-                                st.session_state.pop(f"confirm_rm_{prefix}", None)
-                            st.rerun()
+                        with st.expander("Details", expanded=False):
+                            _render_drawer(movie, prefix)
 
             st.markdown(shelf_bar_html(), unsafe_allow_html=True)
 
-        sel_id = st.session_state.get(f"sel_{prefix}")
-        sel_movie = next((m for m in row_movies if m["id"] == sel_id), None)
-        if sel_movie:
-            _render_drawer(sel_movie, prefix)
+
+@st.fragment
+def _render_active_shelf(list_type, prefix):
+    movies = get_unwatched_movies(list_type)
+    st.caption(f"{len(movies)} movie(s) on this shelf.")
+    _render_shelf(movies, prefix)
 
 
 def render():
@@ -206,19 +182,16 @@ def render():
     section_header("\U0001F4FC Our Lists")
     st.caption("Browse the shelves and pick something to watch.")
 
-    adam_movies = get_unwatched_movies("adam_pick")
-    sean_movies = get_unwatched_movies("sean_pick")
-    mutual_movies = get_unwatched_movies("mutual")
-
-    tab_adam, tab_sean, tab_mutual = st.tabs([
-        f"Adam's Picks ({len(adam_movies)})",
-        f"Sean's Picks ({len(sean_movies)})",
-        f"Mutual ({len(mutual_movies)})",
-    ])
-
-    with tab_adam:
-        _render_shelf(adam_movies, "adam")
-    with tab_sean:
-        _render_shelf(sean_movies, "sean")
-    with tab_mutual:
-        _render_shelf(mutual_movies, "mutual")
+    active_shelf = st.segmented_control(
+        "Choose a shelf",
+        ["Adam's Picks", "Sean's Picks", "Mutual"],
+        default="Adam's Picks",
+        key="our_lists_active_shelf",
+    )
+    shelf_map = {
+        "Adam's Picks": ("adam_pick", "adam"),
+        "Sean's Picks": ("sean_pick", "sean"),
+        "Mutual": ("mutual", "mutual"),
+    }
+    list_type, prefix = shelf_map[active_shelf]
+    _render_active_shelf(list_type, prefix)

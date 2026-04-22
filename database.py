@@ -23,6 +23,9 @@ DB_PATH = Path(__file__).parent / "movies.db"
 LOGGER = logging.getLogger(__name__)
 _DB_STATUS = {"backend": "unknown", "connected": False, "detail": "", "fallback": False}
 _POSTGRES_FAILED = False
+MAX_MOVIES = 20000
+MAX_OVERVIEW_CHARS = 2000
+MAX_NOTES_CHARS = 2000
 
 
 def _startup_log(message):
@@ -73,6 +76,15 @@ def _using_postgres():
 
 def get_db_status():
     return dict(_DB_STATUS)
+
+
+def get_storage_guardrail_status():
+    try:
+        count = _movie_count()
+    except Exception:
+        return {"count": 0, "max_movies": MAX_MOVIES, "percent_used": 0.0}
+    percent = (count / MAX_MOVIES) * 100 if MAX_MOVIES else 0.0
+    return {"count": count, "max_movies": MAX_MOVIES, "percent_used": percent}
 
 
 def _mask_url(url):
@@ -170,6 +182,43 @@ def _run_query(sql, params=(), fetch=None, commit=False):
     finally:
         cur.close()
         conn.close()
+
+def _invalidate_movie_cache():
+    if st is None:
+        return
+    try:
+        st.session_state["_movie_cache_rev"] = (
+            st.session_state.get("_movie_cache_rev", 0) + 1
+        )
+    except Exception:
+        pass
+
+
+def _movie_cache_rev():
+    if st is None:
+        return 0
+    try:
+        return st.session_state.get("_movie_cache_rev", 0)
+    except Exception:
+        return 0
+
+
+def _sanitize_text(value, max_chars):
+    if value is None:
+        return None
+    value = str(value).strip()
+    if not value:
+        return ""
+    return value[:max_chars]
+
+
+def _movie_count():
+    sql = "SELECT COUNT(*) AS c FROM movies"
+    row = _run_query(sql, fetch="one")
+    row_dict = _row_to_dict(row)
+    return int(row_dict.get("c", 0)) if row_dict else 0
+
+
 
 
 def _init_sqlite():
@@ -289,6 +338,11 @@ def init_db():
 
 def add_movie(tmdb_id, title, year, poster_path, director, genres, runtime,
               overview, list_type, added_by):
+    if _movie_count() >= MAX_MOVIES:
+        raise RuntimeError(
+            f"Movie limit reached ({MAX_MOVIES}). Remove old entries before adding more."
+        )
+
     sql = """
         INSERT INTO movies (tmdb_id, title, year, poster_path, director,
                             genres, runtime, overview, list_type, added_by)
@@ -305,9 +359,10 @@ def add_movie(tmdb_id, title, year, poster_path, director, genres, runtime,
             sql,
             (tmdb_id, title, year, poster_path, director,
              json.dumps(genres) if isinstance(genres, list) else genres,
-             runtime, overview, list_type, added_by),
+             runtime, _sanitize_text(overview, MAX_OVERVIEW_CHARS), list_type, added_by),
         )
         conn.commit()
+        _invalidate_movie_cache()
         return True
     except Exception as exc:
         if isinstance(exc, sqlite3.IntegrityError):
@@ -320,7 +375,8 @@ def add_movie(tmdb_id, title, year, poster_path, director, genres, runtime,
         conn.close()
 
 
-def get_unwatched_movies(list_type=None):
+@st.cache_data(show_spinner=False)
+def _get_unwatched_movies_cached(list_type, cache_rev):
     if _using_postgres():
         if list_type:
             rows = _run_query(
@@ -348,7 +404,12 @@ def get_unwatched_movies(list_type=None):
     return [_row_to_dict(r) for r in rows]
 
 
-def get_watched_movies():
+def get_unwatched_movies(list_type=None):
+    return _get_unwatched_movies_cached(list_type, _movie_cache_rev())
+
+
+@st.cache_data(show_spinner=False)
+def _get_watched_movies_cached(cache_rev):
     sql = (
         "SELECT * FROM movies WHERE watched = TRUE ORDER BY watched_date DESC"
         if _using_postgres()
@@ -356,6 +417,10 @@ def get_watched_movies():
     )
     rows = _run_query(sql, fetch="all")
     return [_row_to_dict(r) for r in rows]
+
+
+def get_watched_movies():
+    return _get_watched_movies_cached(_movie_cache_rev())
 
 
 def mark_watched(movie_id, adam_rating=None, sean_rating=None, notes=None,
@@ -372,7 +437,8 @@ def mark_watched(movie_id, adam_rating=None, sean_rating=None, notes=None,
             SET watched = TRUE, watched_date = %s, adam_rating = %s, sean_rating = %s, notes = %s
             WHERE id = %s
             """,
-            (watched_date, adam_rating, sean_rating, notes, movie_id),
+            (watched_date, adam_rating, sean_rating,
+             _sanitize_text(notes, MAX_NOTES_CHARS), movie_id),
             commit=True,
         )
     else:
@@ -382,9 +448,12 @@ def mark_watched(movie_id, adam_rating=None, sean_rating=None, notes=None,
             SET watched = 1, watched_date = ?, adam_rating = ?, sean_rating = ?, notes = ?
             WHERE id = ?
             """,
-            (watched_date, adam_rating, sean_rating, notes, movie_id),
+            (watched_date, adam_rating, sean_rating,
+             _sanitize_text(notes, MAX_NOTES_CHARS), movie_id),
             commit=True,
         )
+
+    _invalidate_movie_cache()
 
 
 def get_movies_missing_posters():
@@ -413,7 +482,7 @@ def update_movie_metadata(movie_id, data):
             """,
             (data.get("tmdb_id"), data.get("poster_path"), data.get("year"),
              data.get("director"), genres_str, data.get("runtime"),
-             data.get("overview"), movie_id),
+             _sanitize_text(data.get("overview"), MAX_OVERVIEW_CHARS), movie_id),
             commit=True,
         )
     else:
@@ -431,14 +500,17 @@ def update_movie_metadata(movie_id, data):
             """,
             (data.get("tmdb_id"), data.get("poster_path"), data.get("year"),
              data.get("director"), genres_str, data.get("runtime"),
-             data.get("overview"), movie_id),
+             _sanitize_text(data.get("overview"), MAX_OVERVIEW_CHARS), movie_id),
             commit=True,
         )
+
+    _invalidate_movie_cache()
 
 
 def remove_movie(movie_id):
     sql = "DELETE FROM movies WHERE id = %s" if _using_postgres() else "DELETE FROM movies WHERE id = ?"
     _run_query(sql, (movie_id,), commit=True)
+    _invalidate_movie_cache()
 
 
 def movie_exists(tmdb_id):
@@ -451,7 +523,8 @@ def movie_exists(tmdb_id):
     return _row_to_dict(row) if row else None
 
 
-def get_all_genres():
+@st.cache_data(show_spinner=False)
+def _get_all_genres_cached(cache_rev):
     sql = (
         "SELECT genres FROM movies WHERE watched = FALSE"
         if _using_postgres()
@@ -467,6 +540,10 @@ def get_all_genres():
         except (json.JSONDecodeError, TypeError):
             pass
     return sorted(all_genres)
+
+
+def get_all_genres():
+    return _get_all_genres_cached(_movie_cache_rev())
 
 
 def get_watch_stats():

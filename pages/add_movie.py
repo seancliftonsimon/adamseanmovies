@@ -34,18 +34,22 @@ def _quick_add(tmdb_id, list_type, added_by):
         st.toast(f"Could not load details: {e}", icon="\u274c")
         return
 
-    success = add_movie(
-        tmdb_id=details["tmdb_id"],
-        title=details["title"],
-        year=details["year"],
-        poster_path=details["poster_path"],
-        director=details["director"],
-        genres=details["genres"],
-        runtime=details["runtime"],
-        overview=details["overview"],
-        list_type=list_type,
-        added_by=added_by,
-    )
+    try:
+        success = add_movie(
+            tmdb_id=details["tmdb_id"],
+            title=details["title"],
+            year=details["year"],
+            poster_path=details["poster_path"],
+            director=details["director"],
+            genres=details["genres"],
+            runtime=details["runtime"],
+            overview=details["overview"],
+            list_type=list_type,
+            added_by=added_by,
+        )
+    except RuntimeError as exc:
+        st.toast(str(exc), icon="⚠️")
+        return
 
     if success:
         if "added_movies" not in st.session_state:
