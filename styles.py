@@ -716,6 +716,13 @@ def inject_css():
         margin-top: 1rem;
     }
 
+    .pick-active-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        margin-top: 0.8rem;
+    }
+
     .pick-results-card {
         background: #fffef6;
         border: 3px solid #111111;

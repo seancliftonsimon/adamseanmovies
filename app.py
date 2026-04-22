@@ -75,14 +75,15 @@ def _current_page():
 
 
 def _render_top_nav(current_page):
-    st.markdown('<div class="top-nav-widget-anchor"></div>', unsafe_allow_html=True)
-    choice = st.segmented_control(
-        "Navigate",
-        [item["key"] for item in NAV_ITEMS],
-        default=current_page,
-        key="top_nav_choice",
-        label_visibility="collapsed",
-    )
+    with st.container():
+        st.markdown('<div class="top-nav-widget-anchor"></div>', unsafe_allow_html=True)
+        choice = st.segmented_control(
+            "Navigate",
+            [item["key"] for item in NAV_ITEMS],
+            default=current_page,
+            key="top_nav_choice",
+            label_visibility="collapsed",
+        )
     if choice and choice != current_page:
         st.session_state.current_page = choice
         target_slug = next(item["slug"] for item in NAV_ITEMS if item["key"] == choice)
