@@ -173,7 +173,7 @@ def inject_css():
     }
 
     /* ===== TOP NAV BAR ===== */
-    [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) {
+    .top-nav-shell {
         position: fixed;
         top: 74px;
         left: 0;
@@ -184,40 +184,63 @@ def inject_css():
         border-bottom: var(--border-strong) solid var(--color-ink-soft);
         box-shadow: 0 var(--shadow-offset-md-y) 0 var(--color-pop-gold);
     }
-    .top-nav-widget-anchor { display: none; }
-    [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-testid="stSegmentedControl"] {
+    .top-nav-inner {
         max-width: 980px;
         margin: 0 auto;
-    }
-    [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-baseweb="button-group"] {
-        width: 100%;
-        display: grid !important;
+        display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: var(--space-1);
-        background: transparent !important;
     }
-    [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-baseweb="button-group"] > button {
+    .top-nav-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         min-height: 52px;
-        border-radius: var(--radius-sm) !important;
-        border: var(--border-base) solid var(--color-ink-soft) !important;
-        background: #fff9db !important;
-        color: var(--color-ink-soft) !important;
-        box-shadow: 4px 4px 0 rgba(0,51,153,0.18) !important;
+        padding: 0.35rem 0.6rem;
+        border-radius: var(--radius-sm);
+        border: var(--border-base) solid var(--color-ink-soft);
+        background: #fff9db;
+        color: var(--color-ink-soft);
+        box-shadow: 4px 4px 0 rgba(0,51,153,0.18);
         font-family: var(--font-display);
         font-weight: 800;
         font-size: 0.76rem;
         letter-spacing: 0.06em;
-        line-height: 1.3;
+        line-height: 1.1;
         text-transform: uppercase;
+        text-decoration: none;
+        text-align: center;
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
-    [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-baseweb="button-group"] > button:hover {
+    .top-nav-link span {
+        display: block;
+    }
+    .top-nav-icon {
+        font-size: 0.95rem;
+        line-height: 1;
+    }
+    .top-nav-text {
+        margin-top: 0.18rem;
+    }
+    .top-nav-link:hover {
         transform: translate(-1px, -1px);
-        box-shadow: 5px 5px 0 var(--color-ink-soft) !important;
+        box-shadow: 5px 5px 0 var(--color-ink-soft);
+        color: var(--color-ink-soft);
     }
-    [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-baseweb="button-group"] > button[aria-pressed="true"] {
+    .top-nav-link.is-active {
         background: var(--color-royal);
-        color: var(--color-pop-yellow) !important;
-        box-shadow: var(--hard-shadow-md) !important;
+        color: var(--color-pop-yellow);
+        box-shadow: var(--hard-shadow-md);
+    }
+    [data-testid="stVerticalBlock"]:has(.top-nav-shell) {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        gap: 0 !important;
+    }
+    [data-testid="stVerticalBlock"]:has(.top-nav-shell) a {
+        text-decoration: none !important;
     }
 
     /* ===== PANEL SHELL ===== */
@@ -1146,14 +1169,14 @@ def inject_css():
             padding: 0 1rem;
         }
         .app-header-logo { font-size: 1.6rem; }
-        [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) {
+        .top-nav-shell {
             top: 68px;
             padding: 0.45rem 0.6rem 0.6rem;
         }
-        [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-baseweb="button-group"] {
+        .top-nav-inner {
             gap: 6px;
         }
-        [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-baseweb="button-group"] > button {
+        .top-nav-link {
             min-height: 48px;
             font-size: 0.7rem;
         }

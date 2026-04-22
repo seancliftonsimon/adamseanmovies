@@ -75,21 +75,24 @@ def _current_page():
 
 
 def _render_top_nav(current_page):
-    with st.container():
-        st.markdown('<div class="top-nav-widget-anchor"></div>', unsafe_allow_html=True)
-        st.markdown('<div class="workflow-label">Navigate</div>', unsafe_allow_html=True)
-        choice = st.segmented_control(
-            "Navigate",
-            [item["key"] for item in NAV_ITEMS],
-            default=current_page,
-            key="top_nav_choice",
-            label_visibility="collapsed",
+    links = []
+    for item in NAV_ITEMS:
+        active_class = " is-active" if item["key"] == current_page else ""
+        icon, label = item["label"].split("\n", 1)
+        links.append(
+            f'<a class="top-nav-link{active_class}" href="?page={item["slug"]}">'
+            f'<span class="top-nav-icon">{icon}</span>'
+            f'<span class="top-nav-text">{label}</span>'
+            '</a>'
         )
-    if choice and choice != current_page:
-        st.session_state.current_page = choice
-        target_slug = next(item["slug"] for item in NAV_ITEMS if item["key"] == choice)
-        st.query_params["page"] = target_slug
-        st.rerun()
+    st.markdown(
+        '<nav class="top-nav-shell" aria-label="Primary">'
+        '<div class="top-nav-inner">'
+        f'{"".join(links)}'
+        '</div>'
+        '</nav>',
+        unsafe_allow_html=True,
+    )
 
 
 def main():
