@@ -77,6 +77,7 @@ def _current_page():
 def _render_top_nav(current_page):
     with st.container():
         st.markdown('<div class="top-nav-widget-anchor"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="workflow-label">Navigate</div>', unsafe_allow_html=True)
         choice = st.segmented_control(
             "Navigate",
             [item["key"] for item in NAV_ITEMS],
