@@ -92,15 +92,12 @@ def _render_drawer(movie, prefix):
     if movie["overview"]:
         st.caption(movie["overview"])
 
-    c1, c2 = st.columns(2)
-    with c1:
-        if st.button("\u2705 We watched this!", key=f"dw_{prefix}_{movie['id']}",
-                     type="primary", width="stretch"):
-            st.session_state[f"rate_{prefix}"] = movie["id"]
-    with c2:
-        if st.button("\U0001F5D1\uFE0F Remove", key=f"drm_{prefix}_{movie['id']}",
-                     width="stretch"):
-            st.session_state[f"confirm_rm_{prefix}"] = movie["id"]
+    if st.button("\u2705 We watched this!", key=f"dw_{prefix}_{movie['id']}",
+                 type="primary", width="stretch"):
+        st.session_state[f"rate_{prefix}"] = movie["id"]
+    if st.button("\U0001F5D1\uFE0F Remove", key=f"drm_{prefix}_{movie['id']}",
+                 width="stretch"):
+        st.session_state[f"confirm_rm_{prefix}"] = movie["id"]
 
     if st.session_state.get(f"rate_{prefix}") == movie["id"]:
         _rating_form(movie, prefix)
@@ -139,6 +136,8 @@ def _render_shelf(movies, prefix):
     shelf_cols = 2 if _is_mobile_client() else SHELF_COLS
     rows = [movies[i:i + shelf_cols] for i in range(0, len(movies), shelf_cols)]
 
+    selected_movie_id = st.session_state.get(f"sel_{prefix}")
+
     for row_idx, row_movies in enumerate(rows):
         with st.container(key=f"shelf-row-{prefix}-{row_idx}"):
             if shelf_cols == 2:
@@ -147,11 +146,14 @@ def _render_shelf(movies, prefix):
                     shelf_row_html(row_movies, make_poster_url, POSTER_PLACEHOLDER),
                     unsafe_allow_html=True,
                 )
-                btn_cols = st.columns(2, gap="small")
+                btn_cols = st.columns(shelf_cols, gap="small")
                 for col_idx, movie in enumerate(row_movies):
                     with btn_cols[col_idx]:
-                        with st.expander("Details", expanded=False):
-                            _render_drawer(movie, prefix)
+                        is_open = selected_movie_id == movie["id"]
+                        label = "▾ Details" if is_open else "▸ Details"
+                        if st.button(label, key=f"open_{prefix}_{movie['id']}", width="stretch"):
+                            st.session_state[f"sel_{prefix}"] = None if is_open else movie["id"]
+                            st.rerun()
             else:
                 # Desktop: use st.columns for posters + buttons
                 cols = st.columns(shelf_cols, gap="small")
@@ -164,8 +166,15 @@ def _render_shelf(movies, prefix):
                             vhs_tape_html(img, movie["title"], movie.get("year")),
                             unsafe_allow_html=True,
                         )
-                        with st.expander("Details", expanded=False):
-                            _render_drawer(movie, prefix)
+                        is_open = selected_movie_id == movie["id"]
+                        label = "▾ Details" if is_open else "▸ Details"
+                        if st.button(label, key=f"open_{prefix}_{movie['id']}", width="stretch"):
+                            st.session_state[f"sel_{prefix}"] = None if is_open else movie["id"]
+                            st.rerun()
+
+            open_in_row = next((m for m in row_movies if m["id"] == st.session_state.get(f"sel_{prefix}")), None)
+            if open_in_row:
+                _render_drawer(open_in_row, prefix)
 
             st.markdown(shelf_bar_html(), unsafe_allow_html=True)
 

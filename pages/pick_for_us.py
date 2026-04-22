@@ -3,9 +3,10 @@ import random
 import time
 from html import escape
 import streamlit as st
+import database
 from styles import inject_css, genre_pills_html, runtime_display, POSTER_PLACEHOLDER
 from tmdb_api import poster_url
-from database import get_unwatched_movies, get_all_genres, mark_watched
+from database import get_unwatched_movies, mark_watched
 
 
 def _has_genre(movie, genre_filter):
@@ -13,12 +14,14 @@ def _has_genre(movie, genre_filter):
     return any(g in movie_genres for g in genre_filter)
 
 
-
 def _runtime_label(total_minutes):
-    hours, minutes = divmod(int(total_minutes), 60)
-    return f"{hours}h {minutes:02d}m"
-
-
+    total = max(0, int(total_minutes))
+    hours, minutes = divmod(total, 60)
+    if hours and minutes:
+        return f"{hours}h {minutes:02d}m"
+    if hours:
+        return f"{hours}h"
+    return f"{minutes}m"
 
 def _runtime_slider():
     slider_sig = inspect.signature(st.slider)
@@ -33,6 +36,8 @@ def _runtime_slider():
 
     if "format_func" in slider_sig.parameters:
         kwargs["format_func"] = _runtime_label
+    if "label_visibility" in slider_sig.parameters:
+        kwargs["label_visibility"] = "collapsed"
 
     min_runtime, max_runtime = st.slider(**kwargs)
 
@@ -175,11 +180,14 @@ def _pick_button(filtered):
 
 
 def _filter_bar(movies):
+    st.markdown('<div class="pick-panel-label">Whose Picks?</div>',
+                unsafe_allow_html=True)
     list_filter = st.pills(
         "Whose picks?",
         ["All", "Adam's Picks", "Sean's Picks", "Mutual Discoveries"],
         default="All",
         key="pick_list_filter",
+        label_visibility="collapsed",
     )
 
     list_map = {
@@ -192,17 +200,22 @@ def _filter_bar(movies):
     if lt:
         movies = [m for m in movies if m["list_type"] == lt]
 
-    available_genres = get_all_genres()
+    available_genres = database.get_all_genres()
+    st.markdown('<div class="pick-panel-label">Genres</div>',
+                unsafe_allow_html=True)
     if available_genres:
         genre_filter = st.pills(
             "Genres",
             available_genres,
             selection_mode="multi",
             key="pick_genre_filter",
+            label_visibility="collapsed",
         )
     else:
         genre_filter = []
 
+    st.markdown('<div class="pick-panel-label">Runtime</div>',
+                unsafe_allow_html=True)
     min_runtime, max_runtime = _runtime_slider()
 
     if genre_filter:
@@ -241,8 +254,6 @@ def render():
 
     with st.container():
         st.markdown('<div class="pick-filter-panel-anchor"></div>',
-                    unsafe_allow_html=True)
-        st.markdown('<div class="pick-panel-line"></div>',
                     unsafe_allow_html=True)
 
         filtered = _filter_bar(all_movies)
