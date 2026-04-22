@@ -89,7 +89,7 @@ def inject_css():
     /* ===== BASE ===== */
     .block-container {
         max-width: 980px;
-        padding-top: 8.9rem;   /* clears fixed header + top nav */
+        padding-top: 6.2rem;   /* clears combined fixed header/nav */
         padding-bottom: 2.2rem;
         font-family: var(--font-body);
         font-size: 1rem;
@@ -139,10 +139,17 @@ def inject_css():
         height: 74px;
         display: flex;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: space-between;
         padding: 0 1.6rem;
         gap: 0.9rem;
         box-sizing: border-box;
+    }
+    .app-header-main {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        min-width: 0;
+        flex-shrink: 0;
     }
     .app-header-logo {
         font-family: var(--font-display);
@@ -171,32 +178,20 @@ def inject_css():
         letter-spacing: 0.18em;
         line-height: 1;
     }
-
-    /* ===== TOP NAV BAR ===== */
-    .top-nav-shell {
-        position: fixed;
-        top: 74px;
-        left: 0;
-        right: 0;
-        z-index: var(--z-nav);
-        padding: 0.35rem 1rem 0.55rem;
-        background: var(--color-royal-shadow);
-        border-bottom: var(--border-strong) solid var(--color-ink-soft);
-        box-shadow: 0 var(--shadow-offset-md-y) 0 var(--color-pop-gold);
-    }
-    .top-nav-inner {
-        max-width: 980px;
-        margin: 0 auto;
+    .app-header-nav {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, auto));
         gap: var(--space-1);
+        align-items: center;
+        justify-content: end;
     }
     .top-nav-link {
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 52px;
-        padding: 0.35rem 0.6rem;
+        gap: 0.32rem;
+        min-height: 38px;
+        padding: 0.28rem 0.72rem;
         border-radius: var(--radius-sm);
         border: var(--border-base) solid var(--color-ink-soft);
         background: #fff9db;
@@ -204,23 +199,20 @@ def inject_css():
         box-shadow: 4px 4px 0 rgba(0,51,153,0.18);
         font-family: var(--font-display);
         font-weight: 800;
-        font-size: 0.76rem;
+        font-size: 0.72rem;
         letter-spacing: 0.06em;
-        line-height: 1.1;
+        line-height: 1;
         text-transform: uppercase;
         text-decoration: none;
         text-align: center;
         transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
-    .top-nav-link span {
-        display: block;
-    }
     .top-nav-icon {
-        font-size: 0.95rem;
+        font-size: 0.88rem;
         line-height: 1;
     }
     .top-nav-text {
-        margin-top: 0.18rem;
+        margin-top: 0;
     }
     .top-nav-link:hover {
         transform: translate(-1px, -1px);
@@ -231,16 +223,6 @@ def inject_css():
         background: var(--color-royal);
         color: var(--color-pop-yellow);
         box-shadow: var(--hard-shadow-md);
-    }
-    [data-testid="stVerticalBlock"]:has(.top-nav-shell) {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        gap: 0 !important;
-    }
-    [data-testid="stVerticalBlock"]:has(.top-nav-shell) a {
-        text-decoration: none !important;
     }
 
     /* ===== PANEL SHELL ===== */
@@ -961,6 +943,25 @@ def inject_css():
         padding: 1rem 1rem 1.1rem;
     }
 
+    [data-testid="stVerticalBlock"]:has(.add-workflow-anchor) {
+        background: rgba(255, 252, 243, 0.98);
+        border: var(--border-strong) solid var(--color-ink);
+        border-radius: var(--radius-md);
+        box-shadow: 8px 8px 0 var(--color-royal-shadow);
+        padding: var(--space-2);
+        margin-bottom: var(--space-2);
+        gap: var(--space-2);
+    }
+    [data-testid="stVerticalBlock"]:has(.add-workflow-anchor) [data-testid="stPills"] {
+        margin-bottom: 0.2rem;
+    }
+    [data-testid="stVerticalBlock"]:has(.add-workflow-anchor) [data-testid="stPills"] [role="radiogroup"],
+    [data-testid="stVerticalBlock"]:has(.add-workflow-anchor) [data-testid="stPills"] [role="group"] {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
     .pick-subhead {
         margin-bottom: 0.45rem;
         font-family: 'Space Grotesk', sans-serif;
@@ -1155,7 +1156,7 @@ def inject_css():
             max-width: 100vw !important;
             box-sizing: border-box !important;
             overflow-x: clip !important;
-            padding-top: 8.2rem;
+            padding-top: 6.8rem;
             padding-left: 0.8rem;
             padding-right: 0.8rem;
             padding-bottom: 2.2rem;
@@ -1165,21 +1166,30 @@ def inject_css():
         .stat-value { font-size: 1.9rem; }
         .stat-cards-row { gap: 10px; }
         .app-header {
-            height: 68px;
-            padding: 0 1rem;
+            height: 84px;
+            padding: 0.65rem 0.85rem;
+            align-items: flex-start;
         }
-        .app-header-logo { font-size: 1.6rem; }
-        .top-nav-shell {
-            top: 68px;
-            padding: 0.45rem 0.6rem 0.6rem;
+        .app-header-main {
+            gap: 0.55rem;
         }
-        .top-nav-inner {
-            gap: 6px;
+        .app-header-logo { font-size: 1.45rem; }
+        .app-header-sep,
+        .app-header-tagline {
+            display: none;
+        }
+        .app-header-nav {
+            gap: 0.35rem;
+            align-self: center;
         }
         .top-nav-link {
-            min-height: 48px;
-            font-size: 0.7rem;
+            min-height: 34px;
+            padding: 0.22rem 0.45rem;
+            font-size: 0.64rem;
+            letter-spacing: 0.05em;
+            box-shadow: 3px 3px 0 rgba(0,51,153,0.18);
         }
+        .top-nav-icon { font-size: 0.72rem; }
         .pick-kicker,
         .pick-result-kicker {
             font-size: 0.74rem;
@@ -1261,7 +1271,7 @@ def inject_css():
     }
 
     @media (min-width: 641px) {
-        .block-container { max-width: 980px; padding-top: 8.9rem; }
+        .block-container { max-width: 980px; padding-top: 6.2rem; }
         .stat-cards-row { grid-template-columns: repeat(4, 1fr); }
     }
     </style>
@@ -1270,13 +1280,18 @@ def inject_css():
 
 # ── Layout HTML helpers ──────────────────────────────────────────────
 
-def app_header_html():
+def app_header_html(nav_links_html=""):
     """Sticky top header bar."""
     return (
         '<div class="app-header">'
+        '<div class="app-header-main">'
         '<div class="app-header-logo">📼 Adam &amp; Sean</div>'
         '<div class="app-header-sep"></div>'
         '<div class="app-header-tagline">Movie Vault</div>'
+        '</div>'
+        '<nav class="app-header-nav" aria-label="Primary">'
+        f'{nav_links_html}'
+        '</nav>'
         '</div>'
     )
 
@@ -1319,20 +1334,25 @@ def workflow_label_html(text):
     return f'<p class="workflow-label">{escape(text)}</p>'
 
 
-def empty_state_html(title, copy):
+def empty_state_html(title, copy=None):
+    copy_html = f'<p class="app-empty-copy">{escape(copy)}</p>' if copy else ""
     return (
         '<div class="app-empty-state">'
         f'<h3 class="app-empty-title">{escape(title)}</h3>'
-        f'<p class="app-empty-copy">{escape(copy)}</p>'
+        f'{copy_html}'
         '</div>'
     )
 
 
-def result_summary_html(count_text, summary_text):
+def result_summary_html(count_text, summary_text=None):
+    summary_html = (
+        f'<p class="result-summary-copy">{escape(summary_text)}</p>'
+        if summary_text else ""
+    )
     return (
         '<div class="result-summary">'
         f'<p class="result-summary-count">{escape(count_text)}</p>'
-        f'<p class="result-summary-copy">{escape(summary_text)}</p>'
+        f'{summary_html}'
         '</div>'
     )
 

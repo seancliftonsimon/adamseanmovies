@@ -128,7 +128,7 @@ def _render_shelf(movies, prefix):
         st.markdown(
             empty_state_html(
                 "This shelf is empty",
-                "Head over to Add a Movie to stock it.",
+                None,
             ),
             unsafe_allow_html=True,
         )
@@ -140,6 +140,7 @@ def _render_shelf(movies, prefix):
         "Sort by",
         ["Recently Added", "Title A\u2013Z", "Shortest First", "Longest First"],
         key=f"sort_{prefix}",
+        label_visibility="collapsed",
     )
     st.markdown(panel_end_html(), unsafe_allow_html=True)
     movies = _sort_movies(movies, sort_option)
@@ -194,7 +195,7 @@ def _render_shelf(movies, prefix):
 def _render_active_shelf(list_type, prefix):
     movies = get_unwatched_movies(list_type)
     st.markdown(
-        result_summary_html(f"{len(movies)} movie(s) on this shelf", "Browse and open details below."),
+        result_summary_html(f"{len(movies)} movie(s)", None),
         unsafe_allow_html=True,
     )
     _render_shelf(movies, prefix)
@@ -206,7 +207,6 @@ def render():
         page_intro_html(
             "Our Lists",
             "Browse the Shelves",
-            "Sort each shelf, inspect details, and move watched picks to your log.",
         ),
         unsafe_allow_html=True,
     )
@@ -218,6 +218,7 @@ def render():
         ["Adam's Picks", "Sean's Picks", "Mutual"],
         default="Adam's Picks",
         key="our_lists_active_shelf",
+        label_visibility="collapsed",
     )
     st.markdown(panel_end_html(), unsafe_allow_html=True)
     shelf_map = {

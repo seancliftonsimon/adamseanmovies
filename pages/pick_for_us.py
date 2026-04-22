@@ -131,26 +131,6 @@ def _run_reveal(filtered):
     placeholder.empty()
 
 
-def _summarize_filters(list_filter, selected_genres, runtime_choice, custom_runtime):
-    parts = []
-    if list_filter != "All":
-        parts.append(list_filter)
-
-    if selected_genres:
-        if len(selected_genres) > 2:
-            parts.append(f"{', '.join(selected_genres[:2])} +{len(selected_genres) - 2} more")
-        else:
-            parts.append(", ".join(selected_genres))
-
-    if runtime_choice != "Any Length":
-        if runtime_choice == "Custom":
-            parts.append(f"Under {_runtime_label(custom_runtime)}")
-        else:
-            parts.append(runtime_choice)
-
-    return " • ".join(parts) if parts else "All picks • Any genre • Any length"
-
-
 def _active_filter_row(active_filters):
     if not active_filters:
         return
@@ -181,7 +161,6 @@ def _runtime_selector():
         if "label_visibility" in slider_sig.parameters:
             kwargs["label_visibility"] = "collapsed"
         custom_runtime = st.slider(**kwargs)
-        st.caption(f"Max runtime: {_runtime_label(custom_runtime)}")
 
     return runtime_choice, custom_runtime
 
@@ -239,24 +218,23 @@ def _render_filters(all_movies):
     st.markdown('</div></div>', unsafe_allow_html=True)
     st.markdown(panel_end_html(), unsafe_allow_html=True)
 
-    summary = _summarize_filters(list_filter, selected_genres, runtime_choice, custom_runtime)
-    return filtered, summary, bool(active_filters)
+    return filtered, bool(active_filters)
 
 
-def _render_results_card(filtered, summary, has_optional_filters):
+def _render_results_card(filtered, has_optional_filters):
     st.markdown(panel_start_html("4. Pick Action"), unsafe_allow_html=True)
 
     has_results = len(filtered) > 0
     if has_results:
         st.markdown(
-            result_summary_html(f"{len(filtered)} Tapes Ready in the Pool", summary),
+            result_summary_html(f"{len(filtered)} Tapes Ready", None),
             unsafe_allow_html=True,
         )
     else:
         st.markdown(
             empty_state_html(
                 "No tapes match these filters",
-                "Try removing a filter or broadening the pool.",
+                None,
             ),
             unsafe_allow_html=True,
         )
@@ -291,7 +269,6 @@ def render():
         page_intro_html(
             "Pick For Us",
             "Movie Vault Selector",
-            "Set your filters and let the vault pull tonight's tape.",
         ),
         unsafe_allow_html=True,
     )
@@ -301,7 +278,7 @@ def render():
         st.markdown(
             empty_state_html(
                 "No unwatched movies yet",
-                "Head over to Add a Movie to build your list.",
+                None,
             ),
             unsafe_allow_html=True,
         )
@@ -309,10 +286,10 @@ def render():
 
     left_col, right_col = st.columns([1.65, 1], gap="large")
     with left_col:
-        filtered, summary, has_optional_filters = _render_filters(all_movies)
+        filtered, has_optional_filters = _render_filters(all_movies)
 
     with right_col:
-        _render_results_card(filtered, summary, has_optional_filters)
+        _render_results_card(filtered, has_optional_filters)
 
     if st.session_state.get("picked_movie"):
         _show_picked_movie(st.session_state["picked_movie"])

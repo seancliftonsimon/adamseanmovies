@@ -23,8 +23,7 @@ def _render_stats(stats):
 
     top_genre = stats.get("top_genre") or "—"
     row2 = [
-        {"label": "Top Genre", "value": top_genre,
-         "sub": "most watched genre"},
+        {"label": "Top Genre", "value": top_genre},
         {"label": "Adam's Picks Done",
          "value": stats["adam_suggested_watched"]},
         {"label": "Sean's Picks Done",
@@ -32,22 +31,8 @@ def _render_stats(stats):
     ]
     st.markdown(stat_cards_row_html(row2), unsafe_allow_html=True)
 
-    if stats["adam_suggested_watched"] > 0 or stats["sean_suggested_watched"] > 0:
-        if stats["adam_suggested_watched"] > stats["sean_suggested_watched"]:
-            st.success("\U0001F3C6 Adam is winning the 'great suggestions' race!")
-        elif stats["sean_suggested_watched"] > stats["adam_suggested_watched"]:
-            st.success("\U0001F3C6 Sean is winning the 'great suggestions' race!")
-        else:
-            st.success("\U0001F91D It's a tie! You both have great taste.")
-
 
 def _render_watched_drawer(movie):
-    list_labels = {
-        "adam_pick": "Adam's Pick",
-        "sean_pick": "Sean's Pick",
-        "mutual": "Mutual Discovery",
-    }
-
     st.markdown(
         f'<div class="vhs-drawer-header">'
         f'\U0001F4FC {escape(movie["title"])} ({movie["year"] or "?"})'
@@ -68,9 +53,6 @@ def _render_watched_drawer(movie):
                         unsafe_allow_html=True)
         if movie["runtime"]:
             st.markdown(f"**Runtime:** {runtime_display(movie['runtime'])}")
-        st.caption(
-            f"Suggested as: {list_labels.get(movie['list_type'], '?')}"
-        )
 
     r_cols = st.columns(2)
     with r_cols[0]:
@@ -114,7 +96,6 @@ def render():
         page_intro_html(
             "Watch Log",
             "Watched Together",
-            "Every movie you've watched together, rated and remembered.",
         ),
         unsafe_allow_html=True,
     )
@@ -126,6 +107,7 @@ def render():
         ["Overview", "Watched Shelf"],
         default="Overview",
         key="watch_log_view",
+        label_visibility="collapsed",
     )
     st.markdown(panel_end_html(), unsafe_allow_html=True)
 
@@ -137,7 +119,7 @@ def render():
         st.markdown(
             empty_state_html(
                 "No watched movies yet",
-                "Pick one from your lists and start your journey.",
+                None,
             ),
             unsafe_allow_html=True,
         )

@@ -3,8 +3,6 @@ from styles import (
     inject_css,
     POSTER_PLACEHOLDER,
     page_intro_html,
-    panel_start_html,
-    panel_end_html,
     workflow_label_html,
     empty_state_html,
     result_summary_html,
@@ -80,42 +78,48 @@ def render():
         page_intro_html(
             "Add a Movie",
             "Stock the Shelves",
-            "Pick a shelf, search TMDb, and add the right tape in one flow.",
         ),
         unsafe_allow_html=True,
     )
 
-    st.markdown(panel_start_html("Workflow"), unsafe_allow_html=True)
-    st.markdown(workflow_label_html("1. Choose a shelf"), unsafe_allow_html=True)
-    selection = st.pills(
-        "Add to",
-        LIST_OPTIONS,
-        default="Adam",
-        key="add_list_selection",
-    )
-
-    if not selection:
-        st.markdown(
-            empty_state_html(
-                "Choose a shelf to continue",
-                "Tap a name above to choose which list to add to.",
-            ),
-            unsafe_allow_html=True,
+    with st.container():
+        st.markdown('<div class="add-workflow-anchor"></div>', unsafe_allow_html=True)
+        st.markdown('<p class="panel-kicker">Workflow</p>', unsafe_allow_html=True)
+        st.markdown('<div class="workflow-stack">', unsafe_allow_html=True)
+        st.markdown('<div class="workflow-block">', unsafe_allow_html=True)
+        st.markdown(workflow_label_html("1. Choose a shelf"), unsafe_allow_html=True)
+        selection = st.pills(
+            "Add to",
+            LIST_OPTIONS,
+            default="Adam",
+            key="add_list_selection",
+            label_visibility="collapsed",
         )
-        st.markdown(panel_end_html(), unsafe_allow_html=True)
-        return
 
-    list_type, added_by = LIST_MAP[selection]
-    btn_label = LIST_LABELS[list_type]
+        if not selection:
+            st.markdown(
+                empty_state_html(
+                    "Choose a shelf to continue",
+                    None,
+                ),
+                unsafe_allow_html=True,
+            )
+            st.markdown('</div></div>', unsafe_allow_html=True)
+            return
 
-    st.markdown(workflow_label_html("2. Search for a movie"), unsafe_allow_html=True)
-    query = st.text_input(
-        "Search for a movie",
-        placeholder="e.g. Eternal Sunshine, The Grand Budapest Hotel...",
-        key="add_search_query",
-    )
+        list_type, added_by = LIST_MAP[selection]
+        btn_label = LIST_LABELS[list_type]
 
-    st.markdown(panel_end_html(), unsafe_allow_html=True)
+        st.markdown('</div><div class="workflow-block">', unsafe_allow_html=True)
+        st.markdown(workflow_label_html("2. Search for a movie"), unsafe_allow_html=True)
+        query = st.text_input(
+            "Search for a movie",
+            placeholder="e.g. Eternal Sunshine, The Grand Budapest Hotel...",
+            key="add_search_query",
+            label_visibility="collapsed",
+        )
+
+        st.markdown('</div></div>', unsafe_allow_html=True)
 
     if not query:
         return
@@ -131,7 +135,7 @@ def render():
         st.markdown(
             empty_state_html(
                 "No movies found",
-                "Try a different search term.",
+                None,
             ),
             unsafe_allow_html=True,
         )
@@ -140,7 +144,7 @@ def render():
     st.markdown(
         result_summary_html(
             f"Showing {min(len(results), 12)} of {total} results",
-            f"Target shelf: {btn_label}",
+            None,
         ),
         unsafe_allow_html=True,
     )

@@ -74,7 +74,7 @@ def _current_page():
     return current_page
 
 
-def _render_top_nav(current_page):
+def _nav_links_html(current_page):
     links = []
     for item in NAV_ITEMS:
         active_class = " is-active" if item["key"] == current_page else ""
@@ -85,24 +85,15 @@ def _render_top_nav(current_page):
             f'<span class="top-nav-text">{label}</span>'
             '</a>'
         )
-    st.markdown(
-        '<nav class="top-nav-shell" aria-label="Primary">'
-        '<div class="top-nav-inner">'
-        f'{"".join(links)}'
-        '</div>'
-        '</nav>',
-        unsafe_allow_html=True,
-    )
+    return "".join(links)
 
 
 def main():
     inject_css()
     _backfill_posters()
 
-    st.markdown(app_header_html(), unsafe_allow_html=True)
-
     page = _current_page()
-    _render_top_nav(page)
+    st.markdown(app_header_html(_nav_links_html(page)), unsafe_allow_html=True)
 
     db_status = get_db_status()
     if db_status.get("fallback"):
