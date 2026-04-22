@@ -7,7 +7,18 @@ import streamlit as st
 
 import database
 from database import get_unwatched_movies, mark_watched
-from styles import POSTER_PLACEHOLDER, genre_pills_html, inject_css, runtime_display
+from styles import (
+    POSTER_PLACEHOLDER,
+    genre_pills_html,
+    inject_css,
+    runtime_display,
+    page_intro_html,
+    panel_start_html,
+    panel_end_html,
+    workflow_label_html,
+    empty_state_html,
+    result_summary_html,
+)
 from tmdb_api import poster_url
 
 LIST_OPTIONS = ["All", "Adam's Picks", "Sean's Picks", "Mutual Discoveries"]
@@ -177,9 +188,11 @@ def _runtime_selector():
 
 def _render_filters(all_movies):
     st.markdown('<div class="pick-filter-panel-anchor"></div>', unsafe_allow_html=True)
-    st.markdown('<div class="pick-flow-card pick-flow-section">', unsafe_allow_html=True)
+    st.markdown(panel_start_html("Workflow"), unsafe_allow_html=True)
+    st.markdown('<div class="workflow-stack">', unsafe_allow_html=True)
+    st.markdown('<div class="workflow-block">', unsafe_allow_html=True)
 
-    st.markdown('<div class="pick-subhead">1. Whose picks?</div>', unsafe_allow_html=True)
+    st.markdown(workflow_label_html("1. Whose picks?"), unsafe_allow_html=True)
     list_filter = st.pills(
         "Whose Picks?",
         LIST_OPTIONS,
@@ -193,7 +206,8 @@ def _render_filters(all_movies):
     if selected_list:
         filtered = [m for m in filtered if m["list_type"] == selected_list]
 
-    st.markdown('<div class="pick-subhead">2. Genres</div>', unsafe_allow_html=True)
+    st.markdown('</div><div class="workflow-block">', unsafe_allow_html=True)
+    st.markdown(workflow_label_html("2. Genres"), unsafe_allow_html=True)
     available_genres = database.get_all_genres()
     selected_genres = st.pills(
         "Genres",
@@ -206,7 +220,8 @@ def _render_filters(all_movies):
         selected_set = set(selected_genres)
         filtered = [m for m in filtered if selected_set.intersection(m["genres_list"])]
 
-    st.markdown('<div class="pick-subhead pick-runtime-subhead">3. Runtime</div>', unsafe_allow_html=True)
+    st.markdown('</div><div class="workflow-block">', unsafe_allow_html=True)
+    st.markdown(workflow_label_html("3. Runtime"), unsafe_allow_html=True)
     runtime_choice, custom_runtime = _runtime_selector()
     if runtime_choice != "Any Length":
         max_runtime = custom_runtime if runtime_choice == "Custom" else RUNTIME_LIMITS[runtime_choice]
@@ -221,23 +236,30 @@ def _render_filters(all_movies):
         active_filters.append(f"Under {_runtime_label(custom_runtime)}" if runtime_choice == "Custom" else runtime_choice)
     _active_filter_row(active_filters)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div></div>', unsafe_allow_html=True)
+    st.markdown(panel_end_html(), unsafe_allow_html=True)
 
     summary = _summarize_filters(list_filter, selected_genres, runtime_choice, custom_runtime)
     return filtered, summary, bool(active_filters)
 
 
 def _render_results_card(filtered, summary, has_optional_filters):
-    st.markdown('<div class="pick-results-card pick-flow-section">', unsafe_allow_html=True)
-    st.markdown('<div class="pick-subhead">4. Pick action</div>', unsafe_allow_html=True)
+    st.markdown(panel_start_html("4. Pick Action"), unsafe_allow_html=True)
 
     has_results = len(filtered) > 0
     if has_results:
-        st.markdown(f'<div class="pick-results-count">{len(filtered)} Tapes Ready in the Pool</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="pick-results-summary">{escape(summary)}</div>', unsafe_allow_html=True)
+        st.markdown(
+            result_summary_html(f"{len(filtered)} Tapes Ready in the Pool", summary),
+            unsafe_allow_html=True,
+        )
     else:
-        st.markdown('<div class="pick-results-count">No Tapes Match These Filters</div>', unsafe_allow_html=True)
-        st.markdown('<div class="pick-results-summary">Try removing a filter or broadening the pool.</div>', unsafe_allow_html=True)
+        st.markdown(
+            empty_state_html(
+                "No tapes match these filters",
+                "Try removing a filter or broadening the pool.",
+            ),
+            unsafe_allow_html=True,
+        )
 
     sample = filtered[:3]
     if sample:
@@ -259,18 +281,30 @@ def _render_results_card(filtered, summary, has_optional_filters):
             st.session_state["pick_custom_runtime"] = 150
             st.rerun()
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown(panel_end_html(), unsafe_allow_html=True)
 
 
 def render():
     inject_css()
     st.markdown('<div class="pick-page-anchor"></div>', unsafe_allow_html=True)
-    st.markdown('<div class="pick-kicker">Pick For Us</div>', unsafe_allow_html=True)
-    st.markdown('<h1 class="pick-title">Movie Vault Selector</h1>', unsafe_allow_html=True)
+    st.markdown(
+        page_intro_html(
+            "Pick For Us",
+            "Movie Vault Selector",
+            "Set your filters and let the vault pull tonight's tape.",
+        ),
+        unsafe_allow_html=True,
+    )
 
     all_movies = get_unwatched_movies()
     if not all_movies:
-        st.info("No unwatched movies yet! Head over to **Add a Movie** to build your list.")
+        st.markdown(
+            empty_state_html(
+                "No unwatched movies yet",
+                "Head over to Add a Movie to build your list.",
+            ),
+            unsafe_allow_html=True,
+        )
         return
 
     left_col, right_col = st.columns([1.65, 1], gap="large")

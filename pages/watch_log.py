@@ -1,9 +1,11 @@
 import streamlit as st
 from html import escape
 from styles import (inject_css, genre_pills_html, runtime_display,
-                    stars_html, section_header, vhs_tape_html,
+                    stars_html, vhs_tape_html,
                     shelf_bar_html, stat_cards_row_html,
-                    POSTER_PLACEHOLDER, SHELF_COLS)
+                    POSTER_PLACEHOLDER, SHELF_COLS, page_intro_html,
+                    panel_start_html, panel_end_html, workflow_label_html,
+                    empty_state_html)
 from tmdb_api import poster_url as make_poster_url
 from database import get_watched_movies, get_watch_stats
 
@@ -108,23 +110,37 @@ def _render_shelf(watched):
 
 def render():
     inject_css()
-    section_header("\U0001F4FC Watched Together")
-    st.caption("Every movie you've watched together, rated and remembered.")
+    st.markdown(
+        page_intro_html(
+            "Watch Log",
+            "Watched Together",
+            "Every movie you've watched together, rated and remembered.",
+        ),
+        unsafe_allow_html=True,
+    )
 
+    st.markdown(panel_start_html("View Mode", tight=True), unsafe_allow_html=True)
+    st.markdown(workflow_label_html("Choose a view"), unsafe_allow_html=True)
     view = st.segmented_control(
         "View",
         ["Overview", "Watched Shelf"],
         default="Overview",
         key="watch_log_view",
     )
+    st.markdown(panel_end_html(), unsafe_allow_html=True)
 
     stats = get_watch_stats() if view == "Overview" else None
     watched = get_watched_movies() if view == "Watched Shelf" else None
 
     total = stats["total"] if stats else len(watched or [])
     if total == 0:
-        st.info("You haven't watched any movies together yet! "
-                "Pick one from your lists and start your journey.")
+        st.markdown(
+            empty_state_html(
+                "No watched movies yet",
+                "Pick one from your lists and start your journey.",
+            ),
+            unsafe_allow_html=True,
+        )
         return
 
     if view == "Overview":

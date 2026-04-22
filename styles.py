@@ -94,13 +94,21 @@ def inject_css():
         font-family: var(--font-body);
         font-size: 1rem;
     }
-    html, body,
+    html, body {
+        overflow-x: hidden;
+        overflow-y: auto !important;
+    }
     [data-testid="stAppViewContainer"],
     [data-testid="stApp"] {
         background:
             radial-gradient(circle at top right, rgba(0, 51, 153, 0.05), transparent 22%),
             linear-gradient(180deg, var(--color-paper-warm) 0%, #f6f2e8 100%);
-        overflow-x: hidden;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+    [data-testid="stAppViewContainer"] > .main,
+    [data-testid="stAppViewContainer"] [data-testid="stMain"] {
+        overflow-y: visible !important;
     }
 
     /* ===== HIDE STREAMLIT CHROME ===== */
@@ -230,6 +238,62 @@ def inject_css():
         border: var(--border-base) solid var(--color-ink-soft);
         border-radius: var(--radius-sm);
         box-shadow: var(--hard-shadow-sm);
+    }
+
+    .page-intro {
+        margin-bottom: var(--space-3);
+    }
+    .page-intro-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-0-5);
+        background: var(--color-royal);
+        color: var(--color-pop-yellow);
+        border: var(--border-base) solid var(--color-ink-soft);
+        box-shadow: var(--hard-shadow-sm);
+        border-radius: var(--radius-sm);
+        padding: var(--space-0-75) var(--space-1-5);
+        font-family: var(--font-label);
+        font-size: var(--type-sm);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+    }
+    .page-intro-title {
+        margin: var(--space-1) 0 var(--space-1);
+        font-family: var(--font-display);
+        font-size: clamp(2rem, 6vw, 3.7rem);
+        line-height: 0.95;
+        text-transform: uppercase;
+        font-style: italic;
+        letter-spacing: -0.04em;
+        color: var(--color-royal);
+    }
+    .page-intro-support {
+        margin: 0;
+        max-width: 44rem;
+        color: #4f5a70;
+        font-family: var(--font-body);
+        line-height: 1.55;
+    }
+
+    .panel-shell {
+        background: var(--color-paper);
+        border: var(--border-strong) solid var(--color-ink-soft);
+        box-shadow: 8px 8px 0 var(--color-royal-shadow);
+        border-radius: var(--radius-md);
+        padding: var(--space-2);
+        margin-bottom: var(--space-2);
+    }
+    .panel-shell-tight { padding: var(--space-1-5); }
+    .panel-kicker {
+        margin: 0 0 var(--space-1);
+        font-family: var(--font-label);
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #5d6780;
+        font-weight: 700;
     }
 
     /* ===== CONTROLS ===== */
@@ -507,6 +571,25 @@ def inject_css():
         transform: translate(2px, 2px);
         box-shadow: 1px 1px 0 var(--color-ink-soft);
     }
+    div.stButton > button:focus-visible,
+    [data-baseweb="button-group"] > button:focus-visible,
+    [data-testid="stPills"] button:focus-visible,
+    [data-testid="stExpander"] summary:focus-visible,
+    [data-testid="stSelectbox"] [role="combobox"]:focus-visible,
+    [data-testid="stTextInput"] input:focus-visible,
+    [data-testid="stTextArea"] textarea:focus-visible {
+        outline: none !important;
+        box-shadow: var(--focus-ring) !important;
+    }
+    div.stButton > button:disabled,
+    [data-baseweb="button-group"] > button:disabled,
+    [data-testid="stPills"] button:disabled,
+    [data-testid="stExpander"] summary[aria-disabled="true"] {
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
     div.stButton > button[kind="primary"],
     div.stButton > button[data-testid="stBaseButton-primary"] {
         background: var(--color-pop-yellow) !important;
@@ -724,6 +807,70 @@ def inject_css():
         box-shadow: 3px 3px 0 var(--color-ink-soft);
         font-family: 'Inter', sans-serif;
         font-size: 0.95rem;
+    }
+
+    .workflow-stack {
+        display: grid;
+        gap: var(--space-2);
+    }
+    .workflow-block {
+        display: grid;
+        gap: var(--space-1);
+    }
+    .workflow-label {
+        margin: 0;
+        font-family: var(--font-label);
+        font-size: var(--type-sm);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #677089;
+    }
+
+    .app-empty-state {
+        display: grid;
+        gap: var(--space-1);
+        background: #fffef8;
+        border: var(--border-base) dashed var(--color-outline);
+        border-radius: var(--radius-sm);
+        padding: var(--space-2);
+        margin: 0 0 var(--space-1);
+    }
+    .app-empty-title {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: var(--type-lg);
+        letter-spacing: -0.02em;
+        color: var(--color-ink-soft);
+    }
+    .app-empty-copy {
+        margin: 0;
+        font-family: var(--font-body);
+        color: #4f5a70;
+    }
+
+    .result-summary {
+        display: grid;
+        gap: var(--space-1);
+        margin-bottom: var(--space-1-5);
+    }
+    .result-summary-count {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: clamp(1.4rem, 3vw, 2.1rem);
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        color: var(--color-royal);
+        text-transform: uppercase;
+        line-height: 0.98;
+    }
+    .result-summary-copy {
+        margin: 0;
+        font-family: var(--font-label);
+        font-size: var(--type-sm);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #59647c;
     }
 
     /* ===== PICKER CARD ===== */
@@ -1032,6 +1179,13 @@ def inject_css():
         .pick-results-count {
             font-size: 1.55rem;
         }
+        .page-intro-title {
+            font-size: clamp(1.8rem, 9vw, 2.8rem);
+        }
+        .panel-shell {
+            padding: var(--space-1-5);
+            box-shadow: 6px 6px 0 var(--color-royal-shadow);
+        }
 
         /* Shelf row: 2-col flex layout */
         .shelf-row-two-col {
@@ -1109,6 +1263,55 @@ def app_header_html():
 def section_header(text):
     st.markdown(f'<div class="store-sign section-shell-title layer-shell-title">{escape(text)}</div>',
                 unsafe_allow_html=True)
+
+
+def page_intro_html(kicker, title, support=None):
+    support_html = (
+        f'<p class="page-intro-support">{escape(support)}</p>'
+        if support else ""
+    )
+    return (
+        '<section class="page-intro">'
+        f'<div class="page-intro-kicker">{escape(kicker)}</div>'
+        f'<h1 class="page-intro-title">{escape(title)}</h1>'
+        f'{support_html}'
+        '</section>'
+    )
+
+
+def panel_start_html(panel_label=None, tight=False):
+    klass = "panel-shell panel-shell-tight" if tight else "panel-shell"
+    kicker_html = (
+        f'<p class="panel-kicker">{escape(panel_label)}</p>'
+        if panel_label else ""
+    )
+    return f'<section class="{klass}">{kicker_html}'
+
+
+def panel_end_html():
+    return "</section>"
+
+
+def workflow_label_html(text):
+    return f'<p class="workflow-label">{escape(text)}</p>'
+
+
+def empty_state_html(title, copy):
+    return (
+        '<div class="app-empty-state">'
+        f'<h3 class="app-empty-title">{escape(title)}</h3>'
+        f'<p class="app-empty-copy">{escape(copy)}</p>'
+        '</div>'
+    )
+
+
+def result_summary_html(count_text, summary_text):
+    return (
+        '<div class="result-summary">'
+        f'<p class="result-summary-count">{escape(count_text)}</p>'
+        f'<p class="result-summary-copy">{escape(summary_text)}</p>'
+        '</div>'
+    )
 
 
 def vhs_tape_html(img_url, title, year=None, badge=None):

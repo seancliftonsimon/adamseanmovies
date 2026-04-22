@@ -1,5 +1,14 @@
 import streamlit as st
-from styles import inject_css, section_header, POSTER_PLACEHOLDER
+from styles import (
+    inject_css,
+    POSTER_PLACEHOLDER,
+    page_intro_html,
+    panel_start_html,
+    panel_end_html,
+    workflow_label_html,
+    empty_state_html,
+    result_summary_html,
+)
 from tmdb_api import search_movies, get_movie_details, small_poster_url
 from database import add_movie, movie_exists
 
@@ -67,10 +76,17 @@ def _quick_add(tmdb_id, list_type, added_by):
 
 def render():
     inject_css()
-    section_header("\U0001F3AC Add a Movie")
+    st.markdown(
+        page_intro_html(
+            "Add a Movie",
+            "Stock the Shelves",
+            "Pick a shelf, search TMDb, and add the right tape in one flow.",
+        ),
+        unsafe_allow_html=True,
+    )
 
-    st.markdown('<div class="pick-flow-card">', unsafe_allow_html=True)
-    st.markdown('<div class="pick-subhead">1. Choose a shelf</div>', unsafe_allow_html=True)
+    st.markdown(panel_start_html("Workflow"), unsafe_allow_html=True)
+    st.markdown(workflow_label_html("1. Choose a shelf"), unsafe_allow_html=True)
     selection = st.pills(
         "Add to",
         LIST_OPTIONS,
@@ -79,20 +95,27 @@ def render():
     )
 
     if not selection:
-        st.caption("Tap a name above to choose which list to add to.")
+        st.markdown(
+            empty_state_html(
+                "Choose a shelf to continue",
+                "Tap a name above to choose which list to add to.",
+            ),
+            unsafe_allow_html=True,
+        )
+        st.markdown(panel_end_html(), unsafe_allow_html=True)
         return
 
     list_type, added_by = LIST_MAP[selection]
     btn_label = LIST_LABELS[list_type]
 
-    st.markdown('<div class="pick-subhead pick-runtime-subhead">2. Search for a movie</div>', unsafe_allow_html=True)
+    st.markdown(workflow_label_html("2. Search for a movie"), unsafe_allow_html=True)
     query = st.text_input(
         "Search for a movie",
         placeholder="e.g. Eternal Sunshine, The Grand Budapest Hotel...",
         key="add_search_query",
     )
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown(panel_end_html(), unsafe_allow_html=True)
 
     if not query:
         return
@@ -105,10 +128,22 @@ def render():
             return
 
     if not results:
-        st.info("No movies found. Try a different search term.")
+        st.markdown(
+            empty_state_html(
+                "No movies found",
+                "Try a different search term.",
+            ),
+            unsafe_allow_html=True,
+        )
         return
 
-    st.caption(f"Showing {min(len(results), 12)} of {total} results")
+    st.markdown(
+        result_summary_html(
+            f"Showing {min(len(results), 12)} of {total} results",
+            f"Target shelf: {btn_label}",
+        ),
+        unsafe_allow_html=True,
+    )
 
     added_set = st.session_state.get("added_movies", set())
 
