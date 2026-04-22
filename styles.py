@@ -15,7 +15,7 @@ def inject_css():
     /* ===== GLOBAL ===== */
     .block-container {
         max-width: 980px;
-        padding-top: 9.6rem;   /* clears fixed header + top nav */
+        padding-top: 8.9rem;   /* clears fixed header + top nav */
         padding-bottom: 2.2rem;
         font-family: 'Inter', sans-serif;
         font-size: 1rem;
@@ -91,37 +91,36 @@ def inject_css():
     }
 
     /* ===== TOP NAV BAR ===== */
-    .top-nav-anchor {
-        display: none;
-    }
-
-    .top-nav-bar {
+    [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) {
         position: fixed;
         top: 74px;
         left: 0;
         right: 0;
-        z-index: 998;
-        padding: 0.5rem 1rem 0.7rem;
-        background: rgba(247, 243, 232, 0.98);
+        z-index: 999;
+        padding: 0.35rem 1rem 0.55rem;
+        background: #2c69d8;
         border-bottom: 3px solid #1a1a1a;
         box-shadow: 0 4px 0 #F2C900;
-        display: grid;
+    }
+    .top-nav-widget-anchor { display: none; }
+    [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-testid="stSegmentedControl"] {
+        max-width: 980px;
+        margin: 0 auto;
+    }
+    [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-baseweb="button-group"] {
+        width: 100%;
+        display: grid !important;
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 8px;
+        background: transparent !important;
     }
-
-    .top-nav-link {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-baseweb="button-group"] > button {
         min-height: 52px;
-        border-radius: 4px;
-        border: 2px solid #1a1a1a;
-        background: #fff9db;
-        color: #1a1a1a;
-        box-shadow: 4px 4px 0 rgba(0,51,153,0.18);
-        text-decoration: none;
-        text-align: center;
+        border-radius: 4px !important;
+        border: 2px solid #1a1a1a !important;
+        background: #fff9db !important;
+        color: #1a1a1a !important;
+        box-shadow: 4px 4px 0 rgba(0,51,153,0.18) !important;
         font-family: 'Epilogue', sans-serif;
         font-weight: 800;
         font-size: 0.76rem;
@@ -129,19 +128,14 @@ def inject_css():
         line-height: 1.3;
         text-transform: uppercase;
     }
-    .top-nav-link:hover {
-        color: #1a1a1a;
-        text-decoration: none;
+    [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-baseweb="button-group"] > button:hover {
         transform: translate(-1px, -1px);
-        box-shadow: 5px 5px 0 #1a1a1a;
+        box-shadow: 5px 5px 0 #1a1a1a !important;
     }
-    .top-nav-link.is-active {
+    [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-baseweb="button-group"] > button[aria-pressed="true"] {
         background: #003399;
-        color: #F2E400;
-        box-shadow: 4px 4px 0 #1a1a1a;
-    }
-    .top-nav-link.is-active:hover {
-        color: #F2E400;
+        color: #F2E400 !important;
+        box-shadow: 4px 4px 0 #1a1a1a !important;
     }
 
     /* ===== PILLS (genre filter, list selector — NOT nav) ===== */
@@ -857,7 +851,7 @@ def inject_css():
             max-width: 100vw !important;
             box-sizing: border-box !important;
             overflow-x: clip !important;
-            padding-top: 8.7rem;
+            padding-top: 8.2rem;
             padding-left: 0.8rem;
             padding-right: 0.8rem;
             padding-bottom: 2.2rem;
@@ -871,12 +865,14 @@ def inject_css():
             padding: 0 1rem;
         }
         .app-header-logo { font-size: 1.6rem; }
-        .top-nav-bar {
+        [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) {
             top: 68px;
             padding: 0.45rem 0.6rem 0.6rem;
+        }
+        [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-baseweb="button-group"] {
             gap: 6px;
         }
-        .top-nav-link {
+        [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-baseweb="button-group"] > button {
             min-height: 48px;
             font-size: 0.7rem;
         }
@@ -952,7 +948,7 @@ def inject_css():
     }
 
     @media (min-width: 641px) {
-        .block-container { max-width: 980px; padding-top: 9.8rem; }
+        .block-container { max-width: 980px; padding-top: 8.9rem; }
         .stat-cards-row { grid-template-columns: repeat(4, 1fr); }
     }
     </style>

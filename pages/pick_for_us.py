@@ -33,6 +33,8 @@ def _runtime_slider():
 
     if "format_func" in slider_sig.parameters:
         kwargs["format_func"] = _runtime_label
+    if "label_visibility" in slider_sig.parameters:
+        kwargs["label_visibility"] = "collapsed"
 
     min_runtime, max_runtime = st.slider(**kwargs)
 
@@ -175,11 +177,14 @@ def _pick_button(filtered):
 
 
 def _filter_bar(movies):
+    st.markdown('<div class="pick-panel-label">Whose Picks?</div>',
+                unsafe_allow_html=True)
     list_filter = st.pills(
         "Whose picks?",
         ["All", "Adam's Picks", "Sean's Picks", "Mutual Discoveries"],
         default="All",
         key="pick_list_filter",
+        label_visibility="collapsed",
     )
 
     list_map = {
@@ -193,16 +198,21 @@ def _filter_bar(movies):
         movies = [m for m in movies if m["list_type"] == lt]
 
     available_genres = get_all_genres()
+    st.markdown('<div class="pick-panel-label">Genres</div>',
+                unsafe_allow_html=True)
     if available_genres:
         genre_filter = st.pills(
             "Genres",
             available_genres,
             selection_mode="multi",
             key="pick_genre_filter",
+            label_visibility="collapsed",
         )
     else:
         genre_filter = []
 
+    st.markdown('<div class="pick-panel-label">Runtime</div>',
+                unsafe_allow_html=True)
     min_runtime, max_runtime = _runtime_slider()
 
     if genre_filter:
@@ -241,8 +251,6 @@ def render():
 
     with st.container():
         st.markdown('<div class="pick-filter-panel-anchor"></div>',
-                    unsafe_allow_html=True)
-        st.markdown('<div class="pick-panel-line"></div>',
                     unsafe_allow_html=True)
 
         filtered = _filter_bar(all_movies)
