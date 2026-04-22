@@ -689,52 +689,71 @@ def inject_css():
         line-height: 1.55;
     }
 
-    .pick-panel-label {
-        margin-bottom: 0.55rem;
+    .pick-flow-section {
+        margin-top: 1rem;
+    }
+
+    .pick-flow-card {
+        background: rgba(255, 252, 243, 0.98);
+        border: 3px solid #111111;
+        box-shadow: 8px 8px 0 #2c69d8;
+        padding: 1rem 1rem 1.1rem;
+    }
+
+    .pick-subhead {
+        margin-bottom: 0.45rem;
         font-family: 'Space Grotesk', sans-serif;
-        font-size: 0.82rem;
+        font-size: 0.78rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: #69758c;
+        letter-spacing: 0.12em;
+        color: #677089;
     }
 
-    .pick-panel-line {
-        height: 8px;
-        width: min(220px, 42%);
-        background: #003399;
-        box-shadow: 4px 4px 0 #111111;
-        margin-bottom: 1.1rem;
+    .pick-runtime-subhead {
+        margin-top: 1rem;
     }
 
-    .pick-pool-banner {
-        margin-top: 1.25rem;
-        margin-bottom: 0.8rem;
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 1rem;
-        background: #003399;
-        color: #ffffff;
+    .pick-results-card {
+        background: #fffef6;
         border: 3px solid #111111;
-        box-shadow: 7px 7px 0 #111111;
-        padding: 0.9rem 1rem;
+        box-shadow: 10px 10px 0 #111111;
+        padding: 1rem;
+        position: sticky;
+        top: 142px;
     }
 
-    .pick-pool-copy {
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: 0.9rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-    }
-
-    .pick-pool-count {
+    .pick-results-count {
         font-family: 'Epilogue', sans-serif;
-        font-size: 2rem;
+        color: #003399;
         font-weight: 900;
-        line-height: 1;
-        color: #F2E400;
-        letter-spacing: -0.05em;
+        font-size: clamp(1.45rem, 3vw, 2.2rem);
+        line-height: 1.02;
+        letter-spacing: -0.03em;
+        margin: 0.15rem 0 0.35rem;
+    }
+
+    .pick-results-summary {
+        color: #4f5a70;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.82rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 0.8rem;
+    }
+
+    .pick-results-thumbs {
+        display: flex;
+        gap: 0.45rem;
+        margin-bottom: 0.85rem;
+    }
+
+    .pick-results-thumbs img {
+        width: 62px;
+        aspect-ratio: 2 / 3;
+        object-fit: cover;
+        border: 2px solid #111111;
+        box-shadow: 3px 3px 0 #2c69d8;
     }
 
     .pick-meta-band {
@@ -790,7 +809,6 @@ def inject_css():
         color: #5e6880;
     }
 
-    [data-testid="stVerticalBlock"]:has(.pick-filter-panel-anchor),
     [data-testid="stVerticalBlock"]:has(.pick-result-anchor),
     [data-testid="stVerticalBlock"]:has(.pick-reveal-anchor) {
         background: rgba(255, 252, 243, 0.98);
@@ -801,18 +819,6 @@ def inject_css():
         gap: 1rem;
     }
 
-    [data-testid="stVerticalBlock"]:has(.pick-filter-panel-anchor) [data-testid="stPills"] {
-        margin-bottom: 0.3rem;
-    }
-
-    [data-testid="stVerticalBlock"]:has(.pick-filter-panel-anchor) div.stButton > button[kind="primary"],
-    [data-testid="stVerticalBlock"]:has(.pick-filter-panel-anchor) div.stButton > button[data-testid="stBaseButton-primary"] {
-        min-height: 4rem !important;
-        font-size: 1.1rem !important;
-        letter-spacing: 0.08em !important;
-        box-shadow: 7px 7px 0 #111111 !important;
-    }
-
     [data-testid="stVerticalBlock"]:has(.pick-result-anchor) [data-testid="stHorizontalBlock"] {
         align-items: start;
     }
@@ -820,6 +826,29 @@ def inject_css():
     [data-testid="stVerticalBlock"]:has(.pick-result-anchor) [data-testid="stImage"] img,
     [data-testid="stVerticalBlock"]:has(.pick-reveal-anchor) [data-testid="stImage"] img {
         box-shadow: 7px 7px 0 #111111;
+    }
+
+    [data-testid="stVerticalBlock"]:has(.pick-flow-card) [data-testid="stPills"] {
+        margin-bottom: 0.4rem;
+    }
+
+    [data-testid="stVerticalBlock"]:has(.pick-flow-card) [data-testid="stPills"] [role="radiogroup"],
+    [data-testid="stVerticalBlock"]:has(.pick-flow-card) [data-testid="stPills"] [role="group"] {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    [data-testid="stVerticalBlock"]:has(.pick-flow-card) [data-testid="stPills"] button {
+        min-height: 2.25rem;
+    }
+
+    [data-testid="stVerticalBlock"]:has(.pick-results-card) div.stButton > button[kind="primary"],
+    [data-testid="stVerticalBlock"]:has(.pick-results-card) div.stButton > button[data-testid="stBaseButton-primary"] {
+        min-height: 3.6rem !important;
+        font-size: 1.08rem !important;
+        letter-spacing: 0.08em !important;
+        box-shadow: 7px 7px 0 #111111 !important;
     }
 
     /* ===== MOVIE CARD (search results) ===== */
@@ -888,17 +917,19 @@ def inject_css():
         }
         .pick-title { margin-top: 0.8rem; }
         .pick-lead { font-size: 0.97rem; }
-        .pick-panel-line { width: 42%; height: 6px; }
-        .pick-pool-banner {
-            align-items: flex-start;
-            flex-direction: column;
-            box-shadow: 6px 6px 0 #111111;
-        }
         [data-testid="stVerticalBlock"]:has(.pick-filter-panel-anchor),
         [data-testid="stVerticalBlock"]:has(.pick-result-anchor),
         [data-testid="stVerticalBlock"]:has(.pick-reveal-anchor) {
             box-shadow: 7px 7px 0 #2c69d8;
             padding: 1rem 0.95rem;
+        }
+        .pick-results-card {
+            position: static;
+            top: auto;
+            box-shadow: 7px 7px 0 #111111;
+        }
+        .pick-results-count {
+            font-size: 1.55rem;
         }
 
         /* Shelf row: 2-col flex layout */
