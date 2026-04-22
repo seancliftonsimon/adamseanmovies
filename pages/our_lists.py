@@ -1,8 +1,10 @@
 import streamlit as st
 from html import escape
 from styles import (inject_css, genre_pills_html, runtime_display,
-                    section_header, vhs_tape_html, shelf_row_html, shelf_bar_html,
-                    POSTER_PLACEHOLDER, SHELF_COLS)
+                    vhs_tape_html, shelf_row_html, shelf_bar_html,
+                    POSTER_PLACEHOLDER, SHELF_COLS, page_intro_html,
+                    panel_start_html, panel_end_html, workflow_label_html,
+                    empty_state_html, result_summary_html)
 from database import get_unwatched_movies, remove_movie, mark_watched
 from tmdb_api import poster_url as make_poster_url
 
@@ -123,14 +125,23 @@ def _render_drawer(movie, prefix):
 
 def _render_shelf(movies, prefix):
     if not movies:
-        st.info("This shelf is empty! Head over to **Add a Movie** to stock it.")
+        st.markdown(
+            empty_state_html(
+                "This shelf is empty",
+                "Head over to Add a Movie to stock it.",
+            ),
+            unsafe_allow_html=True,
+        )
         return
 
+    st.markdown(panel_start_html("Shelf Controls", tight=True), unsafe_allow_html=True)
+    st.markdown(workflow_label_html("Sort shelf"), unsafe_allow_html=True)
     sort_option = st.selectbox(
         "Sort by",
         ["Recently Added", "Title A\u2013Z", "Shortest First", "Longest First"],
         key=f"sort_{prefix}",
     )
+    st.markdown(panel_end_html(), unsafe_allow_html=True)
     movies = _sort_movies(movies, sort_option)
 
     shelf_cols = 2 if _is_mobile_client() else SHELF_COLS
@@ -182,21 +193,33 @@ def _render_shelf(movies, prefix):
 @st.fragment
 def _render_active_shelf(list_type, prefix):
     movies = get_unwatched_movies(list_type)
-    st.caption(f"{len(movies)} movie(s) on this shelf.")
+    st.markdown(
+        result_summary_html(f"{len(movies)} movie(s) on this shelf", "Browse and open details below."),
+        unsafe_allow_html=True,
+    )
     _render_shelf(movies, prefix)
 
 
 def render():
     inject_css()
-    section_header("\U0001F4FC Our Lists")
-    st.caption("Browse the shelves and pick something to watch.")
+    st.markdown(
+        page_intro_html(
+            "Our Lists",
+            "Browse the Shelves",
+            "Sort each shelf, inspect details, and move watched picks to your log.",
+        ),
+        unsafe_allow_html=True,
+    )
 
+    st.markdown(panel_start_html("Shelf Selector", tight=True), unsafe_allow_html=True)
+    st.markdown(workflow_label_html("Choose a shelf"), unsafe_allow_html=True)
     active_shelf = st.segmented_control(
         "Choose a shelf",
         ["Adam's Picks", "Sean's Picks", "Mutual"],
         default="Adam's Picks",
         key="our_lists_active_shelf",
     )
+    st.markdown(panel_end_html(), unsafe_allow_html=True)
     shelf_map = {
         "Adam's Picks": ("adam_pick", "adam"),
         "Sean's Picks": ("sean_pick", "sean"),
