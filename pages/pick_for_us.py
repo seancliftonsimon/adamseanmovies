@@ -4,10 +4,10 @@ from collections import Counter
 from html import escape
 
 import streamlit as st
-
-from database import get_unwatched_movies, mark_watched
-from styles import POSTER_PLACEHOLDER, genre_pills_html, inject_css, runtime_display
+import database
+from styles import inject_css, genre_pills_html, runtime_display, POSTER_PLACEHOLDER
 from tmdb_api import poster_url
+from database import get_unwatched_movies, mark_watched
 
 
 LIST_OPTIONS = ["All", "Adam's Picks", "Sean's Picks", "Mutual Discoveries"]
@@ -24,12 +24,14 @@ RUNTIME_LIMITS = {
     "Under 2h 30m": 150,
 }
 
-
 def _runtime_label(total_minutes):
-    hours, minutes = divmod(int(total_minutes), 60)
-    return f"{hours}h {minutes:02d}m"
-
-
+    total = max(0, int(total_minutes))
+    hours, minutes = divmod(total, 60)
+    if hours and minutes:
+        return f"{hours}h {minutes:02d}m"
+    if hours:
+        return f"{hours}h"
+    return f"{minutes}m"
 
 def _runtime_slider():
     slider_sig = inspect.signature(st.slider)
@@ -46,18 +48,15 @@ def _runtime_slider():
         kwargs["format_func"] = _runtime_label
     if "label_visibility" in slider_sig.parameters:
         kwargs["label_visibility"] = "collapsed"
-    total = max(0, int(total_minutes))
-    hours, minutes = divmod(total, 60)
-    if hours and minutes:
-        return f"{hours}h {minutes:02d}m"
-    if hours:
-        return f"{hours}h"
-    return f"{minutes}m"
 
+    min_runtime, max_runtime = st.slider(**kwargs)
 
-def _has_genre(movie, selected_genres):
-    movie_genres = movie.get("genres_list", [])
-    return any(g in movie_genres for g in selected_genres)
+    if "format_func" not in slider_sig.parameters:
+        st.caption(
+            f"Runtime selected: {_runtime_label(min_runtime)} - {_runtime_label(max_runtime)}"
+        )
+
+    return min_runtime, max_runtime
 
 
 def _watch_form(movie):
@@ -186,39 +185,6 @@ def _summarize_filters(list_filter, selected_genres, runtime_choice, custom_runt
 def _filter_bar(movies):
     st.markdown('<div class="pick-panel-label">Whose Picks?</div>',
                 unsafe_allow_html=True)
-def _top_genres(movies):
-    counter = Counter()
-    for movie in movies:
-        for genre in movie.get("genres_list", []):
-            counter[genre] += 1
-    return [name for name, _ in counter.most_common()]
-
-
-def _active_filter_row(active_filters):
-    if not active_filters:
-        return
-
-    st.markdown('<div class="pick-subhead">Active Filters</div>', unsafe_allow_html=True)
-    row = st.columns([1] * len(active_filters) + [1.2])
-
-    for idx, active in enumerate(active_filters):
-        with row[idx]:
-            if st.button(f"✕ {active['label']}", key=f"remove_filter_{active['key']}", width="stretch"):
-                active["clear"]()
-                st.rerun()
-
-    with row[-1]:
-        if st.button("Clear All", key="clear_all_filters", width="stretch"):
-            st.session_state["pick_list_filter"] = "All"
-            st.session_state["pick_genre_filter"] = []
-            st.session_state["pick_runtime_choice"] = "Any Length"
-            st.session_state["pick_custom_runtime"] = 150
-            st.rerun()
-
-
-def _render_filters(all_movies):
-    st.markdown('<div class="pick-flow-card pick-flow-section">', unsafe_allow_html=True)
-    st.markdown('<div class="pick-subhead">Whose Picks?</div>', unsafe_allow_html=True)
     list_filter = st.pills(
         "Whose Picks?",
         LIST_OPTIONS,
@@ -237,7 +203,7 @@ def _render_filters(all_movies):
     if lt:
         movies = [m for m in movies if m["list_type"] == lt]
 
-    available_genres = get_all_genres()
+    available_genres = database.get_all_genres()
     st.markdown('<div class="pick-panel-label">Genres</div>',
                 unsafe_allow_html=True)
     if available_genres:
@@ -247,106 +213,6 @@ def _render_filters(all_movies):
             selection_mode="multi",
             key="pick_genre_filter",
             label_visibility="collapsed",
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    filtered_by_list = all_movies
-    list_type = LIST_MAP.get(list_filter)
-    if list_type:
-        filtered_by_list = [m for m in all_movies if m["list_type"] == list_type]
-
-    st.markdown('<div class="pick-flow-card pick-flow-section">', unsafe_allow_html=True)
-    st.markdown('<div class="pick-subhead">Refine the Pool</div>', unsafe_allow_html=True)
-    all_genres = _top_genres(filtered_by_list)
-
-    if "pick_genres_expanded" not in st.session_state:
-        st.session_state["pick_genres_expanded"] = False
-
-    default_visible = 10
-    show_all = st.session_state["pick_genres_expanded"] or len(all_genres) <= default_visible
-    visible_genres = all_genres if show_all else all_genres[:default_visible]
-
-    selected_genres = st.pills(
-        "Genres",
-        visible_genres,
-        selection_mode="multi",
-        default=[g for g in st.session_state.get("pick_genre_filter", []) if g in visible_genres],
-        key="pick_genre_filter",
-    )
-
-    if len(all_genres) > default_visible:
-        toggle_label = "Fewer Genres" if show_all else "More Genres"
-        if st.button(toggle_label, key="toggle_more_genres"):
-            st.session_state["pick_genres_expanded"] = not st.session_state["pick_genres_expanded"]
-            st.rerun()
-
-    st.markdown('<div class="pick-subhead pick-runtime-subhead">Runtime</div>', unsafe_allow_html=True)
-    runtime_choice = st.pills(
-        "Runtime",
-        RUNTIME_OPTIONS,
-        default=st.session_state.get("pick_runtime_choice", "Any Length"),
-        key="pick_runtime_choice",
-        label_visibility="collapsed",
-    )
-
-    custom_runtime = st.session_state.get("pick_custom_runtime", 150)
-    if runtime_choice == "Custom":
-        custom_runtime = st.slider(
-            "Custom runtime",
-            min_value=60,
-            max_value=240,
-            step=5,
-            value=custom_runtime,
-            key="pick_custom_runtime",
-            format="%d",
-        )
-        st.caption(f"Under {_runtime_label(custom_runtime)}")
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    filtered = filtered_by_list
-    if selected_genres:
-        filtered = [m for m in filtered if _has_genre(m, selected_genres)]
-
-    runtime_max = None
-    if runtime_choice in RUNTIME_LIMITS:
-        runtime_max = RUNTIME_LIMITS[runtime_choice]
-    elif runtime_choice == "Custom":
-        runtime_max = custom_runtime
-
-    if runtime_max is not None:
-        filtered = [m for m in filtered if not m["runtime"] or m["runtime"] <= runtime_max]
-
-    active_filters = []
-
-    if list_filter != "All":
-        active_filters.append(
-            {
-                "key": "list",
-                "label": list_filter,
-                "clear": lambda: st.session_state.__setitem__("pick_list_filter", "All"),
-            }
-        )
-
-    for genre in selected_genres:
-        active_filters.append(
-            {
-                "key": f"genre_{genre}",
-                "label": genre,
-                "clear": lambda g=genre: st.session_state.__setitem__(
-                    "pick_genre_filter", [x for x in st.session_state.get("pick_genre_filter", []) if x != g]
-                ),
-            }
-        )
-
-    if runtime_choice != "Any Length":
-        runtime_label = runtime_choice if runtime_choice != "Custom" else f"Under {_runtime_label(custom_runtime)}"
-        active_filters.append(
-            {
-                "key": "runtime",
-                "label": runtime_label,
-                "clear": lambda: st.session_state.__setitem__("pick_runtime_choice", "Any Length"),
-            }
         )
 
     _active_filter_row(active_filters)

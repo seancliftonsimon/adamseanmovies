@@ -11,6 +11,14 @@ def inject_css():
     <style>
     /* ===== GOOGLE FONTS ===== */
     @import url('https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,400;0,700;0,800;0,900;1,800;1,900&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap');
+    :root {
+        --ink: #1a1a1a;
+        --royal: #003399;
+        --pop-yellow: #F2E400;
+        --paper: #fffcf3;
+        --panel-shadow: #2c69d8;
+        --hard-shadow: 4px 4px 0 var(--ink);
+    }
 
     /* ===== GLOBAL ===== */
     .block-container {
@@ -301,9 +309,9 @@ def inject_css():
         margin-bottom: 1.5rem;
     }
     .stat-card {
-        background: #ffffff;
-        border: 2px solid #1a1a1a;
-        box-shadow: 4px 4px 0 #1a1a1a;
+        background: var(--paper);
+        border: 2px solid var(--ink);
+        box-shadow: var(--hard-shadow);
         padding: 1.1rem 1rem 0.85rem;
         position: relative;
         overflow: hidden;
@@ -344,8 +352,8 @@ def inject_css():
 
     /* ===== STORE SIGN (section headers) ===== */
     .store-sign {
-        background: #003399;
-        color: #F2E400;
+        background: var(--royal);
+        color: var(--pop-yellow);
         padding: 0.85rem 1.1rem;
         border-radius: 4px;
         font-family: 'Epilogue', sans-serif;
@@ -355,8 +363,8 @@ def inject_css():
         letter-spacing: 0.04em;
         text-align: center;
         margin-bottom: 0.85rem;
-        border: 2px solid #1a1a1a;
-        box-shadow: 4px 4px 0 #1a1a1a;
+        border: 2px solid var(--ink);
+        box-shadow: var(--hard-shadow);
     }
 
     /* ===== GENRE PILLS ===== */
@@ -386,9 +394,9 @@ def inject_css():
 
     /* ===== BUTTONS (global) ===== */
     div.stButton > button {
-        background: #ffffff;
-        color: #1a1a1a;
-        border: 2px solid #1a1a1a;
+        background: var(--paper);
+        color: var(--ink);
+        border: 2px solid var(--ink);
         border-radius: 4px;
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 700;
@@ -396,7 +404,7 @@ def inject_css():
         letter-spacing: 0.05em;
         font-size: 0.8rem;
         padding: 0.55rem 0.9rem;
-        box-shadow: 3px 3px 0 #1a1a1a;
+        box-shadow: 3px 3px 0 var(--ink);
         transition: transform 0.1s, box-shadow 0.1s;
     }
     div.stButton > button:hover {
@@ -805,9 +813,10 @@ def inject_css():
 
     [data-testid="stVerticalBlock"]:has(.pick-result-anchor),
     [data-testid="stVerticalBlock"]:has(.pick-reveal-anchor) {
-        background: rgba(255, 252, 243, 0.98);
+        background: var(--paper);
         border: 3px solid #111111;
-        box-shadow: 10px 10px 0 #2c69d8;
+        border-radius: 6px;
+        box-shadow: 10px 10px 0 var(--panel-shadow);
         padding: 1.45rem clamp(1rem, 2.4vw, 2rem);
         margin-bottom: 1.6rem;
         gap: 1rem;
@@ -847,7 +856,7 @@ def inject_css():
 
     /* ===== MOVIE CARD (search results) ===== */
     .movie-card {
-        background: #ffffff;
+        background: var(--paper);
         border-radius: 4px;
         padding: 1rem;
         margin-bottom: 0.6rem;
