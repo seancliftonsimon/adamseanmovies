@@ -80,7 +80,7 @@ def _render_top_nav(current_page):
         active = "is-active" if item["key"] == current_page else ""
         href = f"?page={item['slug']}"
         nav_links.append(
-            f'<a class="top-nav-link {active}" href="{href}">{item["label"].replace(chr(10), "<br>")}</a>'
+            f'<a class="top-nav-link {active}" href="{href}" target="_self">{item["label"].replace(chr(10), "<br>")}</a>'
         )
 
     st.markdown(

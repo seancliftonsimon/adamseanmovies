@@ -1,3 +1,4 @@
+import inspect
 import random
 import time
 from html import escape
@@ -16,6 +17,32 @@ def _has_genre(movie, genre_filter):
 def _runtime_label(total_minutes):
     hours, minutes = divmod(int(total_minutes), 60)
     return f"{hours}h {minutes:02d}m"
+
+
+
+def _runtime_slider():
+    slider_sig = inspect.signature(st.slider)
+    kwargs = {
+        "label": "Runtime range (minutes)",
+        "min_value": 0,
+        "max_value": 300,
+        "value": (0, 300),
+        "step": 5,
+        "key": "pick_runtime",
+    }
+
+    if "format_func" in slider_sig.parameters:
+        kwargs["format_func"] = _runtime_label
+
+    min_runtime, max_runtime = st.slider(**kwargs)
+
+    if "format_func" not in slider_sig.parameters:
+        st.caption(
+            f"Runtime selected: {_runtime_label(min_runtime)} - {_runtime_label(max_runtime)}"
+        )
+
+    return min_runtime, max_runtime
+
 
 def _watch_form(movie):
     st.markdown(f"### Rate **{movie['title']}**")
@@ -176,14 +203,7 @@ def _filter_bar(movies):
     else:
         genre_filter = []
 
-    min_runtime, max_runtime = st.slider(
-        "Runtime range (minutes)", 0, 300, (0, 300), step=5,
-        key="pick_runtime",
-        format_func=_runtime_label,
-    )
-    st.caption(
-        f"Runtime selected: {_runtime_label(min_runtime)} - {_runtime_label(max_runtime)}"
-    )
+    min_runtime, max_runtime = _runtime_slider()
 
     if genre_filter:
         movies = [m for m in movies if _has_genre(m, genre_filter)]
