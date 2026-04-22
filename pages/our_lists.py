@@ -134,7 +134,7 @@ def _render_shelf(movies, prefix):
         )
         return
 
-    st.markdown(panel_start_html("Shelf Controls", tight=True), unsafe_allow_html=True)
+    st.markdown(panel_start_html(tight=True), unsafe_allow_html=True)
     st.markdown(workflow_label_html("Sort shelf"), unsafe_allow_html=True)
     sort_option = st.selectbox(
         "Sort by",
@@ -211,7 +211,7 @@ def render():
         unsafe_allow_html=True,
     )
 
-    st.markdown(panel_start_html("Shelf Selector", tight=True), unsafe_allow_html=True)
+    st.markdown(panel_start_html(tight=True), unsafe_allow_html=True)
     st.markdown(workflow_label_html("Choose a shelf"), unsafe_allow_html=True)
     active_shelf = st.segmented_control(
         "Choose a shelf",

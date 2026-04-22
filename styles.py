@@ -1304,13 +1304,17 @@ def section_header(text):
 
 
 def page_intro_html(kicker, title, support=None):
+    kicker_html = (
+        f'<div class="page-intro-kicker">{escape(kicker)}</div>'
+        if kicker else ""
+    )
     support_html = (
         f'<p class="page-intro-support">{escape(support)}</p>'
         if support else ""
     )
     return (
         '<section class="page-intro">'
-        f'<div class="page-intro-kicker">{escape(kicker)}</div>'
+        f'{kicker_html}'
         f'<h1 class="page-intro-title">{escape(title)}</h1>'
         f'{support_html}'
         '</section>'

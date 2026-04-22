@@ -167,7 +167,7 @@ def _runtime_selector():
 
 def _render_filters(all_movies):
     st.markdown('<div class="pick-filter-panel-anchor"></div>', unsafe_allow_html=True)
-    st.markdown(panel_start_html("Workflow"), unsafe_allow_html=True)
+    st.markdown(panel_start_html(), unsafe_allow_html=True)
     st.markdown('<div class="workflow-stack">', unsafe_allow_html=True)
     st.markdown('<div class="workflow-block">', unsafe_allow_html=True)
 
@@ -222,7 +222,7 @@ def _render_filters(all_movies):
 
 
 def _render_results_card(filtered, has_optional_filters):
-    st.markdown(panel_start_html("4. Pick Action"), unsafe_allow_html=True)
+    st.markdown(panel_start_html(), unsafe_allow_html=True)
 
     has_results = len(filtered) > 0
     if has_results:
@@ -267,8 +267,8 @@ def render():
     st.markdown('<div class="pick-page-anchor"></div>', unsafe_allow_html=True)
     st.markdown(
         page_intro_html(
+            None,
             "Pick For Us",
-            "Movie Vault Selector",
         ),
         unsafe_allow_html=True,
     )

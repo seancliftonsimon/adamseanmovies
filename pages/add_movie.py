@@ -84,7 +84,6 @@ def render():
 
     with st.container():
         st.markdown('<div class="add-workflow-anchor"></div>', unsafe_allow_html=True)
-        st.markdown('<p class="panel-kicker">Workflow</p>', unsafe_allow_html=True)
         st.markdown('<div class="workflow-stack">', unsafe_allow_html=True)
         st.markdown('<div class="workflow-block">', unsafe_allow_html=True)
         st.markdown(workflow_label_html("1. Choose a shelf"), unsafe_allow_html=True)
