@@ -94,13 +94,21 @@ def inject_css():
         font-family: var(--font-body);
         font-size: 1rem;
     }
-    html, body,
+    html, body {
+        overflow-x: hidden;
+        overflow-y: auto !important;
+    }
     [data-testid="stAppViewContainer"],
     [data-testid="stApp"] {
         background:
             radial-gradient(circle at top right, rgba(0, 51, 153, 0.05), transparent 22%),
             linear-gradient(180deg, var(--color-paper-warm) 0%, #f6f2e8 100%);
-        overflow-x: hidden;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+    [data-testid="stAppViewContainer"] > .main,
+    [data-testid="stAppViewContainer"] [data-testid="stMain"] {
+        overflow-y: visible !important;
     }
 
     /* ===== HIDE STREAMLIT CHROME ===== */
