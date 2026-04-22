@@ -58,9 +58,9 @@ def _current_page():
     return st.session_state.current_page
 
 
-def _render_bottom_nav(current_page):
-    """Four real Streamlit buttons — active one is primary (yellow)."""
-    st.markdown('<div class="bnav-anchor"></div>', unsafe_allow_html=True)
+def _render_top_nav(current_page):
+    """Four real Streamlit buttons in the fixed top header strip."""
+    st.markdown('<div class="top-nav-anchor"></div>', unsafe_allow_html=True)
     cols = st.columns(4, gap="small")
     for i, (page_key, btn_label, _) in enumerate(NAV_ITEMS):
         with cols[i]:
@@ -80,6 +80,9 @@ def main():
 
     st.markdown(app_header_html(), unsafe_allow_html=True)
 
+    page = _current_page()
+    _render_top_nav(page)
+
     db_status = get_db_status()
     if db_status.get("fallback"):
         st.warning(
@@ -88,11 +91,10 @@ def main():
             icon="\u26a0\ufe0f",
         )
 
-    page = _current_page()
     render_map = {key: fn for key, _, fn in NAV_ITEMS}
     render_map[page]()
 
-    _render_bottom_nav(page)
+    
 
 
 if __name__ == "__main__":
