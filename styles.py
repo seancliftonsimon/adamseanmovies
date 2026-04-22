@@ -15,8 +15,8 @@ def inject_css():
     /* ===== GLOBAL ===== */
     .block-container {
         max-width: 980px;
-        padding-top: 5.8rem;   /* clears the fixed header */
-        padding-bottom: 6.4rem;  /* clears the bottom nav */
+        padding-top: 9.6rem;   /* clears fixed header + top nav */
+        padding-bottom: 2.2rem;
         font-family: 'Inter', sans-serif;
         font-size: 1rem;
     }
@@ -54,7 +54,7 @@ def inject_css():
         background: #2c69d8;
         border-bottom: 4px solid #111111;
         box-shadow: 0 4px 0 #F2C900;
-        height: 68px;
+        height: 74px;
         display: flex;
         align-items: center;
         justify-content: flex-start;
@@ -90,34 +90,26 @@ def inject_css():
         line-height: 1;
     }
 
-    /* ===== BOTTOM NAV BAR =====
-       We inject a .bnav-anchor div right before st.columns(4).
-       In Streamlit's DOM they are sibling stElementContainers inside
-       the same stVerticalBlock, so the yellow bar uses the anchor's
-       neighbouring div to paint a background strip, while the real
-       buttons are just st.button components inside the columns.
-    */
-    .bnav-anchor {
-        margin-top: 2rem;
+    /* ===== TOP NAV BAR ===== */
+    .top-nav-anchor {
+        display: none;
     }
 
-    /* Yellow bar that visually hosts the nav buttons.
-       We paint it on the stVerticalBlock that directly contains
-       both the anchor AND the next sibling (the columns row). */
-    body:has(.bnav-anchor) [data-testid="stHorizontalBlock"]:last-of-type {
-        background: rgba(250, 246, 232, 0.96);
-        border-top: 3px solid #1a1a1a;
-        padding: 10px 4px 12px;
-        position: sticky;
-        bottom: 0;
-        z-index: 100;
+    [data-testid="stVerticalBlock"]:has(.top-nav-anchor) [data-testid="stHorizontalBlock"] {
+        position: fixed;
+        top: 74px;
+        left: 0;
+        right: 0;
+        z-index: 998;
+        padding: 0.5rem 1rem 0.7rem;
+        background: rgba(247, 243, 232, 0.98);
+        border-bottom: 3px solid #1a1a1a;
+        box-shadow: 0 4px 0 #F2C900;
         gap: 8px !important;
-        box-shadow: 0 -4px 0 #1a1a1a;
     }
 
-    /* Nav buttons inside the yellow bar — override global button styles */
-    body:has(.bnav-anchor) [data-testid="stHorizontalBlock"]:last-of-type div.stButton > button {
-        height: 56px !important;
+    [data-testid="stVerticalBlock"]:has(.top-nav-anchor) div.stButton > button {
+        height: 52px !important;
         border-radius: 4px !important;
         font-family: 'Epilogue', sans-serif !important;
         font-weight: 800 !important;
@@ -126,29 +118,17 @@ def inject_css():
         line-height: 1.3 !important;
         white-space: pre-wrap !important;
         border: 2px solid #1a1a1a !important;
-        box-shadow: none !important;
         padding: 5px 4px !important;
-        transition: transform 0.1s !important;
     }
-    body:has(.bnav-anchor) [data-testid="stHorizontalBlock"]:last-of-type div.stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 2px 0 #1a1a1a !important;
-    }
-    body:has(.bnav-anchor) [data-testid="stHorizontalBlock"]:last-of-type div.stButton > button:active {
-        transform: translateY(1px) !important;
-        box-shadow: none !important;
-    }
-    /* Active nav button (primary = yellow) */
-    body:has(.bnav-anchor) [data-testid="stHorizontalBlock"]:last-of-type div.stButton > button[kind="primary"],
-    body:has(.bnav-anchor) [data-testid="stHorizontalBlock"]:last-of-type div.stButton > button[data-testid="stBaseButton-primary"] {
+    [data-testid="stVerticalBlock"]:has(.top-nav-anchor) div.stButton > button[kind="primary"],
+    [data-testid="stVerticalBlock"]:has(.top-nav-anchor) div.stButton > button[data-testid="stBaseButton-primary"] {
         background: #003399 !important;
         color: #F2E400 !important;
         border-color: #1a1a1a !important;
         box-shadow: 4px 4px 0 #1a1a1a !important;
     }
-    /* Inactive nav button (secondary = white) */
-    body:has(.bnav-anchor) [data-testid="stHorizontalBlock"]:last-of-type div.stButton > button[kind="secondary"],
-    body:has(.bnav-anchor) [data-testid="stHorizontalBlock"]:last-of-type div.stButton > button[data-testid="stBaseButton-secondary"] {
+    [data-testid="stVerticalBlock"]:has(.top-nav-anchor) div.stButton > button[kind="secondary"],
+    [data-testid="stVerticalBlock"]:has(.top-nav-anchor) div.stButton > button[data-testid="stBaseButton-secondary"] {
         background: #fff9db !important;
         color: #1a1a1a !important;
         border-color: #1a1a1a !important;
@@ -429,8 +409,8 @@ def inject_css():
     }
     div.stButton > button[kind="primary"],
     div.stButton > button[data-testid="stBaseButton-primary"] {
-        background: #F2E400;
-        color: #1a1a1a;
+        background: #F2E400 !important;
+        color: #1a1a1a !important;
         border: 2px solid #1a1a1a;
         font-family: 'Epilogue', sans-serif;
         font-weight: 800;
@@ -441,8 +421,8 @@ def inject_css():
     }
     div.stButton > button[kind="primary"]:hover,
     div.stButton > button[data-testid="stBaseButton-primary"]:hover {
-        background: #F2E400;
-        color: #1a1a1a;
+        background: #F2E400 !important;
+        color: #1a1a1a !important;
         transform: translate(-2px, -2px);
         box-shadow: 6px 6px 0 #1a1a1a;
     }
@@ -659,7 +639,6 @@ def inject_css():
 
     /* ===== PICK PAGE ===== */
     .pick-page-anchor,
-    .pick-hero-anchor,
     .pick-filter-panel-anchor,
     .pick-result-anchor,
     .pick-reveal-anchor {
@@ -802,11 +781,6 @@ def inject_css():
         color: #5e6880;
     }
 
-    [data-testid="stVerticalBlock"]:has(.pick-hero-anchor) {
-        margin-bottom: 1.35rem;
-        gap: 0.35rem;
-    }
-
     [data-testid="stVerticalBlock"]:has(.pick-filter-panel-anchor),
     [data-testid="stVerticalBlock"]:has(.pick-result-anchor),
     [data-testid="stVerticalBlock"]:has(.pick-reveal-anchor) {
@@ -874,20 +848,24 @@ def inject_css():
             max-width: 100vw !important;
             box-sizing: border-box !important;
             overflow-x: clip !important;
-            padding-top: 5.1rem;
+            padding-top: 8.7rem;
             padding-left: 0.8rem;
             padding-right: 0.8rem;
-            padding-bottom: 6.8rem;
+            padding-bottom: 2.2rem;
         }
         h1 { font-size: 1.6rem !important; }
         .store-sign { font-size: 1rem; padding: 0.65rem 0.85rem; }
         .stat-value { font-size: 1.9rem; }
         .stat-cards-row { gap: 10px; }
         .app-header {
-            height: 62px;
+            height: 68px;
             padding: 0 1rem;
         }
         .app-header-logo { font-size: 1.6rem; }
+        [data-testid="stVerticalBlock"]:has(.top-nav-anchor) [data-testid="stHorizontalBlock"] {
+            top: 68px;
+            padding: 0.45rem 0.6rem 0.6rem;
+        }
         .pick-kicker,
         .pick-result-kicker {
             font-size: 0.74rem;
@@ -960,7 +938,7 @@ def inject_css():
     }
 
     @media (min-width: 641px) {
-        .block-container { max-width: 980px; padding-top: 6rem; }
+        .block-container { max-width: 980px; padding-top: 9.8rem; }
         .stat-cards-row { grid-template-columns: repeat(4, 1fr); }
     }
     </style>

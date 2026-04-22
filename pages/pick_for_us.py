@@ -12,6 +12,11 @@ def _has_genre(movie, genre_filter):
     return any(g in movie_genres for g in genre_filter)
 
 
+
+def _runtime_label(total_minutes):
+    hours, minutes = divmod(int(total_minutes), 60)
+    return f"{hours}h {minutes:02d}m"
+
 def _watch_form(movie):
     st.markdown(f"### Rate **{movie['title']}**")
     c1, c2 = st.columns(2)
@@ -140,8 +145,6 @@ def _pick_button(filtered):
 
     if pick_clicked:
         _run_reveal(filtered)
-    elif st.session_state.get("picked_movie"):
-        _show_picked_movie(st.session_state["picked_movie"])
 
 
 def _filter_bar(movies):
@@ -158,7 +161,7 @@ def _filter_bar(movies):
         "Sean's Picks": "sean_pick",
         "Mutual Discoveries": "mutual",
     }
-    lt = list_map[list_filter]
+    lt = list_map.get(list_filter, None)
     if lt:
         movies = [m for m in movies if m["list_type"] == lt]
 
@@ -173,16 +176,19 @@ def _filter_bar(movies):
     else:
         genre_filter = []
 
-    max_runtime = st.slider(
-        "Max runtime (minutes)", 60, 300, 300, step=10,
+    min_runtime, max_runtime = st.slider(
+        "Runtime range", 60, 300, (60, 300), step=5,
         key="pick_runtime",
+        format_func=_runtime_label,
     )
 
     if genre_filter:
         movies = [m for m in movies if _has_genre(m, genre_filter)]
 
-    movies = [m for m in movies
-              if (m["runtime"] or 0) <= max_runtime or not m["runtime"]]
+    movies = [
+        m for m in movies
+        if not m["runtime"] or min_runtime <= m["runtime"] <= max_runtime
+    ]
 
     return movies
 
@@ -192,18 +198,6 @@ def render():
     st.markdown('<div class="pick-page-anchor"></div>',
                 unsafe_allow_html=True)
 
-    with st.container():
-        st.markdown('<div class="pick-hero-anchor"></div>',
-                    unsafe_allow_html=True)
-        st.markdown('<div class="pick-kicker">Staff Favorite Roulette</div>',
-                    unsafe_allow_html=True)
-        st.markdown('<div class="pick-title">Pick For Us</div>',
-                    unsafe_allow_html=True)
-        st.markdown(
-            '<p class="pick-lead">Set the filters, narrow the shelf, and let the vault decide tonight\'s movie. Same picker, cleaner hierarchy, and one clear spin button.</p>',
-            unsafe_allow_html=True,
-        )
-
     all_movies = get_unwatched_movies()
     if not all_movies:
         st.info("No unwatched movies yet! Head over to **Add a Movie** "
@@ -211,9 +205,19 @@ def render():
         return
 
     with st.container():
-        st.markdown('<div class="pick-filter-panel-anchor"></div>',
+        st.markdown('<div class="pick-result-anchor"></div>',
                     unsafe_allow_html=True)
-        st.markdown('<div class="pick-panel-label">Set your filters and spin</div>',
+        if st.session_state.get("picked_movie"):
+            _show_picked_movie(st.session_state["picked_movie"])
+        elif st.session_state.get("watching_movie"):
+            _watch_form(st.session_state["watching_movie"])
+        else:
+            st.markdown('<div class="pick-result-kicker">Tonight\'s Movie</div>',
+                        unsafe_allow_html=True)
+            st.caption("Spin below to pick tonight's movie.")
+
+    with st.container():
+        st.markdown('<div class="pick-filter-panel-anchor"></div>',
                     unsafe_allow_html=True)
         st.markdown('<div class="pick-panel-line"></div>',
                     unsafe_allow_html=True)
@@ -228,7 +232,7 @@ def render():
         st.markdown(
             (
                 '<div class="pick-pool-banner">'
-                '<div class="pick-pool-copy">Tapes ready in the pool</div>'
+                '<div class="pick-pool-copy">Matching tapes</div>'
                 f'<div class="pick-pool-count">{len(filtered)}</div>'
                 '</div>'
             ),
