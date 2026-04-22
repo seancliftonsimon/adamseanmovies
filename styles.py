@@ -12,20 +12,86 @@ def inject_css():
     /* ===== GOOGLE FONTS ===== */
     @import url('https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,400;0,700;0,800;0,900;1,800;1,900&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap');
     :root {
-        --ink: #1a1a1a;
-        --royal: #003399;
-        --pop-yellow: #F2E400;
-        --paper: #fffcf3;
-        --panel-shadow: #2c69d8;
-        --hard-shadow: 4px 4px 0 var(--ink);
+        /* Color tokens */
+        --color-ink: #111111;
+        --color-ink-soft: #1a1a1a;
+        --color-ink-muted: #444653;
+        --color-outline: #747684;
+        --color-royal: #003399;
+        --color-royal-shadow: #2c69d8;
+        --color-royal-deep: #002068;
+        --color-pop-yellow: #F2E400;
+        --color-pop-gold: #F2C900;
+        --color-paper: #fffcf3;
+        --color-paper-warm: #f7f3e8;
+        --color-white: #ffffff;
+        --color-off-white: #fffef6;
+        --color-warning: #fff6bf;
+
+        /* Type scale */
+        --font-display: 'Epilogue', sans-serif;
+        --font-label: 'Space Grotesk', sans-serif;
+        --font-body: 'Inter', sans-serif;
+        --type-xs: 0.62rem;
+        --type-sm: 0.78rem;
+        --type-md: 1rem;
+        --type-lg: 1.25rem;
+        --type-xl: 1.5rem;
+        --type-2xl: 2rem;
+
+        /* Spacing */
+        --space-unit: 8px;
+        --space-0-5: calc(var(--space-unit) * 0.5);
+        --space-0-75: calc(var(--space-unit) * 0.75);
+        --space-1: var(--space-unit);
+        --space-1-5: calc(var(--space-unit) * 1.5);
+        --space-2: calc(var(--space-unit) * 2);
+        --space-3: calc(var(--space-unit) * 3);
+        --space-4: calc(var(--space-unit) * 4);
+
+        /* Borders + radius */
+        --border-thin: 1px;
+        --border-base: 2px;
+        --border-strong: 3px;
+        --border-heavy: 4px;
+        --radius-xs: 2px;
+        --radius-sm: 4px;
+        --radius-md: 6px;
+        --radius-pill: 999px;
+
+        /* Shadows */
+        --shadow-offset-sm-x: 3px;
+        --shadow-offset-sm-y: 3px;
+        --shadow-offset-md-x: 4px;
+        --shadow-offset-md-y: 4px;
+        --shadow-offset-lg-x: 6px;
+        --shadow-offset-lg-y: 6px;
+        --hard-shadow-sm: var(--shadow-offset-sm-x) var(--shadow-offset-sm-y) 0 var(--color-ink-soft);
+        --hard-shadow-md: var(--shadow-offset-md-x) var(--shadow-offset-md-y) 0 var(--color-ink-soft);
+        --hard-shadow-lg: var(--shadow-offset-lg-x) var(--shadow-offset-lg-y) 0 var(--color-ink-soft);
+        --focus-ring: 0 0 0 var(--border-strong) var(--color-pop-yellow);
+
+        /* Layers */
+        --z-base: 1;
+        --z-nav: 900;
+        --z-header: 950;
+        --z-overlay: 999;
+
+        /* Backwards-compatible aliases */
+        --ink: var(--color-ink-soft);
+        --royal: var(--color-royal);
+        --pop-yellow: var(--color-pop-yellow);
+        --paper: var(--color-paper);
+        --panel-shadow: var(--color-royal-shadow);
+        --hard-shadow: var(--hard-shadow-md);
     }
 
-    /* ===== GLOBAL ===== */
+    /* ===== BASE ===== */
     .block-container {
         max-width: 980px;
         padding-top: 8.9rem;   /* clears fixed header + top nav */
         padding-bottom: 2.2rem;
-        font-family: 'Inter', sans-serif;
+        font-family: var(--font-body);
         font-size: 1rem;
     }
     html, body,
@@ -33,35 +99,35 @@ def inject_css():
     [data-testid="stApp"] {
         background:
             radial-gradient(circle at top right, rgba(0, 51, 153, 0.05), transparent 22%),
-            linear-gradient(180deg, #f7f3e8 0%, #f6f2e8 100%);
+            linear-gradient(180deg, var(--color-paper-warm) 0%, #f6f2e8 100%);
         overflow-x: hidden;
     }
 
     /* ===== HIDE STREAMLIT CHROME ===== */
     #MainMenu, header, footer { display: none !important; }
 
-    /* ===== TYPOGRAPHY ===== */
+    /* ===== TYPOGRAPHY ROLES ===== */
     h1, h2, h3 {
-        font-family: 'Epilogue', sans-serif !important;
+        font-family: var(--font-display) !important;
         font-weight: 900 !important;
-        color: #1a1a1a !important;
+        color: var(--color-ink-soft) !important;
         letter-spacing: -0.02em !important;
     }
-    h1 { font-size: 2rem !important; letter-spacing: -0.03em !important; }
-    h2 { font-size: 1.5rem !important; }
+    h1 { font-size: var(--type-2xl) !important; letter-spacing: -0.03em !important; }
+    h2 { font-size: var(--type-xl) !important; }
     h3 { font-size: 1.2rem !important; }
-    p, li { font-family: 'Inter', sans-serif; color: #1a1a1a; font-size: 1rem; }
+    p, li { font-family: var(--font-body); color: var(--color-ink-soft); font-size: var(--type-md); }
 
-    /* ===== STICKY APP HEADER ===== */
+    /* ===== NAV ===== */
     .app-header {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
-        z-index: 999;
-        background: #2c69d8;
-        border-bottom: 4px solid #111111;
-        box-shadow: 0 4px 0 #F2C900;
+        z-index: var(--z-header);
+        background: var(--color-royal-shadow);
+        border-bottom: var(--border-heavy) solid var(--color-ink);
+        box-shadow: 0 var(--shadow-offset-md-y) 0 var(--color-pop-gold);
         height: 74px;
         display: flex;
         align-items: center;
@@ -71,14 +137,14 @@ def inject_css():
         box-sizing: border-box;
     }
     .app-header-logo {
-        font-family: 'Epilogue', sans-serif;
+        font-family: var(--font-display);
         font-weight: 900;
         font-style: italic;
         font-size: 2rem;
         color: #FFD51F;
         text-transform: uppercase;
         letter-spacing: -0.05em;
-        text-shadow: 2px 2px 0 #111111;
+        text-shadow: 2px 2px 0 var(--color-ink);
         line-height: 1;
         white-space: nowrap;
     }
@@ -89,7 +155,7 @@ def inject_css():
         flex-shrink: 0;
     }
     .app-header-tagline {
-        font-family: 'Space Grotesk', sans-serif;
+        font-family: var(--font-label);
         font-size: 0.7rem;
         font-weight: 700;
         color: rgba(255,255,255,0.75);
@@ -104,11 +170,11 @@ def inject_css():
         top: 74px;
         left: 0;
         right: 0;
-        z-index: 999;
+        z-index: var(--z-nav);
         padding: 0.35rem 1rem 0.55rem;
-        background: #2c69d8;
-        border-bottom: 3px solid #1a1a1a;
-        box-shadow: 0 4px 0 #F2C900;
+        background: var(--color-royal-shadow);
+        border-bottom: var(--border-strong) solid var(--color-ink-soft);
+        box-shadow: 0 var(--shadow-offset-md-y) 0 var(--color-pop-gold);
     }
     .top-nav-widget-anchor { display: none; }
     [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-testid="stSegmentedControl"] {
@@ -119,17 +185,17 @@ def inject_css():
         width: 100%;
         display: grid !important;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 8px;
+        gap: var(--space-1);
         background: transparent !important;
     }
     [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-baseweb="button-group"] > button {
         min-height: 52px;
-        border-radius: 4px !important;
-        border: 2px solid #1a1a1a !important;
+        border-radius: var(--radius-sm) !important;
+        border: var(--border-base) solid var(--color-ink-soft) !important;
         background: #fff9db !important;
-        color: #1a1a1a !important;
+        color: var(--color-ink-soft) !important;
         box-shadow: 4px 4px 0 rgba(0,51,153,0.18) !important;
-        font-family: 'Epilogue', sans-serif;
+        font-family: var(--font-display);
         font-weight: 800;
         font-size: 0.76rem;
         letter-spacing: 0.06em;
@@ -138,15 +204,35 @@ def inject_css():
     }
     [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-baseweb="button-group"] > button:hover {
         transform: translate(-1px, -1px);
-        box-shadow: 5px 5px 0 #1a1a1a !important;
+        box-shadow: 5px 5px 0 var(--color-ink-soft) !important;
     }
     [data-testid="stVerticalBlock"]:has(.top-nav-widget-anchor) [data-baseweb="button-group"] > button[aria-pressed="true"] {
-        background: #003399;
-        color: #F2E400 !important;
-        box-shadow: 4px 4px 0 #1a1a1a !important;
+        background: var(--color-royal);
+        color: var(--color-pop-yellow) !important;
+        box-shadow: var(--hard-shadow-md) !important;
     }
 
-    /* ===== PILLS (genre filter, list selector — NOT nav) ===== */
+    /* ===== PANEL SHELL ===== */
+    .layer-panel {
+        background: var(--color-paper);
+        border: var(--border-strong) solid var(--color-ink);
+        border-radius: var(--radius-md);
+        box-shadow: 8px 8px 0 var(--color-royal-shadow);
+    }
+    .layer-shell-title {
+        font-family: var(--font-label);
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+    }
+    .layer-card {
+        background: var(--color-white);
+        border: var(--border-base) solid var(--color-ink-soft);
+        border-radius: var(--radius-sm);
+        box-shadow: var(--hard-shadow-sm);
+    }
+
+    /* ===== CONTROLS ===== */
     [data-testid="stPills"] {
         gap: 6px !important;
     }
@@ -156,12 +242,12 @@ def inject_css():
         text-transform: uppercase !important;
         letter-spacing: 0.06em !important;
         font-size: 0.85rem !important;
-        color: #1a1a1a !important;
+        color: var(--color-ink-soft) !important;
     }
     [data-testid="stPills"] button {
         background: #fffdf5 !important;
-        color: #1a1a1a !important;
-        border: 2px solid #1a1a1a !important;
+        color: var(--color-ink-soft) !important;
+        border: 2px solid var(--color-ink-soft) !important;
         border-radius: 999px !important;
         font-family: 'Space Grotesk', sans-serif !important;
         font-weight: 700 !important;
@@ -174,31 +260,33 @@ def inject_css():
     }
     [data-testid="stPills"] button:hover {
         transform: translate(-1px, -1px) !important;
-        box-shadow: 3px 3px 0 #1a1a1a !important;
-        background: #ffffff !important;
-        color: #1a1a1a !important;
+        box-shadow: 3px 3px 0 var(--color-ink-soft) !important;
+        background: var(--color-white) !important;
+        color: var(--color-ink-soft) !important;
     }
     [data-testid="stPills"] button[aria-checked="true"] {
-        background: #003399 !important;
-        color: #F2E400 !important;
-        border-color: #1a1a1a !important;
-        box-shadow: 4px 4px 0 #1a1a1a !important;
+        background: var(--color-royal) !important;
+        color: var(--color-pop-yellow) !important;
+        border-color: var(--color-ink-soft) !important;
+        box-shadow: 4px 4px 0 var(--color-ink-soft) !important;
         transform: none !important;
     }
 
     /* ===== VHS TAPE CARD ===== */
-    .vhs-tape {
-        background: #111111;
-        border: 2px solid #1a1a1a;
-        border-radius: 2px;
-        box-shadow: 3px 3px 0 #1a1a1a;
+    .vhs-tape,
+    .layer-card-vhs {
+        background: var(--color-ink);
+        border: 2px solid var(--color-ink-soft);
+        border-radius: var(--radius-xs);
+        box-shadow: 3px 3px 0 var(--color-ink-soft);
         overflow: hidden;
         transition: transform 0.1s ease, box-shadow 0.1s ease;
         margin-bottom: 2px;
     }
-    .vhs-tape:hover {
+    .vhs-tape:hover,
+    .layer-card-vhs:hover {
         transform: translate(-2px, -2px);
-        box-shadow: 5px 5px 0 #1a1a1a;
+        box-shadow: 5px 5px 0 var(--color-ink-soft);
     }
     .vhs-img-wrap { position: relative; overflow: hidden; }
     .vhs-img-wrap img {
@@ -214,14 +302,14 @@ def inject_css():
         position: absolute;
         top: 5px;
         left: 5px;
-        background: #F2E400;
-        color: #1a1a1a;
+        background: var(--color-pop-yellow);
+        color: var(--color-ink-soft);
         font-family: 'Space Grotesk', sans-serif;
         font-size: 0.48rem;
         font-weight: 700;
         padding: 2px 5px;
-        border: 1px solid #1a1a1a;
-        box-shadow: 1px 1px 0 #1a1a1a;
+        border: 1px solid var(--color-ink-soft);
+        box-shadow: 1px 1px 0 var(--color-ink-soft);
         text-transform: uppercase;
         letter-spacing: 0.08em;
         line-height: 1.2;
@@ -237,8 +325,8 @@ def inject_css():
         pointer-events: none;
     }
     .vhs-info {
-        background: #ffffff;
-        border-top: 2px solid #1a1a1a;
+        background: var(--color-white);
+        border-top: 2px solid var(--color-ink-soft);
         padding: 5px 7px 4px;
     }
     .vhs-title {
@@ -246,7 +334,7 @@ def inject_css():
         font-family: 'Epilogue', sans-serif;
         font-weight: 800;
         font-size: 0.65rem;
-        color: #1a1a1a;
+        color: var(--color-ink-soft);
         text-transform: uppercase;
         letter-spacing: -0.01em;
         overflow: hidden;
@@ -272,30 +360,30 @@ def inject_css():
     /* ===== SHELF BAR ===== */
     .shelf-bar {
         height: 6px;
-        background: #1a1a1a;
+        background: var(--color-ink-soft);
         margin: 2px 0 10px;
     }
 
     /* ===== DRAWER ===== */
     .vhs-drawer-header {
-        background: #003399;
+        background: var(--color-royal);
         padding: 0.6rem 0.85rem;
         margin-bottom: 0;
         font-family: 'Epilogue', sans-serif;
         font-weight: 800;
-        color: #F2E400;
+        color: var(--color-pop-yellow);
         font-size: 0.95rem;
         letter-spacing: 0.04em;
-        border-radius: 4px 4px 0 0;
+        border-radius: var(--radius-sm) 4px 0 0;
         text-transform: uppercase;
-        border: 2px solid #1a1a1a;
+        border: 2px solid var(--color-ink-soft);
         border-bottom: none;
-        box-shadow: 3px 0 0 #1a1a1a, -1px 0 0 #1a1a1a;
+        box-shadow: 3px 0 0 var(--color-ink-soft), -1px 0 0 var(--color-ink-soft);
     }
     .vhs-drawer-end {
         height: 4px;
-        background: #F2E400;
-        border: 2px solid #1a1a1a;
+        background: var(--color-pop-yellow);
+        border: 2px solid var(--color-ink-soft);
         border-top: none;
         margin-top: 0;
         margin-bottom: 1rem;
@@ -316,7 +404,7 @@ def inject_css():
         position: relative;
         overflow: hidden;
     }
-    .stat-card-yellow { background: #F2E400; }
+    .stat-card-yellow { background: var(--color-pop-yellow); }
     .stat-label {
         font-family: 'Space Grotesk', sans-serif;
         font-size: 0.68rem;
@@ -328,7 +416,7 @@ def inject_css():
         margin: 0 0 6px;
         line-height: 1;
     }
-    .stat-card-yellow .stat-label { color: #1a1a1a; opacity: 0.7; }
+    .stat-card-yellow .stat-label { color: var(--color-ink-soft); opacity: 0.7; }
     .stat-value {
         font-family: 'Epilogue', sans-serif;
         font-weight: 900;
@@ -338,7 +426,7 @@ def inject_css():
         letter-spacing: -0.04em;
         margin: 0 0 4px;
     }
-    .stat-card-yellow .stat-value { color: #1a1a1a; }
+    .stat-card-yellow .stat-value { color: var(--color-ink-soft); }
     .stat-sub {
         font-family: 'Space Grotesk', sans-serif;
         font-size: 0.62rem;
@@ -351,11 +439,12 @@ def inject_css():
     }
 
     /* ===== STORE SIGN (section headers) ===== */
-    .store-sign {
+    .store-sign,
+    .section-shell-title {
         background: var(--royal);
         color: var(--pop-yellow);
         padding: 0.85rem 1.1rem;
-        border-radius: 4px;
+        border-radius: var(--radius-sm);
         font-family: 'Epilogue', sans-serif;
         font-size: 1.25rem;
         font-weight: 900;
@@ -370,26 +459,26 @@ def inject_css():
     /* ===== GENRE PILLS ===== */
     .genre-pill {
         display: inline-block;
-        background: #1a1a1a;
-        color: #F2E400;
+        background: var(--color-ink-soft);
+        color: var(--color-pop-yellow);
         padding: 3px 10px;
         border-radius: 20px;
         font-family: 'Space Grotesk', sans-serif;
         font-size: 0.72rem;
         margin: 2px 3px 2px 0;
         font-weight: 700;
-        border: 1.5px solid #1a1a1a;
+        border: 1.5px solid var(--color-ink-soft);
         text-transform: uppercase;
         letter-spacing: 0.08em;
     }
 
     /* ===== STAR RATINGS ===== */
     .stars {
-        color: #F2E400;
+        color: var(--color-pop-yellow);
         font-size: 1.1rem;
         letter-spacing: 1px;
         font-weight: 700;
-        -webkit-text-stroke: 0.5px #1a1a1a;
+        -webkit-text-stroke: 0.5px var(--color-ink-soft);
     }
 
     /* ===== BUTTONS (global) ===== */
@@ -397,7 +486,7 @@ def inject_css():
         background: var(--paper);
         color: var(--ink);
         border: 2px solid var(--ink);
-        border-radius: 4px;
+        border-radius: var(--radius-sm);
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 700;
         text-transform: uppercase;
@@ -409,47 +498,47 @@ def inject_css():
     }
     div.stButton > button:hover {
         transform: translate(-1px, -1px);
-        box-shadow: 4px 4px 0 #1a1a1a;
-        border-color: #1a1a1a;
-        background: #ffffff;
-        color: #1a1a1a;
+        box-shadow: 4px 4px 0 var(--color-ink-soft);
+        border-color: var(--color-ink-soft);
+        background: var(--color-white);
+        color: var(--color-ink-soft);
     }
     div.stButton > button:active {
         transform: translate(2px, 2px);
-        box-shadow: 1px 1px 0 #1a1a1a;
+        box-shadow: 1px 1px 0 var(--color-ink-soft);
     }
     div.stButton > button[kind="primary"],
     div.stButton > button[data-testid="stBaseButton-primary"] {
-        background: #F2E400 !important;
-        color: #1a1a1a !important;
-        border: 2px solid #1a1a1a;
+        background: var(--color-pop-yellow) !important;
+        color: var(--color-ink-soft) !important;
+        border: 2px solid var(--color-ink-soft);
         font-family: 'Epilogue', sans-serif;
         font-weight: 800;
         font-size: 0.9rem;
         padding: 0.6rem 1rem;
-        border-radius: 4px;
-        box-shadow: 4px 4px 0 #1a1a1a;
+        border-radius: var(--radius-sm);
+        box-shadow: 4px 4px 0 var(--color-ink-soft);
     }
     div.stButton > button[kind="primary"]:hover,
     div.stButton > button[data-testid="stBaseButton-primary"]:hover {
-        background: #F2E400 !important;
-        color: #1a1a1a !important;
+        background: var(--color-pop-yellow) !important;
+        color: var(--color-ink-soft) !important;
         transform: translate(-2px, -2px);
-        box-shadow: 6px 6px 0 #1a1a1a;
+        box-shadow: 6px 6px 0 var(--color-ink-soft);
     }
     div.stButton > button[kind="primary"]:active,
     div.stButton > button[data-testid="stBaseButton-primary"]:active {
         transform: translate(2px, 2px);
-        box-shadow: 1px 1px 0 #1a1a1a;
+        box-shadow: 1px 1px 0 var(--color-ink-soft);
     }
 
     /* ===== METRIC CARDS ===== */
     [data-testid="stMetric"] {
-        background: #ffffff;
-        border: 2px solid #1a1a1a;
-        border-radius: 4px;
+        background: var(--color-white);
+        border: 2px solid var(--color-ink-soft);
+        border-radius: var(--radius-sm);
         padding: 0.85rem;
-        box-shadow: 3px 3px 0 #1a1a1a;
+        box-shadow: 3px 3px 0 var(--color-ink-soft);
     }
     [data-testid="stMetric"] label {
         color: #444444 !important;
@@ -459,7 +548,7 @@ def inject_css():
         letter-spacing: 0.08em;
     }
     [data-testid="stMetric"] [data-testid="stMetricValue"] {
-        color: #003399 !important;
+        color: var(--color-royal) !important;
         font-family: 'Epilogue', sans-serif !important;
         font-weight: 900 !important;
         font-size: 1.8rem !important;
@@ -469,14 +558,14 @@ def inject_css():
     .stTabs [data-baseweb="tab-list"] {
         gap: 4px;
         background: #e2e2e2;
-        border-radius: 4px;
+        border-radius: var(--radius-sm);
         padding: 4px;
-        border: 2px solid #1a1a1a;
-        box-shadow: 3px 3px 0 #1a1a1a;
+        border: 2px solid var(--color-ink-soft);
+        box-shadow: 3px 3px 0 var(--color-ink-soft);
     }
     .stTabs [data-baseweb="tab"] {
-        border-radius: 2px;
-        padding: 8px 16px;
+        border-radius: var(--radius-xs);
+        padding: var(--space-1) var(--space-2);
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 700;
         font-size: 0.82rem;
@@ -485,46 +574,46 @@ def inject_css():
         letter-spacing: 0.05em;
     }
     .stTabs [aria-selected="true"] {
-        background: #003399 !important;
-        color: #F2E400 !important;
-        border-radius: 2px !important;
-        box-shadow: 2px 2px 0 #1a1a1a !important;
+        background: var(--color-royal) !important;
+        color: var(--color-pop-yellow) !important;
+        border-radius: var(--radius-xs) !important;
+        box-shadow: 2px 2px 0 var(--color-ink-soft) !important;
     }
     .stTabs [data-baseweb="tab-highlight"],
     .stTabs [data-baseweb="tab-border"] { display: none; }
 
     /* ===== EXPANDER ===== */
     [data-testid="stExpander"] {
-        background: #ffffff;
-        border: 2px solid #1a1a1a !important;
-        border-radius: 4px;
+        background: var(--color-white);
+        border: 2px solid var(--color-ink-soft) !important;
+        border-radius: var(--radius-sm);
         margin-bottom: 0.6rem;
-        box-shadow: 3px 3px 0 #1a1a1a;
+        box-shadow: 3px 3px 0 var(--color-ink-soft);
     }
-    [data-testid="stExpander"]:hover { box-shadow: 4px 4px 0 #1a1a1a; }
+    [data-testid="stExpander"]:hover { box-shadow: 4px 4px 0 var(--color-ink-soft); }
     [data-testid="stExpander"] summary {
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         font-size: 0.85rem;
-        color: #1a1a1a;
+        color: var(--color-ink-soft);
         padding: 0.75rem 1rem;
     }
 
     /* ===== TEXT INPUT ===== */
     [data-testid="stTextInput"] input {
-        background: #ffffff;
-        border: 2px solid #1a1a1a;
-        border-radius: 4px;
-        color: #1a1a1a;
+        background: var(--color-white);
+        border: 2px solid var(--color-ink-soft);
+        border-radius: var(--radius-sm);
+        color: var(--color-ink-soft);
         font-family: 'Inter', sans-serif;
         font-size: 1rem;
         padding: 0.6rem 0.75rem;
     }
     [data-testid="stTextInput"] input:focus {
-        border-color: #003399;
-        box-shadow: 0 0 0 3px #F2E400;
+        border-color: var(--color-royal);
+        box-shadow: var(--focus-ring);
     }
     [data-testid="stTextInput"] label {
         font-family: 'Space Grotesk', sans-serif !important;
@@ -532,21 +621,21 @@ def inject_css():
         text-transform: uppercase;
         letter-spacing: 0.06em;
         font-size: 0.82rem !important;
-        color: #1a1a1a !important;
+        color: var(--color-ink-soft) !important;
     }
 
     /* ===== TEXT AREA ===== */
     [data-testid="stTextArea"] textarea {
-        background: #ffffff;
-        border: 2px solid #1a1a1a;
-        border-radius: 4px;
-        color: #1a1a1a;
+        background: var(--color-white);
+        border: 2px solid var(--color-ink-soft);
+        border-radius: var(--radius-sm);
+        color: var(--color-ink-soft);
         font-family: 'Inter', sans-serif;
         font-size: 1rem;
     }
     [data-testid="stTextArea"] textarea:focus {
-        border-color: #003399;
-        box-shadow: 0 0 0 3px #F2E400;
+        border-color: var(--color-royal);
+        box-shadow: var(--focus-ring);
     }
     [data-testid="stTextArea"] label {
         font-family: 'Space Grotesk', sans-serif !important;
@@ -554,15 +643,15 @@ def inject_css():
         text-transform: uppercase;
         letter-spacing: 0.06em;
         font-size: 0.82rem !important;
-        color: #1a1a1a !important;
+        color: var(--color-ink-soft) !important;
     }
 
     /* ===== SELECT BOX ===== */
     [data-testid="stSelectbox"] > div > div {
-        background: #ffffff;
-        border: 2px solid #1a1a1a;
-        border-radius: 4px;
-        color: #1a1a1a;
+        background: var(--color-white);
+        border: 2px solid var(--color-ink-soft);
+        border-radius: var(--radius-sm);
+        color: var(--color-ink-soft);
         font-size: 1rem;
     }
     [data-testid="stSelectbox"] label {
@@ -571,12 +660,12 @@ def inject_css():
         text-transform: uppercase;
         letter-spacing: 0.06em;
         font-size: 0.82rem !important;
-        color: #1a1a1a !important;
+        color: var(--color-ink-soft) !important;
     }
 
     /* ===== RADIO BUTTONS ===== */
     [data-testid="stRadio"] label {
-        color: #1a1a1a !important;
+        color: var(--color-ink-soft) !important;
         font-family: 'Inter', sans-serif !important;
         font-size: 0.95rem !important;
     }
@@ -589,8 +678,8 @@ def inject_css():
     }
     /* Selected radio dot — white fill so it's readable on any bg */
     [data-testid="stRadio"] [data-baseweb="radio"][aria-checked="true"] [role="presentation"] {
-        background-color: #003399 !important;
-        border-color: #003399 !important;
+        background-color: var(--color-royal) !important;
+        border-color: var(--color-royal) !important;
     }
 
     /* ===== SLIDER ===== */
@@ -600,23 +689,23 @@ def inject_css():
         text-transform: uppercase !important;
         letter-spacing: 0.06em !important;
         font-size: 0.82rem !important;
-        color: #1a1a1a !important;
+        color: var(--color-ink-soft) !important;
     }
     [data-testid="stSlider"] [data-testid="stTickBar"] span,
     [data-testid="stSlider"] [data-testid="stSliderThumbValue"] {
-        color: #1a1a1a !important;
+        color: var(--color-ink-soft) !important;
         font-family: 'Space Grotesk', sans-serif !important;
         font-weight: 700 !important;
     }
 
     /* ===== DIVIDER ===== */
-    [data-testid="stHorizontalRule"] { border-color: #1a1a1a; border-width: 2px; }
+    [data-testid="stHorizontalRule"] { border-color: var(--color-ink-soft); border-width: 2px; }
 
     /* ===== IMAGE ===== */
     [data-testid="stImage"] img {
-        border-radius: 2px;
-        border: 2px solid #1a1a1a;
-        box-shadow: 3px 3px 0 #1a1a1a;
+        border-radius: var(--radius-xs);
+        border: 2px solid var(--color-ink-soft);
+        box-shadow: 3px 3px 0 var(--color-ink-soft);
     }
 
     /* ===== CAPTION ===== */
@@ -628,24 +717,24 @@ def inject_css():
         text-transform: uppercase !important;
     }
 
-    /* ===== ALERTS ===== */
+    /* ===== FEEDBACK STATES ===== */
     [data-testid="stAlert"] {
-        border-radius: 4px;
-        border: 2px solid #1a1a1a !important;
-        box-shadow: 3px 3px 0 #1a1a1a;
+        border-radius: var(--radius-sm);
+        border: 2px solid var(--color-ink-soft) !important;
+        box-shadow: 3px 3px 0 var(--color-ink-soft);
         font-family: 'Inter', sans-serif;
         font-size: 0.95rem;
     }
 
     /* ===== PICKER CARD ===== */
     .picker-card {
-        background: #003399;
-        border: 2px solid #1a1a1a;
-        border-radius: 6px;
+        background: var(--color-royal);
+        border: 2px solid var(--color-ink-soft);
+        border-radius: var(--radius-md);
         padding: 1.75rem 1.5rem;
         text-align: center;
-        box-shadow: 6px 6px 0 #1a1a1a;
-        color: #ffffff;
+        box-shadow: 6px 6px 0 var(--color-ink-soft);
+        color: var(--color-white);
     }
 
     /* ===== PICK PAGE ===== */
@@ -659,10 +748,10 @@ def inject_css():
     .pick-kicker,
     .pick-result-kicker {
         display: inline-block;
-        background: #003399;
-        color: #ffffff;
-        border: 3px solid #111111;
-        box-shadow: 5px 5px 0 #111111;
+        background: var(--color-royal);
+        color: var(--color-white);
+        border: var(--border-strong) solid var(--color-ink);
+        box-shadow: 5px 5px 0 var(--color-ink);
         padding: 0.55rem 0.95rem;
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 700;
@@ -680,7 +769,7 @@ def inject_css():
         font-weight: 900;
         text-transform: uppercase;
         letter-spacing: -0.06em;
-        color: #003399;
+        color: var(--color-royal);
     }
 
     .pick-lead {
@@ -697,7 +786,7 @@ def inject_css():
 
     .pick-flow-card {
         background: rgba(255, 252, 243, 0.98);
-        border: 3px solid #111111;
+        border: var(--border-strong) solid var(--color-ink);
         box-shadow: 8px 8px 0 #2c69d8;
         padding: 1rem 1rem 1.1rem;
     }
@@ -725,8 +814,8 @@ def inject_css():
 
     .pick-results-card {
         background: #fffef6;
-        border: 3px solid #111111;
-        box-shadow: 10px 10px 0 #111111;
+        border: var(--border-strong) solid var(--color-ink);
+        box-shadow: 10px 10px 0 var(--color-ink);
         padding: 1rem;
         position: sticky;
         top: 142px;
@@ -734,7 +823,7 @@ def inject_css():
 
     .pick-results-count {
         font-family: 'Epilogue', sans-serif;
-        color: #003399;
+        color: var(--color-royal);
         font-weight: 900;
         font-size: clamp(1.45rem, 3vw, 2.2rem);
         line-height: 1.02;
@@ -761,7 +850,7 @@ def inject_css():
         width: 62px;
         aspect-ratio: 2 / 3;
         object-fit: cover;
-        border: 2px solid #111111;
+        border: 2px solid var(--color-ink);
         box-shadow: 3px 3px 0 #2c69d8;
     }
 
@@ -777,7 +866,7 @@ def inject_css():
         align-items: center;
         gap: 0.35rem;
         background: #fff6bf;
-        border: 2px solid #111111;
+        border: 2px solid var(--color-ink);
         border-radius: 999px;
         padding: 0.38rem 0.72rem;
         font-family: 'Space Grotesk', sans-serif;
@@ -785,7 +874,7 @@ def inject_css():
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        color: #1a1a1a;
+        color: var(--color-ink-soft);
     }
 
     .pick-result-title {
@@ -797,7 +886,7 @@ def inject_css():
         font-weight: 900;
         text-transform: uppercase;
         letter-spacing: -0.05em;
-        color: #003399;
+        color: var(--color-royal);
     }
 
     .pick-result-overview {
@@ -821,8 +910,8 @@ def inject_css():
     [data-testid="stVerticalBlock"]:has(.pick-result-anchor),
     [data-testid="stVerticalBlock"]:has(.pick-reveal-anchor) {
         background: var(--paper);
-        border: 3px solid #111111;
-        border-radius: 6px;
+        border: var(--border-strong) solid var(--color-ink);
+        border-radius: var(--radius-md);
         box-shadow: 10px 10px 0 var(--panel-shadow);
         padding: 1.45rem clamp(1rem, 2.4vw, 2rem);
         margin-bottom: 1.6rem;
@@ -835,7 +924,7 @@ def inject_css():
 
     [data-testid="stVerticalBlock"]:has(.pick-result-anchor) [data-testid="stImage"] img,
     [data-testid="stVerticalBlock"]:has(.pick-reveal-anchor) [data-testid="stImage"] img {
-        box-shadow: 7px 7px 0 #111111;
+        box-shadow: 7px 7px 0 var(--color-ink);
     }
 
     [data-testid="stVerticalBlock"]:has(.pick-flow-card) [data-testid="stPills"] {
@@ -858,38 +947,38 @@ def inject_css():
         min-height: 3.6rem !important;
         font-size: 1.08rem !important;
         letter-spacing: 0.08em !important;
-        box-shadow: 7px 7px 0 #111111 !important;
+        box-shadow: 7px 7px 0 var(--color-ink) !important;
     }
 
     /* ===== MOVIE CARD (search results) ===== */
     .movie-card {
         background: var(--paper);
-        border-radius: 4px;
+        border-radius: var(--radius-sm);
         padding: 1rem;
         margin-bottom: 0.6rem;
-        border: 2px solid #1a1a1a;
-        box-shadow: 3px 3px 0 #1a1a1a;
+        border: 2px solid var(--color-ink-soft);
+        box-shadow: 3px 3px 0 var(--color-ink-soft);
         transition: transform 0.1s, box-shadow 0.1s;
     }
     .movie-card:hover {
         transform: translate(-1px, -1px);
-        box-shadow: 4px 4px 0 #1a1a1a;
+        box-shadow: 4px 4px 0 var(--color-ink-soft);
     }
     .movie-card img {
-        border-radius: 2px;
+        border-radius: var(--radius-xs);
         width: 100%;
         max-width: 185px;
-        border: 1px solid #1a1a1a;
+        border: 1px solid var(--color-ink-soft);
     }
 
     /* ===== SIDEBAR (fallback) ===== */
     [data-testid="stSidebar"] {
-        background: #003399;
-        border-right: 3px solid #1a1a1a;
+        background: var(--color-royal);
+        border-right: 3px solid var(--color-ink-soft);
     }
-    [data-testid="stSidebar"] * { color: #ffffff !important; }
+    [data-testid="stSidebar"] * { color: var(--color-white) !important; }
 
-    /* ===== MOBILE ===== */
+    /* ===== RESPONSIVE OVERRIDES ===== */
     @media (max-width: 640px) {
         .block-container {
             width: 100vw !important;
@@ -925,7 +1014,7 @@ def inject_css():
         .pick-result-kicker {
             font-size: 0.74rem;
             padding: 0.48rem 0.7rem;
-            box-shadow: 4px 4px 0 #111111;
+            box-shadow: 4px 4px 0 var(--color-ink);
         }
         .pick-title { margin-top: 0.8rem; }
         .pick-lead { font-size: 0.97rem; }
@@ -938,7 +1027,7 @@ def inject_css():
         .pick-results-card {
             position: static;
             top: auto;
-            box-shadow: 7px 7px 0 #111111;
+            box-shadow: 7px 7px 0 var(--color-ink);
         }
         .pick-results-count {
             font-size: 1.55rem;
@@ -1018,7 +1107,7 @@ def app_header_html():
 # ── Content HTML helpers ──────────────────────────────────────────────
 
 def section_header(text):
-    st.markdown(f'<div class="store-sign">{escape(text)}</div>',
+    st.markdown(f'<div class="store-sign section-shell-title layer-shell-title">{escape(text)}</div>',
                 unsafe_allow_html=True)
 
 
@@ -1028,7 +1117,7 @@ def vhs_tape_html(img_url, title, year=None, badge=None):
     badge_html = (f'<div class="vhs-badge">{escape(badge)}</div>'
                   if badge else "")
     return (
-        f'<div class="vhs-tape">'
+        f'<div class="vhs-tape layer-card-vhs layer-card">'
         f'<div class="vhs-img-wrap">'
         f'<img src="{img_url}" alt="{escape(title)}" loading="lazy" />'
         f'{badge_html}'
@@ -1051,7 +1140,7 @@ def shelf_row_html(movies, make_poster_url_fn, poster_placeholder):
         year = str(movie["year"]) if movie.get("year") else ""
         cells.append(
             f'<div class="shelf-cell">'
-            f'<div class="vhs-tape">'
+            f'<div class="vhs-tape layer-card-vhs layer-card">'
             f'<div class="vhs-img-wrap">'
             f'<img src="{img}" alt="{escape(title)}" loading="lazy" />'
             f'</div>'
