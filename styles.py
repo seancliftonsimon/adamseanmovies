@@ -95,7 +95,7 @@ def inject_css():
         display: none;
     }
 
-    [data-testid="stVerticalBlock"]:has(.top-nav-anchor) [data-testid="stHorizontalBlock"] {
+    .top-nav-bar {
         position: fixed;
         top: 74px;
         left: 0;
@@ -105,34 +105,43 @@ def inject_css():
         background: rgba(247, 243, 232, 0.98);
         border-bottom: 3px solid #1a1a1a;
         box-shadow: 0 4px 0 #F2C900;
-        gap: 8px !important;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
     }
 
-    [data-testid="stVerticalBlock"]:has(.top-nav-anchor) div.stButton > button {
-        height: 52px !important;
-        border-radius: 4px !important;
-        font-family: 'Epilogue', sans-serif !important;
-        font-weight: 800 !important;
-        font-size: 0.76rem !important;
-        letter-spacing: 0.06em !important;
-        line-height: 1.3 !important;
-        white-space: pre-wrap !important;
-        border: 2px solid #1a1a1a !important;
-        padding: 5px 4px !important;
+    .top-nav-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 52px;
+        border-radius: 4px;
+        border: 2px solid #1a1a1a;
+        background: #fff9db;
+        color: #1a1a1a;
+        box-shadow: 4px 4px 0 rgba(0,51,153,0.18);
+        text-decoration: none;
+        text-align: center;
+        font-family: 'Epilogue', sans-serif;
+        font-weight: 800;
+        font-size: 0.76rem;
+        letter-spacing: 0.06em;
+        line-height: 1.3;
+        text-transform: uppercase;
     }
-    [data-testid="stVerticalBlock"]:has(.top-nav-anchor) div.stButton > button[kind="primary"],
-    [data-testid="stVerticalBlock"]:has(.top-nav-anchor) div.stButton > button[data-testid="stBaseButton-primary"] {
-        background: #003399 !important;
-        color: #F2E400 !important;
-        border-color: #1a1a1a !important;
-        box-shadow: 4px 4px 0 #1a1a1a !important;
+    .top-nav-link:hover {
+        color: #1a1a1a;
+        text-decoration: none;
+        transform: translate(-1px, -1px);
+        box-shadow: 5px 5px 0 #1a1a1a;
     }
-    [data-testid="stVerticalBlock"]:has(.top-nav-anchor) div.stButton > button[kind="secondary"],
-    [data-testid="stVerticalBlock"]:has(.top-nav-anchor) div.stButton > button[data-testid="stBaseButton-secondary"] {
-        background: #fff9db !important;
-        color: #1a1a1a !important;
-        border-color: #1a1a1a !important;
-        box-shadow: 4px 4px 0 rgba(0,51,153,0.18) !important;
+    .top-nav-link.is-active {
+        background: #003399;
+        color: #F2E400;
+        box-shadow: 4px 4px 0 #1a1a1a;
+    }
+    .top-nav-link.is-active:hover {
+        color: #F2E400;
     }
 
     /* ===== PILLS (genre filter, list selector — NOT nav) ===== */
@@ -862,9 +871,14 @@ def inject_css():
             padding: 0 1rem;
         }
         .app-header-logo { font-size: 1.6rem; }
-        [data-testid="stVerticalBlock"]:has(.top-nav-anchor) [data-testid="stHorizontalBlock"] {
+        .top-nav-bar {
             top: 68px;
             padding: 0.45rem 0.6rem 0.6rem;
+            gap: 6px;
+        }
+        .top-nav-link {
+            min-height: 48px;
+            font-size: 0.7rem;
         }
         .pick-kicker,
         .pick-result-kicker {

@@ -21,10 +21,10 @@ from tmdb_api import search_movies, get_movie_details
 _YEAR_RE = re.compile(r"\s*\((\d{4})\)\s*$")
 
 NAV_ITEMS = [
-    ("\U0001F3AC Add",  "🎬\nADD",  add_movie.render),
-    ("\U0001F3B0 Pick", "🎰\nPICK", pick_for_us.render),
-    ("\U0001F4CB Lists","📋\nLISTS", our_lists.render),
-    ("\U0001F4FC Log",  "📼\nLOG",  watch_log.render),
+    {"key": "\U0001F3AC Add", "label": "🎬\nADD", "slug": "add", "fn": add_movie.render},
+    {"key": "\U0001F3B0 Pick", "label": "🎰\nPICK", "slug": "pick", "fn": pick_for_us.render},
+    {"key": "\U0001F4CB Lists", "label": "📋\nLISTS", "slug": "lists", "fn": our_lists.render},
+    {"key": "\U0001F4FC Log", "label": "📼\nLOG", "slug": "log", "fn": watch_log.render},
 ]
 
 
@@ -58,25 +58,36 @@ def _backfill_posters():
 
 
 def _current_page():
-    if "current_page" not in st.session_state:
+    slug_to_key = {item["slug"]: item["key"] for item in NAV_ITEMS}
+
+    requested_slug = st.query_params.get("page")
+    if requested_slug in slug_to_key:
+        st.session_state.current_page = slug_to_key[requested_slug]
+    elif "current_page" not in st.session_state:
         st.session_state.current_page = "\U0001F3AC Add"
-    return st.session_state.current_page
+
+    current_page = st.session_state.current_page
+    current_slug = next(item["slug"] for item in NAV_ITEMS if item["key"] == current_page)
+    if st.query_params.get("page") != current_slug:
+        st.query_params["page"] = current_slug
+
+    return current_page
 
 
 def _render_top_nav(current_page):
-    """Four real Streamlit buttons in the fixed top header strip."""
-    st.markdown('<div class="top-nav-anchor"></div>', unsafe_allow_html=True)
-    cols = st.columns(4, gap="small")
-    for i, (page_key, btn_label, _) in enumerate(NAV_ITEMS):
-        with cols[i]:
-            if st.button(
-                btn_label,
-                key=f"bnav_{i}",
-                type="primary" if page_key == current_page else "secondary",
-                use_container_width=True,
-            ):
-                st.session_state.current_page = page_key
-                st.rerun()
+    nav_links = []
+    for item in NAV_ITEMS:
+        active = "is-active" if item["key"] == current_page else ""
+        href = f"?page={item['slug']}"
+        nav_links.append(
+            f'<a class="top-nav-link {active}" href="{href}">{item["label"].replace(chr(10), "<br>")}</a>'
+        )
+
+    st.markdown(
+        '<div class="top-nav-anchor"></div>'
+        f'<div class="top-nav-bar">{"".join(nav_links)}</div>',
+        unsafe_allow_html=True,
+    )
 
 
 def main():
@@ -107,10 +118,8 @@ def main():
                 icon="⚠️",
             )
 
-    render_map = {key: fn for key, _, fn in NAV_ITEMS}
+    render_map = {item["key"]: item["fn"] for item in NAV_ITEMS}
     render_map[page]()
-
-    
 
 
 if __name__ == "__main__":
