@@ -10,7 +10,12 @@ st.set_page_config(
 
 from pages import add_movie, pick_for_us, our_lists, watch_log
 from styles import inject_css, app_header_html
-from database import get_db_status, get_movies_missing_posters, update_movie_metadata
+from database import (
+    get_db_status,
+    get_movies_missing_posters,
+    get_storage_guardrail_status,
+    update_movie_metadata,
+)
 from tmdb_api import search_movies, get_movie_details
 
 _YEAR_RE = re.compile(r"\s*\((\d{4})\)\s*$")
@@ -101,6 +106,17 @@ def main():
             "Data won't persist across app restarts or be shared between users.",
             icon="\u26a0\ufe0f",
         )
+    else:
+        guardrail = get_storage_guardrail_status()
+        if guardrail["percent_used"] >= 90:
+            st.warning(
+                (
+                    "Movie storage guardrail is nearly full "
+                    f"({guardrail['count']}/{guardrail['max_movies']}). "
+                    "Consider removing older entries."
+                ),
+                icon="⚠️",
+            )
 
     render_map = {item["key"]: item["fn"] for item in NAV_ITEMS}
     render_map[page]()

@@ -87,9 +87,6 @@ def _render_watched_drawer(movie):
 
 
 def _render_shelf(watched):
-    if "sel_watched" not in st.session_state:
-        st.session_state["sel_watched"] = None
-
     rows = [watched[i:i + SHELF_COLS]
             for i in range(0, len(watched), SHELF_COLS)]
 
@@ -103,23 +100,10 @@ def _render_shelf(watched):
                     vhs_tape_html(img, movie["title"], movie.get("year")),
                     unsafe_allow_html=True,
                 )
-                is_sel = st.session_state["sel_watched"] == movie["id"]
-                if st.button(
-                    "\u25B2" if is_sel else "\u25BC",
-                    key=f"wvhs_{movie['id']}",
-                    width="stretch",
-                ):
-                    st.session_state["sel_watched"] = (
-                        None if is_sel else movie["id"]
-                    )
-                    st.rerun()
+                with st.expander("Details", expanded=False):
+                    _render_watched_drawer(movie)
 
         st.markdown(shelf_bar_html(), unsafe_allow_html=True)
-
-        sel_id = st.session_state.get("sel_watched")
-        sel_movie = next((m for m in row_movies if m["id"] == sel_id), None)
-        if sel_movie:
-            _render_watched_drawer(sel_movie)
 
 
 def render():
@@ -127,14 +111,23 @@ def render():
     section_header("\U0001F4FC Watched Together")
     st.caption("Every movie you've watched together, rated and remembered.")
 
-    stats = get_watch_stats()
-    watched = get_watched_movies()
+    view = st.segmented_control(
+        "View",
+        ["Overview", "Watched Shelf"],
+        default="Overview",
+        key="watch_log_view",
+    )
 
-    if stats["total"] == 0:
+    stats = get_watch_stats() if view == "Overview" else None
+    watched = get_watched_movies() if view == "Watched Shelf" else None
+
+    total = stats["total"] if stats else len(watched or [])
+    if total == 0:
         st.info("You haven't watched any movies together yet! "
                 "Pick one from your lists and start your journey.")
         return
 
-    _render_stats(stats)
-    st.divider()
-    _render_shelf(watched)
+    if view == "Overview":
+        _render_stats(stats)
+    else:
+        _render_shelf(watched)

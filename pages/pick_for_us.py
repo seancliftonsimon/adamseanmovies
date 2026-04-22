@@ -179,6 +179,7 @@ def _filter_bar(movies):
     min_runtime, max_runtime = st.slider(
         "Runtime range (minutes)", 0, 300, (0, 300), step=5,
         key="pick_runtime",
+        format_func=_runtime_label,
     )
     st.caption(
         f"Runtime selected: {_runtime_label(min_runtime)} - {_runtime_label(max_runtime)}"
