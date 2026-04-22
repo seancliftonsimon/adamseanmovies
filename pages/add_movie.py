@@ -69,6 +69,8 @@ def render():
     inject_css()
     section_header("\U0001F3AC Add a Movie")
 
+    st.markdown('<div class="pick-flow-card">', unsafe_allow_html=True)
+    st.markdown('<div class="pick-subhead">1. Choose a shelf</div>', unsafe_allow_html=True)
     selection = st.pills(
         "Add to",
         LIST_OPTIONS,
@@ -83,11 +85,14 @@ def render():
     list_type, added_by = LIST_MAP[selection]
     btn_label = LIST_LABELS[list_type]
 
+    st.markdown('<div class="pick-subhead pick-runtime-subhead">2. Search for a movie</div>', unsafe_allow_html=True)
     query = st.text_input(
         "Search for a movie",
         placeholder="e.g. Eternal Sunshine, The Grand Budapest Hotel...",
         key="add_search_query",
     )
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
     if not query:
         return

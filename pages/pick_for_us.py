@@ -1,14 +1,14 @@
+import inspect
 import random
 import time
-from collections import Counter
 from html import escape
 
 import streamlit as st
-import database
-from styles import inject_css, genre_pills_html, runtime_display, POSTER_PLACEHOLDER
-from tmdb_api import poster_url
-from database import get_unwatched_movies, mark_watched
 
+import database
+from database import get_unwatched_movies, mark_watched
+from styles import POSTER_PLACEHOLDER, genre_pills_html, inject_css, runtime_display
+from tmdb_api import poster_url
 
 LIST_OPTIONS = ["All", "Adam's Picks", "Sean's Picks", "Mutual Discoveries"]
 LIST_MAP = {
@@ -24,6 +24,7 @@ RUNTIME_LIMITS = {
     "Under 2h 30m": 150,
 }
 
+
 def _runtime_label(total_minutes):
     total = max(0, int(total_minutes))
     hours, minutes = divmod(total, 60)
@@ -33,31 +34,6 @@ def _runtime_label(total_minutes):
         return f"{hours}h"
     return f"{minutes}m"
 
-def _runtime_slider():
-    slider_sig = inspect.signature(st.slider)
-    kwargs = {
-        "label": "Runtime range (minutes)",
-        "min_value": 0,
-        "max_value": 300,
-        "value": (0, 300),
-        "step": 5,
-        "key": "pick_runtime",
-    }
-
-    if "format_func" in slider_sig.parameters:
-        kwargs["format_func"] = _runtime_label
-    if "label_visibility" in slider_sig.parameters:
-        kwargs["label_visibility"] = "collapsed"
-
-    min_runtime, max_runtime = st.slider(**kwargs)
-
-    if "format_func" not in slider_sig.parameters:
-        st.caption(
-            f"Runtime selected: {_runtime_label(min_runtime)} - {_runtime_label(max_runtime)}"
-        )
-
-    return min_runtime, max_runtime
-
 
 def _watch_form(movie):
     st.markdown(f"### Rate **{movie['title']}**")
@@ -66,9 +42,7 @@ def _watch_form(movie):
         adam_r = st.slider("Adam's rating", 1, 10, 7, key="pick_adam_r")
     with c2:
         sean_r = st.slider("Sean's rating", 1, 10, 7, key="pick_sean_r")
-    notes = st.text_area(
-        "Notes (optional)", key="pick_notes", placeholder="e.g. Great pick!"
-    )
+    notes = st.text_area("Notes (optional)", key="pick_notes", placeholder="e.g. Great pick!")
     watch_date = st.date_input("Date watched", key="pick_wd")
     if st.button("Save to Watch Log", key="pick_save_watch", type="primary", width="stretch"):
         mark_watched(movie["id"], adam_r, sean_r, notes, watch_date)
@@ -97,9 +71,7 @@ def _show_picked_movie(movie, celebrate=False):
         facts.append(runtime_display(movie["runtime"]))
     facts.append(list_labels.get(movie["list_type"], movie["list_type"]))
 
-    facts_html = "".join(
-        f'<span class="pick-meta-pill">{escape(fact)}</span>' for fact in facts
-    )
+    facts_html = "".join(f'<span class="pick-meta-pill">{escape(fact)}</span>' for fact in facts)
 
     with st.container():
         st.markdown('<div class="pick-result-anchor"></div>', unsafe_allow_html=True)
@@ -110,18 +82,12 @@ def _show_picked_movie(movie, celebrate=False):
         with cols[0]:
             st.image(img, width="stretch")
         with cols[1]:
-            st.markdown(
-                f'<h2 class="pick-result-title">{escape(movie["title"])}</h2>',
-                unsafe_allow_html=True,
-            )
+            st.markdown(f'<h2 class="pick-result-title">{escape(movie["title"])}</h2>', unsafe_allow_html=True)
             st.markdown(f'<div class="pick-meta-band">{facts_html}</div>', unsafe_allow_html=True)
             if movie["genres_list"]:
                 st.markdown(genre_pills_html(movie["genres_list"]), unsafe_allow_html=True)
             if movie["overview"]:
-                st.markdown(
-                    f'<p class="pick-result-overview">{escape(movie["overview"])}</p>',
-                    unsafe_allow_html=True,
-                )
+                st.markdown(f'<p class="pick-result-overview">{escape(movie["overview"])}</p>', unsafe_allow_html=True)
 
         c1, c2 = st.columns(2)
         with c1:
@@ -134,32 +100,24 @@ def _show_picked_movie(movie, celebrate=False):
                 st.session_state["picked_movie"] = None
                 st.rerun()
 
-    if st.session_state.get("watching_movie"):
-        _watch_form(st.session_state["watching_movie"])
 
 
 def _run_reveal(filtered):
     placeholder = st.empty()
-
-    for i in range(18):
+    for i in range(12):
         movie = random.choice(filtered)
         img = poster_url(movie["poster_path"]) if movie["poster_path"] else POSTER_PLACEHOLDER
         with placeholder.container():
             st.markdown('<div class="pick-reveal-anchor"></div>', unsafe_allow_html=True)
-            st.markdown(
-                '<div class="pick-reveal-copy">Finding your perfect tape...</div>',
-                unsafe_allow_html=True,
-            )
+            st.markdown('<div class="pick-reveal-copy">Finding your perfect tape...</div>', unsafe_allow_html=True)
             cols = st.columns([1, 2, 1])
             with cols[1]:
                 st.image(img, width=160)
                 st.markdown(f"#### {movie['title']}")
-        time.sleep(0.08 + (i * 0.04))
+        time.sleep(0.08 + (i * 0.03))
 
-    final = random.choice(filtered)
-    st.session_state["picked_movie"] = final
+    st.session_state["picked_movie"] = random.choice(filtered)
     placeholder.empty()
-    _show_picked_movie(final, celebrate=True)
 
 
 def _summarize_filters(list_filter, selected_genres, runtime_choice, custom_runtime):
@@ -182,9 +140,46 @@ def _summarize_filters(list_filter, selected_genres, runtime_choice, custom_runt
     return " • ".join(parts) if parts else "All picks • Any genre • Any length"
 
 
-def _filter_bar(movies):
-    st.markdown('<div class="pick-panel-label">Whose Picks?</div>',
-                unsafe_allow_html=True)
+def _active_filter_row(active_filters):
+    if not active_filters:
+        return
+    pills = "".join(f'<span class="pick-meta-pill">{escape(item)}</span>' for item in active_filters)
+    st.markdown(f'<div class="pick-active-filters">{pills}</div>', unsafe_allow_html=True)
+
+
+def _runtime_selector():
+    runtime_choice = st.pills(
+        "Runtime",
+        RUNTIME_OPTIONS,
+        default=st.session_state.get("pick_runtime_choice", "Any Length"),
+        key="pick_runtime_choice",
+        label_visibility="collapsed",
+    )
+
+    custom_runtime = st.session_state.get("pick_custom_runtime", 150)
+    if runtime_choice == "Custom":
+        slider_sig = inspect.signature(st.slider)
+        kwargs = {
+            "label": "Custom max runtime",
+            "min_value": 60,
+            "max_value": 300,
+            "value": custom_runtime,
+            "step": 5,
+            "key": "pick_custom_runtime",
+        }
+        if "label_visibility" in slider_sig.parameters:
+            kwargs["label_visibility"] = "collapsed"
+        custom_runtime = st.slider(**kwargs)
+        st.caption(f"Max runtime: {_runtime_label(custom_runtime)}")
+
+    return runtime_choice, custom_runtime
+
+
+def _render_filters(all_movies):
+    st.markdown('<div class="pick-filter-panel-anchor"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="pick-flow-card pick-flow-section">', unsafe_allow_html=True)
+
+    st.markdown('<div class="pick-subhead">1. Whose picks?</div>', unsafe_allow_html=True)
     list_filter = st.pills(
         "Whose Picks?",
         LIST_OPTIONS,
@@ -193,29 +188,40 @@ def _filter_bar(movies):
         label_visibility="collapsed",
     )
 
-    list_map = {
-        "All": None,
-        "Adam's Picks": "adam_pick",
-        "Sean's Picks": "sean_pick",
-        "Mutual Discoveries": "mutual",
-    }
-    lt = list_map.get(list_filter, None)
-    if lt:
-        movies = [m for m in movies if m["list_type"] == lt]
+    filtered = list(all_movies)
+    selected_list = LIST_MAP.get(list_filter)
+    if selected_list:
+        filtered = [m for m in filtered if m["list_type"] == selected_list]
 
+    st.markdown('<div class="pick-subhead">2. Genres</div>', unsafe_allow_html=True)
     available_genres = database.get_all_genres()
-    st.markdown('<div class="pick-panel-label">Genres</div>',
-                unsafe_allow_html=True)
-    if available_genres:
-        genre_filter = st.pills(
-            "Genres",
-            available_genres,
-            selection_mode="multi",
-            key="pick_genre_filter",
-            label_visibility="collapsed",
-        )
+    selected_genres = st.pills(
+        "Genres",
+        available_genres,
+        selection_mode="multi",
+        key="pick_genre_filter",
+        label_visibility="collapsed",
+    ) if available_genres else []
+    if selected_genres:
+        selected_set = set(selected_genres)
+        filtered = [m for m in filtered if selected_set.intersection(m["genres_list"])]
 
+    st.markdown('<div class="pick-subhead pick-runtime-subhead">3. Runtime</div>', unsafe_allow_html=True)
+    runtime_choice, custom_runtime = _runtime_selector()
+    if runtime_choice != "Any Length":
+        max_runtime = custom_runtime if runtime_choice == "Custom" else RUNTIME_LIMITS[runtime_choice]
+        filtered = [m for m in filtered if not m.get("runtime") or int(m["runtime"]) <= max_runtime]
+
+    active_filters = []
+    if list_filter != "All":
+        active_filters.append(list_filter)
+    if selected_genres:
+        active_filters.extend(selected_genres)
+    if runtime_choice != "Any Length":
+        active_filters.append(f"Under {_runtime_label(custom_runtime)}" if runtime_choice == "Custom" else runtime_choice)
     _active_filter_row(active_filters)
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
     summary = _summarize_filters(list_filter, selected_genres, runtime_choice, custom_runtime)
     return filtered, summary, bool(active_filters)
@@ -223,25 +229,16 @@ def _filter_bar(movies):
 
 def _render_results_card(filtered, summary, has_optional_filters):
     st.markdown('<div class="pick-results-card pick-flow-section">', unsafe_allow_html=True)
-    st.markdown('<div class="pick-subhead">Ready to Spin</div>', unsafe_allow_html=True)
+    st.markdown('<div class="pick-subhead">4. Pick action</div>', unsafe_allow_html=True)
 
     has_results = len(filtered) > 0
     if has_results:
-        st.markdown(
-            f'<div class="pick-results-count">{len(filtered)} Tapes Ready in the Pool</div>',
-            unsafe_allow_html=True,
-        )
+        st.markdown(f'<div class="pick-results-count">{len(filtered)} Tapes Ready in the Pool</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="pick-results-summary">{escape(summary)}</div>', unsafe_allow_html=True)
     else:
         st.markdown('<div class="pick-results-count">No Tapes Match These Filters</div>', unsafe_allow_html=True)
-        st.markdown(
-            '<div class="pick-results-summary">Try removing a filter or broadening the pool.</div>',
-            unsafe_allow_html=True,
-        )
+        st.markdown('<div class="pick-results-summary">Try removing a filter or broadening the pool.</div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="pick-panel-label">Runtime</div>',
-                unsafe_allow_html=True)
-    min_runtime, max_runtime = _runtime_slider()
     sample = filtered[:3]
     if sample:
         thumbs_html = []
@@ -252,6 +249,7 @@ def _render_results_card(filtered, summary, has_optional_filters):
 
     if st.button("Pick for Us", key="pick_btn", type="primary", width="stretch", disabled=not has_results):
         _run_reveal(filtered)
+        st.rerun()
 
     if (not has_results) and has_optional_filters:
         if st.button("Clear All", key="clear_all_results", width="stretch"):
@@ -267,35 +265,13 @@ def _render_results_card(filtered, summary, has_optional_filters):
 def render():
     inject_css()
     st.markdown('<div class="pick-page-anchor"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="pick-kicker">Pick For Us</div>', unsafe_allow_html=True)
+    st.markdown('<h1 class="pick-title">Movie Vault Selector</h1>', unsafe_allow_html=True)
 
     all_movies = get_unwatched_movies()
     if not all_movies:
         st.info("No unwatched movies yet! Head over to **Add a Movie** to build your list.")
         return
-
-    with st.container():
-        st.markdown('<div class="pick-result-anchor"></div>',
-                    unsafe_allow_html=True)
-        if st.session_state.get("picked_movie"):
-            _show_picked_movie(st.session_state["picked_movie"])
-        elif st.session_state.get("watching_movie"):
-            _watch_form(st.session_state["watching_movie"])
-        else:
-            st.markdown('<div class="pick-result-kicker">Tonight\'s Movie</div>',
-                        unsafe_allow_html=True)
-            st.caption("Spin below to pick tonight's movie.")
-
-    with st.container():
-        st.markdown('<div class="pick-filter-panel-anchor"></div>',
-                    unsafe_allow_html=True)
-
-        filtered = _filter_bar(all_movies)
-    st.markdown('<div class="pick-kicker">Pick For Us</div>', unsafe_allow_html=True)
-    st.markdown('<h1 class="pick-title">Movie Vault Selector</h1>', unsafe_allow_html=True)
-    st.markdown(
-        '<p class="pick-lead">Three quick steps: choose whose vault, refine the pool, then spin the tape deck.</p>',
-        unsafe_allow_html=True,
-    )
 
     left_col, right_col = st.columns([1.65, 1], gap="large")
     with left_col:
