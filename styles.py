@@ -741,6 +741,10 @@ def inject_css():
         border-radius: var(--radius-sm);
         color: var(--color-ink-soft);
         font-size: 1rem;
+        min-height: 3.25rem;
+    }
+    [data-testid="stSelectbox"] input {
+        caret-color: transparent !important;
     }
     [data-testid="stSelectbox"] label {
         font-family: 'Space Grotesk', sans-serif !important;
@@ -1106,6 +1110,28 @@ def inject_css():
         display: flex;
         flex-wrap: wrap;
         gap: 0.5rem;
+    }
+
+    [data-testid="stVerticalBlock"]:has(.our-shelves-anchor) .page-intro {
+        margin-bottom: var(--space-1-5);
+    }
+    [data-testid="stVerticalBlock"]:has(.our-shelves-anchor) .page-intro-title {
+        margin-top: var(--space-1);
+        margin-bottom: var(--space-0-75);
+    }
+    [data-testid="stVerticalBlock"]:has(.our-shelves-anchor) .workflow-label {
+        margin-bottom: 0.15rem;
+    }
+    [data-testid="stVerticalBlock"]:has(.our-shelves-anchor) [data-testid="stExpander"] {
+        margin-bottom: 0;
+        min-height: 3.25rem;
+    }
+    [data-testid="stVerticalBlock"]:has(.our-shelves-anchor) [data-testid="stExpander"] summary {
+        min-height: 3.25rem;
+        display: flex;
+        align-items: center;
+        font-size: 1rem;
+        letter-spacing: 0.06em;
     }
 
     [data-testid="stVerticalBlock"]:has(.pick-results-card-anchor) div.stButton > button[kind="primary"],
