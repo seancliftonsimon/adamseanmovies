@@ -162,18 +162,17 @@ def _poster_carousel_html(movies, duration=16, show_ticker=False, status=None, s
         f'<div class="pick-carousel-spotlight">{escape(spotlight_title)}</div>' if spotlight_title else ""
     )
 
-    return dedent(
-        f"""
-        <div class="pick-carousel-wrap">
-            {ticker_html}
-            <div class="pick-carousel-track" style="--carousel-duration:{duration:.2f}s;">
-                {''.join(tiles)}
-            </div>
-        </div>
-        {status_html}
-        {spotlight_html}
-        """
-    ).strip()
+    tiles_html = "".join(tiles)
+    return (
+        f'<div class="pick-carousel-wrap">'
+        f'{ticker_html}'
+        f'<div class="pick-carousel-track" style="--carousel-duration:{duration:.2f}s;">'
+        f'{tiles_html}'
+        f'</div>'
+        f'</div>'
+        f'{status_html}'
+        f'{spotlight_html}'
+    )
 
 
 def _apply_filters(all_movies):

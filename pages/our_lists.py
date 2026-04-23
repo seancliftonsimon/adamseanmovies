@@ -195,21 +195,22 @@ def _render_shelf(movies, prefix):
     control_cols = st.columns(2, gap="small")
     with control_cols[0]:
         st.markdown(workflow_label_html("Sort shelf"), unsafe_allow_html=True)
-        sort_option = st.selectbox(
-            "Sort by",
-            [
-                "When Added (Newest First)",
-                "When Added (Oldest First)",
-                "Release Year (Oldest \u2192 Newest)",
-                "Release Year (Newest \u2192 Oldest)",
-                "Director Groups",
-                "Title A\u2013Z",
-                "Shortest First",
-                "Longest First",
-            ],
-            key=f"sort_{prefix}",
-            label_visibility="collapsed",
-        )
+        with st.expander("Sort shelf", expanded=False):
+            sort_option = st.selectbox(
+                "Sort by",
+                [
+                    "When Added (Newest First)",
+                    "When Added (Oldest First)",
+                    "Release Year (Oldest \u2192 Newest)",
+                    "Release Year (Newest \u2192 Oldest)",
+                    "Director Groups",
+                    "Title A\u2013Z",
+                    "Shortest First",
+                    "Longest First",
+                ],
+                key=f"sort_{prefix}",
+                label_visibility="collapsed",
+            )
     with control_cols[1]:
         st.markdown(workflow_label_html("Filter shelf"), unsafe_allow_html=True)
         with st.expander("Filter shelf", expanded=False):
