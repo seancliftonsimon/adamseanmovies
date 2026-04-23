@@ -13,8 +13,6 @@ from styles import (
     inject_css,
     runtime_display,
     page_intro_html,
-    panel_start_html,
-    panel_end_html,
     workflow_label_html,
     empty_state_html,
     result_summary_html,
@@ -167,7 +165,6 @@ def _runtime_selector():
 
 def _render_filters(all_movies):
     st.markdown('<div class="pick-filter-panel-anchor"></div>', unsafe_allow_html=True)
-    st.markdown(panel_start_html(), unsafe_allow_html=True)
     st.markdown('<div class="workflow-stack">', unsafe_allow_html=True)
     st.markdown('<div class="workflow-block">', unsafe_allow_html=True)
 
@@ -216,14 +213,11 @@ def _render_filters(all_movies):
     _active_filter_row(active_filters)
 
     st.markdown('</div></div>', unsafe_allow_html=True)
-    st.markdown(panel_end_html(), unsafe_allow_html=True)
 
     return filtered, bool(active_filters)
 
 
 def _render_results_card(filtered, has_optional_filters):
-    st.markdown(panel_start_html(), unsafe_allow_html=True)
-
     has_results = len(filtered) > 0
     if has_results:
         st.markdown(
@@ -258,8 +252,6 @@ def _render_results_card(filtered, has_optional_filters):
             st.session_state["pick_runtime_choice"] = "Any Length"
             st.session_state["pick_custom_runtime"] = 150
             st.rerun()
-
-    st.markdown(panel_end_html(), unsafe_allow_html=True)
 
 
 def render():

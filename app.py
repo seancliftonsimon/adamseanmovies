@@ -23,7 +23,7 @@ _YEAR_RE = re.compile(r"\s*\((\d{4})\)\s*$")
 NAV_ITEMS = [
     {"key": "\U0001F3AC Add", "label": "🎬\nADD", "slug": "add", "fn": add_movie.render},
     {"key": "\U0001F3B0 Pick", "label": "🎰\nPICK", "slug": "pick", "fn": pick_for_us.render},
-    {"key": "\U0001F4CB Lists", "label": "📋\nLISTS", "slug": "lists", "fn": our_lists.render},
+    {"key": "\U0001F4DA Shelves", "label": "📚\nSHELVES", "slug": "shelves", "fn": our_lists.render},
     {"key": "\U0001F4FC Log", "label": "📼\nLOG", "slug": "log", "fn": watch_log.render},
 ]
 
@@ -59,6 +59,7 @@ def _backfill_posters():
 
 def _current_page():
     slug_to_key = {item["slug"]: item["key"] for item in NAV_ITEMS}
+    slug_to_key["lists"] = "\U0001F4DA Shelves"
 
     requested_slug = st.query_params.get("page")
     if requested_slug in slug_to_key:
