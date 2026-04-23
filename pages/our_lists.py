@@ -191,39 +191,45 @@ def _render_shelf(movies, prefix):
         )
         return
 
-    st.markdown(workflow_label_html("Sort shelf"), unsafe_allow_html=True)
-    sort_option = st.selectbox(
-        "Sort by",
-        [
-            "When Added (Newest First)",
-            "When Added (Oldest First)",
-            "Release Year (Oldest \u2192 Newest)",
-            "Release Year (Newest \u2192 Oldest)",
-            "Director Groups",
-            "Title A\u2013Z",
-            "Shortest First",
-            "Longest First",
-        ],
-        key=f"sort_{prefix}",
-        label_visibility="collapsed",
-    )
-
     available_genres = sorted({g for movie in movies for g in movie["genres_list"]})
-    with st.expander("Filter shelf", expanded=False):
-        runtime_choice = st.pills(
-            "Runtime",
-            RUNTIME_OPTIONS,
-            default=st.session_state.get(f"runtime_{prefix}", "Any Length"),
-            key=f"runtime_{prefix}",
+    control_cols = st.columns(2, gap="small")
+    with control_cols[0]:
+        st.markdown(workflow_label_html("Sort shelf"), unsafe_allow_html=True)
+        sort_option = st.selectbox(
+            "Sort by",
+            [
+                "When Added (Newest First)",
+                "When Added (Oldest First)",
+                "Release Year (Oldest \u2192 Newest)",
+                "Release Year (Newest \u2192 Oldest)",
+                "Director Groups",
+                "Title A\u2013Z",
+                "Shortest First",
+                "Longest First",
+            ],
+            key=f"sort_{prefix}",
             label_visibility="collapsed",
         )
-        selected_genres = st.pills(
-            "Genres",
-            available_genres,
-            key=f"genres_{prefix}",
-            selection_mode="multi",
-            label_visibility="collapsed",
-        ) if available_genres else []
+    with control_cols[1]:
+        st.markdown(workflow_label_html("Filter shelf"), unsafe_allow_html=True)
+        with st.expander("Filter shelf", expanded=False):
+            runtime_choice = st.pills(
+                "Runtime",
+                RUNTIME_OPTIONS,
+                default=st.session_state.get(f"runtime_{prefix}", "Any Length"),
+                key=f"runtime_{prefix}",
+                label_visibility="collapsed",
+            )
+            selected_genres = st.pills(
+                "Genres",
+                available_genres,
+                key=f"genres_{prefix}",
+                selection_mode="multi",
+                label_visibility="collapsed",
+            ) if available_genres else []
+
+    runtime_choice = st.session_state.get(f"runtime_{prefix}", "Any Length")
+    selected_genres = st.session_state.get(f"genres_{prefix}", [])
     movies = _apply_filters(movies, selected_genres, runtime_choice)
     st.markdown(result_summary_html(f"{len(movies)} movie(s)", None), unsafe_allow_html=True)
     if not movies:
@@ -286,6 +292,7 @@ def _render_active_shelf(list_type, prefix):
 
 def render():
     inject_css()
+    st.markdown('<div class="our-shelves-anchor"></div>', unsafe_allow_html=True)
     st.markdown(
         page_intro_html(
             "Our Shelves",
