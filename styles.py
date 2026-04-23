@@ -814,16 +814,8 @@ def inject_css():
         font-size: 0.95rem;
     }
 
-    .workflow-stack {
-        display: grid;
-        gap: var(--space-2);
-    }
-    .workflow-block {
-        display: grid;
-        gap: var(--space-1);
-    }
     .workflow-label {
-        margin: 0;
+        margin: 0 0 0.2rem;
         font-family: var(--font-label);
         font-size: var(--type-sm);
         font-weight: 700;
@@ -914,7 +906,7 @@ def inject_css():
     }
 
     .pick-title {
-        margin: 1rem 0 0.7rem;
+        margin: 0.45rem 0 0.35rem;
         font-family: 'Epilogue', sans-serif;
         font-size: clamp(2.75rem, 8vw, 4.9rem);
         line-height: 0.92;
@@ -931,17 +923,6 @@ def inject_css():
         color: #586273;
         font-size: 1.05rem;
         line-height: 1.55;
-    }
-
-    .pick-flow-section {
-        margin-top: 1rem;
-    }
-
-    .pick-flow-card {
-        background: rgba(255, 252, 243, 0.98);
-        border: var(--border-strong) solid var(--color-ink);
-        box-shadow: 8px 8px 0 #2c69d8;
-        padding: 1rem 1rem 1.1rem;
     }
 
     [data-testid="stVerticalBlock"]:has(.add-workflow-anchor) {
@@ -1084,10 +1065,11 @@ def inject_css():
     [data-testid="stVerticalBlock"]:has(.pick-filters-card-anchor) {
         background: var(--color-paper);
         border: var(--border-strong) solid var(--color-ink-soft);
-        box-shadow: 8px 8px 0 var(--color-royal-shadow);
+        box-shadow: 6px 6px 0 var(--color-royal-shadow);
         border-radius: var(--radius-md);
-        padding: var(--space-2);
-        margin-bottom: var(--space-2);
+        padding: var(--space-1-5);
+        margin-bottom: var(--space-1-5);
+        gap: var(--space-1);
     }
 
     [data-testid="stVerticalBlock"]:has(.pick-results-card-anchor) {
@@ -1110,19 +1092,20 @@ def inject_css():
         box-shadow: 7px 7px 0 var(--color-ink);
     }
 
-    [data-testid="stVerticalBlock"]:has(.pick-flow-card) [data-testid="stPills"] {
-        margin-bottom: 0.4rem;
+    [data-testid="stVerticalBlock"]:has(.pick-page-anchor) .page-intro {
+        margin-bottom: var(--space-1-5);
     }
-
-    [data-testid="stVerticalBlock"]:has(.pick-flow-card) [data-testid="stPills"] [role="radiogroup"],
-    [data-testid="stVerticalBlock"]:has(.pick-flow-card) [data-testid="stPills"] [role="group"] {
+    [data-testid="stVerticalBlock"]:has(.pick-page-anchor) .page-intro-title {
+        margin-top: 0;
+    }
+    [data-testid="stVerticalBlock"]:has(.pick-filters-card-anchor) [data-testid="stPills"] {
+        margin-bottom: 0.2rem;
+    }
+    [data-testid="stVerticalBlock"]:has(.pick-filters-card-anchor) [data-testid="stPills"] [role="radiogroup"],
+    [data-testid="stVerticalBlock"]:has(.pick-filters-card-anchor) [data-testid="stPills"] [role="group"] {
         display: flex;
         flex-wrap: wrap;
         gap: 0.5rem;
-    }
-
-    [data-testid="stVerticalBlock"]:has(.pick-flow-card) [data-testid="stPills"] button {
-        min-height: 2.25rem;
     }
 
     [data-testid="stVerticalBlock"]:has(.pick-results-card-anchor) div.stButton > button[kind="primary"],

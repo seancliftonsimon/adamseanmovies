@@ -166,10 +166,8 @@ def _runtime_selector():
 def _render_filters(all_movies):
     with st.container():
         st.markdown('<div class="pick-filters-card-anchor"></div>', unsafe_allow_html=True)
-        st.markdown('<div class="workflow-stack">', unsafe_allow_html=True)
-        st.markdown('<div class="workflow-block">', unsafe_allow_html=True)
 
-        st.markdown(workflow_label_html("1. Whose picks?"), unsafe_allow_html=True)
+        st.markdown(workflow_label_html("Whose picks?"), unsafe_allow_html=True)
         list_filter = st.pills(
             "Whose Picks?",
             LIST_OPTIONS,
@@ -183,8 +181,7 @@ def _render_filters(all_movies):
         if selected_list:
             filtered = [m for m in filtered if m["list_type"] == selected_list]
 
-        st.markdown('</div><div class="workflow-block">', unsafe_allow_html=True)
-        st.markdown(workflow_label_html("2. Genres"), unsafe_allow_html=True)
+        st.markdown(workflow_label_html("Genres"), unsafe_allow_html=True)
         available_genres = database.get_all_genres()
         selected_genres = st.pills(
             "Genres",
@@ -197,8 +194,7 @@ def _render_filters(all_movies):
             selected_set = set(selected_genres)
             filtered = [m for m in filtered if selected_set.intersection(m["genres_list"])]
 
-        st.markdown('</div><div class="workflow-block">', unsafe_allow_html=True)
-        st.markdown(workflow_label_html("3. Runtime"), unsafe_allow_html=True)
+        st.markdown(workflow_label_html("Runtime"), unsafe_allow_html=True)
         runtime_choice, custom_runtime = _runtime_selector()
         if runtime_choice != "Any Length":
             max_runtime = custom_runtime if runtime_choice == "Custom" else RUNTIME_LIMITS[runtime_choice]
@@ -212,8 +208,6 @@ def _render_filters(all_movies):
         if runtime_choice != "Any Length":
             active_filters.append(f"Under {_runtime_label(custom_runtime)}" if runtime_choice == "Custom" else runtime_choice)
         _active_filter_row(active_filters)
-
-        st.markdown('</div></div>', unsafe_allow_html=True)
 
     return filtered, bool(active_filters)
 

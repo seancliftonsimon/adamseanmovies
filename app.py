@@ -81,7 +81,7 @@ def _nav_links_html(current_page):
         active_class = " is-active" if item["key"] == current_page else ""
         icon, label = item["label"].split("\n", 1)
         links.append(
-            f'<a class="top-nav-link{active_class}" href="?page={item["slug"]}">'
+            f'<a class="top-nav-link{active_class}" href="/?page={item["slug"]}" target="_self">'
             f'<span class="top-nav-icon">{icon}</span>'
             f'<span class="top-nav-text">{label}</span>'
             '</a>'
