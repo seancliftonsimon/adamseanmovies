@@ -891,7 +891,8 @@ def inject_css():
 
     /* ===== PICK PAGE ===== */
     .pick-page-anchor,
-    .pick-filter-panel-anchor,
+    .pick-filters-card-anchor,
+    .pick-results-card-anchor,
     .pick-result-anchor,
     .pick-reveal-anchor {
         display: none;
@@ -981,15 +982,6 @@ def inject_css():
         flex-wrap: wrap;
         gap: 0.45rem;
         margin-top: 0.8rem;
-    }
-
-    .pick-results-card {
-        background: #fffef6;
-        border: var(--border-strong) solid var(--color-ink);
-        box-shadow: 10px 10px 0 var(--color-ink);
-        padding: 1rem;
-        position: sticky;
-        top: 142px;
     }
 
     .pick-results-count {
@@ -1089,6 +1081,26 @@ def inject_css():
         gap: 1rem;
     }
 
+    [data-testid="stVerticalBlock"]:has(.pick-filters-card-anchor) {
+        background: var(--color-paper);
+        border: var(--border-strong) solid var(--color-ink-soft);
+        box-shadow: 8px 8px 0 var(--color-royal-shadow);
+        border-radius: var(--radius-md);
+        padding: var(--space-2);
+        margin-bottom: var(--space-2);
+    }
+
+    [data-testid="stVerticalBlock"]:has(.pick-results-card-anchor) {
+        background: #fffef6;
+        border: var(--border-strong) solid var(--color-ink);
+        box-shadow: 10px 10px 0 var(--color-ink);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        position: sticky;
+        top: 142px;
+        gap: 0.75rem;
+    }
+
     [data-testid="stVerticalBlock"]:has(.pick-result-anchor) [data-testid="stHorizontalBlock"] {
         align-items: start;
     }
@@ -1113,8 +1125,8 @@ def inject_css():
         min-height: 2.25rem;
     }
 
-    [data-testid="stVerticalBlock"]:has(.pick-results-card) div.stButton > button[kind="primary"],
-    [data-testid="stVerticalBlock"]:has(.pick-results-card) div.stButton > button[data-testid="stBaseButton-primary"] {
+    [data-testid="stVerticalBlock"]:has(.pick-results-card-anchor) div.stButton > button[kind="primary"],
+    [data-testid="stVerticalBlock"]:has(.pick-results-card-anchor) div.stButton > button[data-testid="stBaseButton-primary"] {
         min-height: 3.6rem !important;
         font-size: 1.08rem !important;
         letter-spacing: 0.08em !important;
@@ -1198,13 +1210,12 @@ def inject_css():
         }
         .pick-title { margin-top: 0.8rem; }
         .pick-lead { font-size: 0.97rem; }
-        [data-testid="stVerticalBlock"]:has(.pick-filter-panel-anchor),
         [data-testid="stVerticalBlock"]:has(.pick-result-anchor),
         [data-testid="stVerticalBlock"]:has(.pick-reveal-anchor) {
             box-shadow: 7px 7px 0 #2c69d8;
             padding: 1rem 0.95rem;
         }
-        .pick-results-card {
+        [data-testid="stVerticalBlock"]:has(.pick-results-card-anchor) {
             position: static;
             top: auto;
             box-shadow: 7px 7px 0 var(--color-ink);
@@ -1215,11 +1226,6 @@ def inject_css():
         .page-intro-title {
             font-size: clamp(1.8rem, 9vw, 2.8rem);
         }
-        .panel-shell {
-            padding: var(--space-1-5);
-            box-shadow: 6px 6px 0 var(--color-royal-shadow);
-        }
-
         /* Shelf row: 2-col flex layout */
         .shelf-row-two-col {
             display: flex !important;
