@@ -164,94 +164,100 @@ def _runtime_selector():
 
 
 def _render_filters(all_movies):
-    st.markdown('<div class="pick-filter-panel-anchor"></div>', unsafe_allow_html=True)
-    st.markdown('<div class="workflow-stack">', unsafe_allow_html=True)
-    st.markdown('<div class="workflow-block">', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="pick-filters-card-anchor"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="workflow-stack">', unsafe_allow_html=True)
+        st.markdown('<div class="workflow-block">', unsafe_allow_html=True)
 
-    st.markdown(workflow_label_html("1. Whose picks?"), unsafe_allow_html=True)
-    list_filter = st.pills(
-        "Whose Picks?",
-        LIST_OPTIONS,
-        default=st.session_state.get("pick_list_filter", "All"),
-        key="pick_list_filter",
-        label_visibility="collapsed",
-    )
+        st.markdown(workflow_label_html("1. Whose picks?"), unsafe_allow_html=True)
+        list_filter = st.pills(
+            "Whose Picks?",
+            LIST_OPTIONS,
+            default=st.session_state.get("pick_list_filter", "All"),
+            key="pick_list_filter",
+            label_visibility="collapsed",
+        )
 
-    filtered = list(all_movies)
-    selected_list = LIST_MAP.get(list_filter)
-    if selected_list:
-        filtered = [m for m in filtered if m["list_type"] == selected_list]
+        filtered = list(all_movies)
+        selected_list = LIST_MAP.get(list_filter)
+        if selected_list:
+            filtered = [m for m in filtered if m["list_type"] == selected_list]
 
-    st.markdown('</div><div class="workflow-block">', unsafe_allow_html=True)
-    st.markdown(workflow_label_html("2. Genres"), unsafe_allow_html=True)
-    available_genres = database.get_all_genres()
-    selected_genres = st.pills(
-        "Genres",
-        available_genres,
-        selection_mode="multi",
-        key="pick_genre_filter",
-        label_visibility="collapsed",
-    ) if available_genres else []
-    if selected_genres:
-        selected_set = set(selected_genres)
-        filtered = [m for m in filtered if selected_set.intersection(m["genres_list"])]
+        st.markdown('</div><div class="workflow-block">', unsafe_allow_html=True)
+        st.markdown(workflow_label_html("2. Genres"), unsafe_allow_html=True)
+        available_genres = database.get_all_genres()
+        selected_genres = st.pills(
+            "Genres",
+            available_genres,
+            selection_mode="multi",
+            key="pick_genre_filter",
+            label_visibility="collapsed",
+        ) if available_genres else []
+        if selected_genres:
+            selected_set = set(selected_genres)
+            filtered = [m for m in filtered if selected_set.intersection(m["genres_list"])]
 
-    st.markdown('</div><div class="workflow-block">', unsafe_allow_html=True)
-    st.markdown(workflow_label_html("3. Runtime"), unsafe_allow_html=True)
-    runtime_choice, custom_runtime = _runtime_selector()
-    if runtime_choice != "Any Length":
-        max_runtime = custom_runtime if runtime_choice == "Custom" else RUNTIME_LIMITS[runtime_choice]
-        filtered = [m for m in filtered if not m.get("runtime") or int(m["runtime"]) <= max_runtime]
+        st.markdown('</div><div class="workflow-block">', unsafe_allow_html=True)
+        st.markdown(workflow_label_html("3. Runtime"), unsafe_allow_html=True)
+        runtime_choice, custom_runtime = _runtime_selector()
+        if runtime_choice != "Any Length":
+            max_runtime = custom_runtime if runtime_choice == "Custom" else RUNTIME_LIMITS[runtime_choice]
+            filtered = [m for m in filtered if not m.get("runtime") or int(m["runtime"]) <= max_runtime]
 
-    active_filters = []
-    if list_filter != "All":
-        active_filters.append(list_filter)
-    if selected_genres:
-        active_filters.extend(selected_genres)
-    if runtime_choice != "Any Length":
-        active_filters.append(f"Under {_runtime_label(custom_runtime)}" if runtime_choice == "Custom" else runtime_choice)
-    _active_filter_row(active_filters)
+        active_filters = []
+        if list_filter != "All":
+            active_filters.append(list_filter)
+        if selected_genres:
+            active_filters.extend(selected_genres)
+        if runtime_choice != "Any Length":
+            active_filters.append(f"Under {_runtime_label(custom_runtime)}" if runtime_choice == "Custom" else runtime_choice)
+        _active_filter_row(active_filters)
 
-    st.markdown('</div></div>', unsafe_allow_html=True)
+        st.markdown('</div></div>', unsafe_allow_html=True)
 
     return filtered, bool(active_filters)
 
 
 def _render_results_card(filtered, has_optional_filters):
-    has_results = len(filtered) > 0
-    if has_results:
-        st.markdown(
-            result_summary_html(f"{len(filtered)} Tapes Ready", None),
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(
-            empty_state_html(
-                "No tapes match these filters",
-                None,
-            ),
-            unsafe_allow_html=True,
-        )
+    pick_requested = False
+    with st.container():
+        st.markdown('<div class="pick-results-card-anchor"></div>', unsafe_allow_html=True)
 
-    sample = filtered[:3]
-    if sample:
-        thumbs_html = []
-        for movie in sample:
-            img = poster_url(movie["poster_path"], "w154") if movie["poster_path"] else POSTER_PLACEHOLDER
-            thumbs_html.append(f'<img src="{img}" alt="{escape(movie["title"])}" />')
-        st.markdown(f'<div class="pick-results-thumbs">{"".join(thumbs_html)}</div>', unsafe_allow_html=True)
+        has_results = len(filtered) > 0
+        if has_results:
+            st.markdown(
+                result_summary_html(f"{len(filtered)} Tapes Ready", None),
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                empty_state_html(
+                    "No tapes match these filters",
+                    None,
+                ),
+                unsafe_allow_html=True,
+            )
 
-    if st.button("Pick for Us", key="pick_btn", type="primary", width="stretch", disabled=not has_results):
-        _run_reveal(filtered)
-        st.rerun()
+        sample = filtered[:3]
+        if sample:
+            thumbs_html = []
+            for movie in sample:
+                img = poster_url(movie["poster_path"], "w154") if movie["poster_path"] else POSTER_PLACEHOLDER
+                thumbs_html.append(f'<img src="{img}" alt="{escape(movie["title"])}" />')
+            st.markdown(f'<div class="pick-results-thumbs">{"".join(thumbs_html)}</div>', unsafe_allow_html=True)
 
-    if (not has_results) and has_optional_filters:
-        if st.button("Clear All", key="clear_all_results", width="stretch"):
-            st.session_state["pick_list_filter"] = "All"
-            st.session_state["pick_genre_filter"] = []
-            st.session_state["pick_runtime_choice"] = "Any Length"
-            st.session_state["pick_custom_runtime"] = 150
-            st.rerun()
+        if st.button("Pick for Us", key="pick_btn", type="primary", width="stretch", disabled=not has_results):
+            pick_requested = True
+
+        if (not has_results) and has_optional_filters:
+            if st.button("Clear All", key="clear_all_results", width="stretch"):
+                st.session_state["pick_list_filter"] = "All"
+                st.session_state["pick_genre_filter"] = []
+                st.session_state["pick_runtime_choice"] = "Any Length"
+                st.session_state["pick_custom_runtime"] = 150
+                st.rerun()
+
+    return pick_requested
 
 
 def render():
@@ -276,14 +282,22 @@ def render():
         )
         return
 
+    reveal_container = st.container()
+    with reveal_container:
+        if st.session_state.get("picked_movie"):
+            _show_picked_movie(st.session_state["picked_movie"])
+
     left_col, right_col = st.columns([1.65, 1], gap="large")
     with left_col:
         filtered, has_optional_filters = _render_filters(all_movies)
 
     with right_col:
-        _render_results_card(filtered, has_optional_filters)
+        pick_requested = _render_results_card(filtered, has_optional_filters)
 
-    if st.session_state.get("picked_movie"):
-        _show_picked_movie(st.session_state["picked_movie"])
-    elif st.session_state.get("watching_movie"):
+    if pick_requested:
+        with reveal_container:
+            _run_reveal(filtered)
+        st.rerun()
+
+    if st.session_state.get("watching_movie"):
         _watch_form(st.session_state["watching_movie"])
