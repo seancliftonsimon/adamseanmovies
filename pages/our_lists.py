@@ -105,7 +105,7 @@ def _apply_filters(movies, selected_genres, runtime_choice):
     if selected_genres:
         selected_set = set(selected_genres)
         filtered = [m for m in filtered if selected_set.intersection(m["genres_list"])]
-    if runtime_choice != "Any Length":
+    if runtime_choice and runtime_choice != "Any Length" and runtime_choice in RUNTIME_LIMITS:
         max_runtime = RUNTIME_LIMITS[runtime_choice]
         filtered = [m for m in filtered if not m.get("runtime") or int(m["runtime"]) <= max_runtime]
     return filtered
