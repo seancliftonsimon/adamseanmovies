@@ -2,6 +2,7 @@ import inspect
 import random
 import time
 from html import escape
+from textwrap import dedent
 
 import streamlit as st
 
@@ -145,12 +146,14 @@ def _poster_carousel_html(movies, duration=16, show_ticker=False, status=None, s
         poster = poster_url(movie["poster_path"], "w185") if movie["poster_path"] else POSTER_PLACEHOLDER
         safe_title = escape(movie["title"])
         tiles.append(
-            f"""
-            <div class="pick-carousel-item">
-                <img src="{poster}" alt="{safe_title}" loading="lazy" />
-                <span>{safe_title}</span>
-            </div>
-            """
+            dedent(
+                f"""
+                <div class="pick-carousel-item">
+                    <img src="{poster}" alt="{safe_title}" loading="lazy" />
+                    <span>{safe_title}</span>
+                </div>
+                """
+            ).strip()
         )
 
     ticker_html = '<div class="pick-carousel-ticker">▼</div>' if show_ticker else ""
@@ -159,16 +162,18 @@ def _poster_carousel_html(movies, duration=16, show_ticker=False, status=None, s
         f'<div class="pick-carousel-spotlight">{escape(spotlight_title)}</div>' if spotlight_title else ""
     )
 
-    return f"""
-    <div class="pick-carousel-wrap">
-        {ticker_html}
-        <div class="pick-carousel-track" style="--carousel-duration:{duration:.2f}s;">
-            {''.join(tiles)}
+    return dedent(
+        f"""
+        <div class="pick-carousel-wrap">
+            {ticker_html}
+            <div class="pick-carousel-track" style="--carousel-duration:{duration:.2f}s;">
+                {''.join(tiles)}
+            </div>
         </div>
-    </div>
-    {status_html}
-    {spotlight_html}
-    """
+        {status_html}
+        {spotlight_html}
+        """
+    ).strip()
 
 
 def _apply_filters(all_movies):
