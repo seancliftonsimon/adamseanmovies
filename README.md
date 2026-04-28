@@ -1,51 +1,51 @@
 # Adam & Sean Movie Night
 
-A couples movie watchlist app built with Streamlit. Search for movies, organize them into lists, randomly pick what to watch, and keep a log of everything you've seen together.
+A mobile-first Next.js PWA for adding movies, picking something to watch together, browsing shared shelves, and keeping a watch log.
 
-## Features
+## Environment
 
-- **Add a Movie** — Search TMDb, preview full details (poster, director, genres, runtime), and add to one of three lists:
-  - Adam's Picks (movies Adam has seen and wants to share)
-  - Sean's Picks (movies Sean has seen and wants to share)
-  - Mutual Discoveries (neither has seen — both want to)
-- **Pick for Us** — Randomly select a movie with a slot-machine-style reveal animation. Filter by whose picks, genre, runtime, or quick "vibe" presets.
-- **Our Lists** — Browse all unwatched movies, sorted and organized by list type.
-- **Watch Log** — Track watched movies with individual ratings, notes, and fun stats.
+Keep the current secret names:
 
-## Setup
+```bash
+DATABASE_URL=postgresql://...
+TMDB_READ_TOKEN=...
+TMDB_API_KEY=...
+```
 
-1. **Get TMDb credentials** at [themoviedb.org](https://www.themoviedb.org/settings/api)
+`TMDB_READ_TOKEN` is preferred. `TMDB_API_KEY` is only used as the fallback.
 
-2. **Create** `.streamlit/secrets.toml` with either a read token, an API key, or both:
-   ```toml
-   TMDB_READ_TOKEN = "your_read_access_token"
-   TMDB_API_KEY = "your_api_key"
-   ```
+The app will use regular environment variables first. For local development, it also falls back to `.streamlit/secrets.toml` if those values already live there.
 
-3. **Create a Neon Postgres project** (recommended for shared persistent data):
-   - In the Neon console, copy the connection string from:
-     - **Project** -> **Connection Details** -> **Connection string**
-   - Ensure it includes SSL (`sslmode=require`), for example:
-     ```toml
-     DATABASE_URL = "postgresql://neondb_owner:[YOUR_PASSWORD]@ep-XXXX.[REGION].aws.neon.tech/neondb?sslmode=require"
-     ```
-   - Add that `DATABASE_URL` to Streamlit secrets in local and deployed environments.
-   - On startup, the app will auto-create the `movies` table and indexes if they do not exist.
+## Local Development
 
-4. **Install dependencies and run:**
-   ```bash
-   pip install -r requirements.txt
-   streamlit run app.py
-   ```
+Install dependencies and start the app:
 
-### Database behavior
+```bash
+npm install
+npm run dev
+```
 
-- If `DATABASE_URL` is set, the app uses Postgres (Neon), giving one shared dataset for all users.
-- If `DATABASE_URL` is not set, the app falls back to local SQLite (`movies.db`) for local development.
+Then open [http://localhost:3000/add](http://localhost:3000/add).
 
-## Tech Stack
+## Scripts
 
-- **Streamlit** — UI framework
-- **TMDb API** — Movie data, posters, credits (free)
-- **Neon Postgres** — Shared persistent multi-user database
-- **SQLite** — Local fallback database (zero config)
+- `npm run dev` — start the local Next.js app
+- `npm run lint` — run ESLint
+- `npm test` — run Vitest unit tests
+- `npm run test:e2e` — run the Playwright smoke test
+- `npm run build` — production build check
+- `npm run db:seed` — seed a small starter dataset into an empty database
+- `npm run db:backfill-posters` — backfill missing poster metadata from TMDb
+
+## Notes
+
+- The app preserves the existing `movies` table shape and `list_type` values: `adam_pick`, `sean_pick`, `mutual`.
+- Hidden Streamlit side effects were moved into explicit scripts:
+  - seeding is no longer automatic
+  - poster backfill is no longer tied to page load
+- The app is designed for Vercel + Neon and keeps TMDb credentials server-side.
+- It preserves the current `movies` table contract so it can point at the existing Neon database immediately.
+
+## Deployment
+
+Deploy the repo root as the Vercel project and add the same env var names there. If your Neon connection string needs a pooled/serverless endpoint, update the value of `DATABASE_URL` without renaming the key.
