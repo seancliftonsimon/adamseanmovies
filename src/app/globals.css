@@ -438,6 +438,11 @@ img {
   gap: 1rem;
 }
 
+.detail-sheet__grid {
+  display: grid;
+  gap: 1rem;
+}
+
 .drawer-card {
   padding: 1rem;
 }
@@ -650,23 +655,6 @@ img {
   width: 60px;
 }
 
-.reveal-stage {
-  display: grid;
-  justify-items: center;
-  gap: 0.8rem;
-  padding: 1.25rem 0 0.25rem;
-}
-
-.reveal-stage__copy {
-  margin: 0;
-  color: #5e6880;
-  font-family: var(--font-label);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
 .tab-row {
   display: flex;
   flex-wrap: wrap;
@@ -691,6 +679,237 @@ img {
   border: 0;
 }
 
+.pick-reveal-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 5px),
+    rgba(8, 9, 20, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.pick-reveal-modal__card {
+  position: relative;
+  width: min(58rem, 100%);
+  min-height: min(43rem, 82vh);
+  overflow: hidden;
+  border: 3px solid var(--color-ink);
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(90deg, rgba(242, 228, 0, 0.14) 0 2px, transparent 2px 34px),
+    conic-gradient(from 110deg at 50% 48%, rgba(242, 228, 0, 0.28), transparent 20%, rgba(255, 77, 141, 0.24), transparent 45%, rgba(44, 105, 216, 0.32), transparent 72%, rgba(255, 255, 255, 0.18)),
+    linear-gradient(135deg, #101018 0%, #17245b 52%, #003399 100%);
+  box-shadow: 12px 12px 0 var(--color-ink);
+  color: var(--color-white);
+  isolation: isolate;
+  perspective: 1150px;
+}
+
+.pick-reveal-modal__card::before,
+.pick-reveal-modal__card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.pick-reveal-modal__card::before {
+  background:
+    linear-gradient(115deg, transparent 0 34%, rgba(255, 255, 255, 0.16) 35%, transparent 42%),
+    radial-gradient(circle at center, transparent 34%, rgba(0, 0, 0, 0.45) 100%);
+  animation: pickRevealSweep 4.8s linear infinite;
+  z-index: 5;
+}
+
+.pick-reveal-modal__card::after {
+  background: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 6px);
+  mix-blend-mode: overlay;
+  opacity: 0.36;
+  z-index: 8;
+}
+
+.pick-reveal-modal__lights {
+  position: absolute;
+  inset: -20%;
+  background:
+    conic-gradient(from 0deg, transparent, rgba(242, 228, 0, 0.2), transparent 18%, rgba(255, 77, 141, 0.22), transparent 42%, rgba(255, 255, 255, 0.18), transparent 70%),
+    repeating-linear-gradient(90deg, transparent 0 30px, rgba(255, 255, 255, 0.12) 30px 34px);
+  animation: pickRevealSpin 7.2s linear infinite;
+  opacity: 0.7;
+  z-index: -1;
+}
+
+.pick-reveal-filmstrips {
+  position: absolute;
+  inset: -2rem -10%;
+  z-index: 7;
+  display: grid;
+  align-content: space-around;
+  gap: 1.25rem;
+  opacity: 0.52;
+  transform: rotate(-7deg) scale(1.08);
+  animation: pickRevealFilmExit 9.2s ease forwards;
+}
+
+.pick-reveal-filmstrip {
+  display: flex;
+  width: max-content;
+  gap: 0.7rem;
+  animation: pickRevealStrip 12s linear infinite;
+}
+
+.pick-reveal-filmstrip[data-direction="reverse"] {
+  animation-direction: reverse;
+  transform: translateX(-10%);
+}
+
+.pick-reveal-filmstrip__poster {
+  width: clamp(4.6rem, 9vw, 6.9rem);
+  aspect-ratio: 2 / 3;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.72);
+  border-radius: 5px;
+  background: #111;
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
+}
+
+.pick-reveal-filmstrip__poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pick-reveal-spotlight {
+  position: absolute;
+  inset: 1rem;
+  z-index: 12;
+  display: grid;
+  place-items: center;
+  animation: pickRevealSpotlightExit 9.2s ease forwards;
+}
+
+.pick-reveal-spotlight__card {
+  grid-area: 1 / 1;
+  width: min(20rem, 48vw);
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border: 3px solid var(--color-white);
+  border-radius: 7px;
+  background: #111;
+  box-shadow:
+    0 0 0 4px var(--color-ink),
+    10px 10px 0 var(--color-pop-yellow),
+    18px 18px 0 rgba(0, 0, 0, 0.54);
+  opacity: 0;
+  transform-origin: center;
+  transform: scale(0.9) rotate(-2deg);
+  transition:
+    opacity 80ms ease,
+    transform 80ms ease;
+}
+
+.pick-reveal-spotlight__card[data-active="true"] {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.pick-reveal-spotlight__card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pick-reveal-winner {
+  position: absolute;
+  inset: 1rem;
+  z-index: 14;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(1.1rem) scale(0.86);
+  animation: pickRevealWinner 9.2s ease forwards;
+}
+
+.pick-reveal-winner img {
+  height: min(31rem, 67vh);
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border: 3px solid var(--color-white);
+  border-radius: 6px;
+  background: #111;
+  box-shadow:
+    0 0 0 4px var(--color-ink),
+    9px 9px 0 var(--color-pop-yellow),
+    18px 18px 0 rgba(0, 0, 0, 0.55);
+}
+
+@keyframes pickRevealWinner {
+  0%,
+  72% {
+    opacity: 0;
+    transform: translateY(1.1rem) scale(0.86);
+  }
+  82% {
+    opacity: 1;
+    transform: translateY(0) scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pickRevealSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pickRevealSweep {
+  0% {
+    transform: translateX(-18%) rotate(0deg);
+  }
+  100% {
+    transform: translateX(18%) rotate(360deg);
+  }
+}
+
+@keyframes pickRevealStrip {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes pickRevealFilmExit {
+  0%,
+  78% {
+    opacity: 0.52;
+    filter: saturate(1.15);
+  }
+  100% {
+    opacity: 0;
+    filter: saturate(1.6) blur(8px);
+  }
+}
+
+@keyframes pickRevealSpotlightExit {
+  0%,
+  76% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+}
+
 @media (min-width: 760px) {
   .app-shell {
     padding-bottom: 2rem;
@@ -713,6 +932,11 @@ img {
     align-items: start;
   }
 
+  .detail-sheet__grid {
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.25fr);
+    align-items: start;
+  }
+
   .stats-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -723,5 +947,48 @@ img {
 
   .dialog-backdrop {
     align-items: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .pick-reveal-modal {
+    padding: 0.65rem;
+  }
+
+  .pick-reveal-modal__card {
+    min-height: min(38rem, 86vh);
+    box-shadow: 7px 7px 0 var(--color-ink);
+  }
+
+  .pick-reveal-filmstrips {
+    inset: -1rem -32%;
+    gap: 0.8rem;
+  }
+
+  .pick-reveal-spotlight__card {
+    width: min(15.5rem, 61vw);
+  }
+
+  .pick-reveal-winner img {
+    height: min(26rem, 64vh);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pick-reveal-modal *,
+  .pick-reveal-modal__card::before {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+
+  .pick-reveal-spotlight,
+  .pick-reveal-filmstrips {
+    opacity: 0;
+  }
+
+  .pick-reveal-winner {
+    opacity: 1;
+    transform: none;
   }
 }

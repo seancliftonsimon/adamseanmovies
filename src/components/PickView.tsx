@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { PageIntro } from "@/components/PageIntro";
 import { Poster } from "@/components/Poster";
@@ -12,18 +13,39 @@ import {
   RUNTIME_PRESETS,
 } from "@/lib/constants";
 import { buildActivePickFilters, filterPickMovies, type PickListFilterValue } from "@/lib/movie-filters";
+import { getPosterUrl } from "@/lib/posters";
 import type { MovieRecord, WatchPayload } from "@/lib/types";
 import { formatRuntime, formatRuntimeCompact } from "@/lib/utils";
 
-function delay(ms: number) {
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, ms);
-  });
-}
+const REVEAL_DURATION_MS = 9200;
+const REVEAL_POSTER_LIMIT = 18;
 
 function pickRandom<T>(items: T[]) {
   return items[Math.floor(Math.random() * items.length)];
 }
+
+function shuffled<T>(items: T[]) {
+  return [...items].sort(() => Math.random() - 0.5);
+}
+
+function buildRevealContenders(movies: MovieRecord[], winner: MovieRecord) {
+  const contenders = shuffled(movies).slice(0, REVEAL_POSTER_LIMIT);
+
+  if (!contenders.some((movie) => movie.id === winner.id)) {
+    contenders[contenders.length ? contenders.length - 1 : 0] = winner;
+  }
+
+  return shuffled(contenders);
+}
+
+function posterSource(movie: MovieRecord, size = "w342") {
+  return getPosterUrl(movie.posterPath, size) ?? "/poster-placeholder.svg";
+}
+
+type RevealRun = {
+  winner: MovieRecord;
+  contenders: MovieRecord[];
+};
 
 export function PickView({
   initialMovies,
@@ -40,7 +62,8 @@ export function PickView({
   const [runtimeFilter, setRuntimeFilter] = useState<(typeof RUNTIME_PRESETS)[number]["value"]>("any");
   const [customRuntime, setCustomRuntime] = useState(150);
   const [pickedMovie, setPickedMovie] = useState<MovieRecord | null>(null);
-  const [revealingMovie, setRevealingMovie] = useState<MovieRecord | null>(null);
+  const [revealRun, setRevealRun] = useState<RevealRun | null>(null);
+  const [spotlightIndex, setSpotlightIndex] = useState(0);
   const [isRevealing, setIsRevealing] = useState(false);
   const [watchMovie, setWatchMovie] = useState<MovieRecord | null>(null);
   const [watchBusy, setWatchBusy] = useState(false);
@@ -62,22 +85,43 @@ export function PickView({
     customRuntime,
   });
 
-  async function runReveal() {
+  useEffect(() => {
+    if (!revealRun) {
+      return;
+    }
+
+    const posterTimer = window.setInterval(() => {
+      setSpotlightIndex((current) => current + 1);
+    }, 135);
+
+    const timer = window.setTimeout(() => {
+      setPickedMovie(revealRun.winner);
+      setRevealRun(null);
+      setIsRevealing(false);
+      window.requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    }, REVEAL_DURATION_MS);
+
+    return () => {
+      window.clearInterval(posterTimer);
+      window.clearTimeout(timer);
+    };
+  }, [revealRun]);
+
+  function runReveal() {
     if (!filteredMovies.length || isRevealing) {
       return;
     }
 
+    const winner = pickRandom(filteredMovies);
     setPickedMovie(null);
+    setSpotlightIndex(0);
+    setRevealRun({
+      winner,
+      contenders: buildRevealContenders(filteredMovies, winner),
+    });
     setIsRevealing(true);
-
-    for (let index = 0; index < 12; index += 1) {
-      setRevealingMovie(pickRandom(filteredMovies));
-      await delay(80 + index * 30);
-    }
-
-    setRevealingMovie(null);
-    setPickedMovie(pickRandom(filteredMovies));
-    setIsRevealing(false);
   }
 
   async function handleWatchSubmit(payload: WatchPayload) {
@@ -139,11 +183,95 @@ export function PickView({
 
   return (
     <div className="stack">
+      {revealRun ? (() => {
+        const activeSpotlightIndex = spotlightIndex % revealRun.contenders.length;
+
+        return (
+        <div className="pick-reveal-modal" role="dialog" aria-modal="true" aria-label="Choosing tonight's movie">
+          <div className="pick-reveal-modal__card">
+            <div className="pick-reveal-modal__lights" aria-hidden="true" />
+
+            <div className="pick-reveal-filmstrips" aria-hidden="true">
+              {[0, 1, 2].map((row) => (
+                <div className="pick-reveal-filmstrip" data-direction={row === 1 ? "reverse" : "forward"} key={row}>
+                  {[...revealRun.contenders, ...revealRun.contenders].map((movie, index) => (
+                    <div className="pick-reveal-filmstrip__poster" key={`${row}-${movie.id}-${index}`}>
+                      <Image alt="" height={278} src={posterSource(movie, "w185")} width={185} />
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+
+            <div className="pick-reveal-spotlight" aria-hidden="true">
+              {revealRun.contenders.map((movie, index) => (
+                <div
+                  className="pick-reveal-spotlight__card"
+                  data-active={index === activeSpotlightIndex}
+                  key={movie.id}
+                >
+                  <Image alt="" height={513} priority={index === 0} src={posterSource(movie)} width={342} />
+                </div>
+              ))}
+            </div>
+
+            <div className="pick-reveal-winner">
+              <Image alt="" height={750} priority src={posterSource(revealRun.winner, "w500")} width={500} />
+            </div>
+          </div>
+        </div>
+        );
+      })() : null}
+
       <PageIntro
         kicker={null}
         title="Pick For Us"
         support="Filter by shelf, genre, or runtime, then let the tape machine decide tonight’s movie."
       />
+
+      {pickedMovie ? (
+        <section className="panel detail-sheet">
+          <div>
+            <p className="page-intro__kicker" style={{ marginBottom: "0.85rem" }}>
+              Tonight&apos;s Movie
+            </p>
+            <div className="detail-sheet__grid">
+              <Poster posterPath={pickedMovie.posterPath} title={pickedMovie.title} priority />
+              <div className="stack">
+                <h3 className="movie-detail__title">{pickedMovie.title}</h3>
+                <div className="meta-band">
+                  {pickedMovie.year ? <span className="meta-pill">{pickedMovie.year}</span> : null}
+                  {pickedMovie.director ? <span className="meta-pill">Dir. {pickedMovie.director}</span> : null}
+                  {pickedMovie.runtime ? (
+                    <span className="meta-pill">{formatRuntime(pickedMovie.runtime)}</span>
+                  ) : null}
+                  <span className="meta-pill">{LIST_TYPE_LABELS[pickedMovie.listType]}</span>
+                </div>
+                {pickedMovie.genresList.length ? (
+                  <div className="movie-card__meta">
+                    {pickedMovie.genresList.map((genre) => (
+                      <span key={genre} className="meta-pill">
+                        {genre}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                {pickedMovie.overview ? (
+                  <p className="movie-detail__overview">{pickedMovie.overview}</p>
+                ) : null}
+                <div className="inline-actions">
+                  <button className="button-secondary" type="button" onClick={() => setPickedMovie(null)}>
+                    Spin Again
+                  </button>
+                  <button className="button" type="button" onClick={() => setWatchMovie(pickedMovie)}>
+                    Let&apos;s Watch This!
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <div className="layout-split">
         <section className="panel stack">
@@ -271,58 +399,6 @@ export function PickView({
           ) : null}
         </section>
       </div>
-
-      {isRevealing && revealingMovie ? (
-        <section className="panel reveal-stage">
-          <p className="reveal-stage__copy">Finding your perfect tape...</p>
-          <Poster posterPath={revealingMovie.posterPath} title={revealingMovie.title} />
-          <h3 className="movie-detail__title">{revealingMovie.title}</h3>
-        </section>
-      ) : null}
-
-      {pickedMovie ? (
-        <section className="panel detail-sheet">
-          <div>
-            <p className="page-intro__kicker" style={{ marginBottom: "0.85rem" }}>
-              Tonight&apos;s Movie
-            </p>
-            <div className="layout-split" style={{ gridTemplateColumns: "minmax(0, 0.95fr) minmax(0, 1.25fr)" }}>
-              <Poster posterPath={pickedMovie.posterPath} title={pickedMovie.title} priority />
-              <div className="stack">
-                <h3 className="movie-detail__title">{pickedMovie.title}</h3>
-                <div className="meta-band">
-                  {pickedMovie.year ? <span className="meta-pill">{pickedMovie.year}</span> : null}
-                  {pickedMovie.director ? <span className="meta-pill">Dir. {pickedMovie.director}</span> : null}
-                  {pickedMovie.runtime ? (
-                    <span className="meta-pill">{formatRuntime(pickedMovie.runtime)}</span>
-                  ) : null}
-                  <span className="meta-pill">{LIST_TYPE_LABELS[pickedMovie.listType]}</span>
-                </div>
-                {pickedMovie.genresList.length ? (
-                  <div className="movie-card__meta">
-                    {pickedMovie.genresList.map((genre) => (
-                      <span key={genre} className="meta-pill">
-                        {genre}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-                {pickedMovie.overview ? (
-                  <p className="movie-detail__overview">{pickedMovie.overview}</p>
-                ) : null}
-                <div className="inline-actions">
-                  <button className="button-secondary" type="button" onClick={() => setPickedMovie(null)}>
-                    Spin Again
-                  </button>
-                  <button className="button" type="button" onClick={() => setWatchMovie(pickedMovie)}>
-                    Let&apos;s Watch This!
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      ) : null}
 
       <WatchDialog
         busy={watchBusy}
