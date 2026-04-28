@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 185 278" role="img" aria-labelledby="title desc">
+  <title id="title">No poster available</title>
+  <desc id="desc">A retro blue placeholder card for a missing movie poster.</desc>
+  <rect width="185" height="278" fill="#003399" />
+  <rect x="12" y="12" width="161" height="254" rx="8" fill="#0c1744" stroke="#F2E400" stroke-width="6" />
+  <text x="50%" y="46%" text-anchor="middle" fill="#F2E400" font-family="Arial, sans-serif" font-size="76">📼</text>
+  <text x="50%" y="72%" text-anchor="middle" fill="#F2E400" font-family="Arial, sans-serif" font-size="20" font-weight="700" letter-spacing="2">NO TAPE</text>
+</svg>
